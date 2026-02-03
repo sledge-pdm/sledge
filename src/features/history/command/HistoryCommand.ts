@@ -5,6 +5,7 @@ import { HistoryContext } from '~/features/history/types';
 export type HistoryCommandType =
   | 'canvas_size'
   | 'color'
+  | 'selection_change'
   | 'convert_selection'
   | 'frasco_layer'
   | 'image_pool_add'

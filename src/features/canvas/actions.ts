@@ -5,7 +5,7 @@ import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEn
 import { HistoryContext } from '~/features/history/types';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManagerLegacyYouShouldNotUseThis } from '~/features/selection/SelectionAreaManager';
 import { setInteractStore } from '~/stores/EditorStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
@@ -55,13 +55,13 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
     }
   }
   updateFrascoCanvas('changeCanvasSize');
-  selectionManager.resizeSelectionMask(newSize);
+  selectionManagerLegacyYouShouldNotUseThis.resizeSelectionMask(newSize);
 
   setInteractStore('isCanvasSizeFrameMode', false);
   setInteractStore('canvasSizeFrameOffset', { x: 0, y: 0 });
   setInteractStore('canvasSizeFrameSize', { width: 0, height: 0 });
 
-  selectionManager.clear();
+  selectionManagerLegacyYouShouldNotUseThis.clear();
 
   if (register) {
     command.registerAfter();

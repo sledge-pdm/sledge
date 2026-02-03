@@ -1,7 +1,7 @@
 import { Vec2 } from '@sledge-pdm/core';
 import { logUserInfo } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManagerLegacyYouShouldNotUseThis } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable, startMove } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 
@@ -10,8 +10,8 @@ export class MoveTool implements ToolBehavior {
   private startPosition: Vec2 = { x: 0, y: 0 };
 
   onStart(args: ToolArgs): ToolResult {
-    selectionManager.commitOffset();
-    selectionManager.commit();
+    selectionManagerLegacyYouShouldNotUseThis.commitOffset();
+    selectionManagerLegacyYouShouldNotUseThis.commit();
     if (!floatingMoveManager.isMoving()) {
       // 選択状態があれば選択範囲のバッファを、なければレイヤーを移動
       startMove();

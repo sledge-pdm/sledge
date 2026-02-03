@@ -16,6 +16,7 @@ import {
   trim_mask_with_box,
 } from '~/utils/wasm';
 
+// Fxxk off these "fragment" bc it's so complecated and useless
 export type PixelFragment = {
   kind: 'pixel';
   position: Vec2;
@@ -50,6 +51,9 @@ export type PartialFragment = {
 export type SelectionFragment = PixelFragment | RectFragment | TileFragment | WholeFragment | PartialFragment;
 export type SelectionState = 'idle' | 'selected';
 
+/**
+ * @deprecated
+ */
 class SelectionAreaManager {
   private prevEditMode: SelectionEditMode | undefined = undefined;
   private state: SelectionState = 'idle';
@@ -97,6 +101,11 @@ class SelectionAreaManager {
 
   public getSelectionMask() {
     return this.selectionMask;
+  }
+
+  public setSelectionMask(selectionMask: SelectionMask) {
+    this.previewMask = undefined;
+    this.selectionMask = selectionMask;
   }
 
   public getPreviewMask() {
@@ -388,8 +397,7 @@ class SelectionAreaManager {
   }
 }
 
-export const selectionManager = new SelectionAreaManager();
-export const getCurrentSelection = () => selectionManager.getSelectionMask();
+export const selectionManagerLegacyYouShouldNotUseThis = new SelectionAreaManager();
 
 const DEFAULT_TILE_SIZE = 32;
 

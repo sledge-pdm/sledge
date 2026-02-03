@@ -1,5 +1,8 @@
+import { doCommands } from '~/features/history';
+import { SelectionChangeCommand } from '~/features/history/command/selection/SelectionChangeCommand';
 import { logSystemWarn } from '~/features/log/service';
-import { PartialFragment, selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManager } from '~/features/selection/SelectionManager';
+import SelectionMask from '~/features/selection/SelectionMask';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
@@ -13,9 +16,21 @@ import { fill_lasso_selection } from '~/utils/wasm';
 export type LassoDisplayMode = 'fill' | 'outline';
 export class LassoSelection extends SelectionBase {
   readonly categoryId = TOOL_CATEGORIES.LASSO_SELECTION;
-  previewFragment: PartialFragment | undefined = undefined;
+  previewFragment:
+    | {
+        partialMask: Uint8Array;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      }
+    | undefined = undefined;
   private points: number[] = [];
   private lastUpdateTime = 0;
+  private baseMaskSnapshot: Uint8Array | undefined;
+  private beforeBackSnapshot: SelectionMask | undefined;
+  private canvasWidth = 0;
+  private canvasHeight = 0;
   private readonly UPDATE_INTERVAL = 16; // 60fps相当
 
   getDisplayMode(preset: LassoSelectionPresetConfig): LassoDisplayMode {
@@ -91,7 +106,6 @@ export class LassoSelection extends SelectionBase {
       this.previewFragment.height !== clampedHeight
     ) {
       this.previewFragment = {
-        kind: 'partial',
         partialMask: new Uint8Array(clampedWidth * clampedHeight),
         x: clampedX,
         y: clampedY,
@@ -117,9 +131,46 @@ export class LassoSelection extends SelectionBase {
     }
   }
 
+  private applyPreviewToFront(mode: SelectionEditMode) {
+    if (!this.previewFragment) return;
+    if (this.canvasWidth === 0 || this.canvasHeight === 0) return;
+
+    let base: Uint8Array;
+    if (mode === 'replace') {
+      base = new Uint8Array(this.canvasWidth * this.canvasHeight);
+    } else {
+      base = new Uint8Array(this.canvasWidth * this.canvasHeight);
+      if (this.baseMaskSnapshot) base.set(this.baseMaskSnapshot);
+    }
+
+    const { partialMask, x, y, width, height } = this.previewFragment;
+    for (let py = 0; py < height; py++) {
+      const dstRow = (y + py) * this.canvasWidth + x;
+      const srcRow = py * width;
+      for (let px = 0; px < width; px++) {
+        if (partialMask[srcRow + px] === 0) continue;
+        const idx = dstRow + px;
+        if (mode === 'subtract') {
+          base[idx] = 0;
+        } else {
+          base[idx] = 1;
+        }
+      }
+    }
+
+    const front = new SelectionMask(this.canvasWidth, this.canvasHeight);
+    front.setMask(base);
+    selectionManager.setFront(front);
+  }
+
   protected onStartSelection(args: ToolArgs, mode: SelectionEditMode) {
-    selectionManager.beginPreview(mode);
     this.startPosition = args.position;
+    const back = selectionManager.getBack();
+    this.canvasWidth = back?.getWidth() ?? projectStore.canvas.size.width ?? 0;
+    this.canvasHeight = back?.getHeight() ?? projectStore.canvas.size.height ?? 0;
+    this.baseMaskSnapshot = back ? new Uint8Array(back.getMask()) : undefined;
+    this.beforeBackSnapshot = back ? cloneMask(back) : undefined;
+    if (this.canvasWidth === 0 || this.canvasHeight === 0) return;
 
     // 座標追跡を初期化
     this.points = [args.position.x, args.position.y];
@@ -127,7 +178,6 @@ export class LassoSelection extends SelectionBase {
 
     // 初期状態では1点のみなので、小さな初期バウンディングボックスを作成
     this.previewFragment = {
-      kind: 'partial',
       partialMask: new Uint8Array(1),
       x: Math.floor(args.position.x),
       y: Math.floor(args.position.y),
@@ -138,7 +188,7 @@ export class LassoSelection extends SelectionBase {
     const preset = getPresetOf(TOOL_CATEGORIES.LASSO_SELECTION, args.presetName ?? 'default') as LassoSelectionPresetConfig;
     const displayMode = this.getDisplayMode(preset);
     if (displayMode === 'fill') {
-      selectionManager.setPreviewFragment(this.previewFragment);
+      this.applyPreviewToFront(mode);
     } else {
       eventBus.emit('selection:updateLassoOutline', {});
     }
@@ -173,7 +223,7 @@ export class LassoSelection extends SelectionBase {
         this.updatePartialMask(projectStore.canvas.size.width, projectStore.canvas.size.height, fillMode);
       }
 
-      selectionManager.setPreviewFragment(this.previewFragment);
+      this.applyPreviewToFront(mode);
     } else {
       eventBus.emit('selection:updateLassoOutline', {});
     }
@@ -205,13 +255,44 @@ export class LassoSelection extends SelectionBase {
     this.points = [];
     eventBus.emit('selection:updateLassoOutline', {});
 
-    selectionManager.setPreviewFragment(this.previewFragment);
-    selectionManager.commit();
+    this.applyPreviewToFront(mode);
+    const after = normalizeMask(selectionManager.getFront());
+    if (!after && !this.beforeBackSnapshot) {
+      selectionManager.clearFront();
+      this.baseMaskSnapshot = undefined;
+      this.beforeBackSnapshot = undefined;
+      this.previewFragment = undefined;
+      return;
+    }
+    doCommands(
+      new SelectionChangeCommand({
+        beforeBack: this.beforeBackSnapshot,
+        afterBack: after,
+      })
+    );
+    this.baseMaskSnapshot = undefined;
+    this.beforeBackSnapshot = undefined;
+    this.previewFragment = undefined;
   }
 
   protected onCancelSelection(_args: ToolArgs, mode: SelectionEditMode) {
     // 座標をクリア
     this.points = [];
-    selectionManager.commit();
+    selectionManager.clearFront();
+    this.baseMaskSnapshot = undefined;
+    this.beforeBackSnapshot = undefined;
+    this.previewFragment = undefined;
   }
 }
+
+const cloneMask = (mask: SelectionMask): SelectionMask => {
+  const cloned = new SelectionMask(mask.getWidth(), mask.getHeight());
+  cloned.setMask(new Uint8Array(mask.getMask()));
+  return cloned;
+};
+
+const normalizeMask = (mask: SelectionMask | undefined): SelectionMask | undefined => {
+  if (!mask) return undefined;
+  if (mask.isCleared()) return undefined;
+  return cloneMask(mask);
+};

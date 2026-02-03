@@ -2,7 +2,7 @@ import { CircleKernel, SquareKernel } from '@sledge-pdm/frasco';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { getSelectionOffset } from '~/features/selection/SelectionOperator';
 import {
   getActiveToolCategoryId,
@@ -63,7 +63,11 @@ const CanvasOverlaySVG: Component = () => {
   const updateSelectionOutline = () => {
     const { width, height } = projectStore.canvas.size;
     const offset = getSelectionOffset();
-    const mask = selectionManager.getCombinedMask();
+    const mask = selectionManager.getMaskForDisplay();
+    if (!mask) {
+      setPathCmdList(new PathCmdList([]));
+      return;
+    }
     const pathString = mask_to_path(mask, width, height, offset.x, offset.y);
     setPathCmdList(PathCmdList.parse(pathString));
   };
@@ -74,7 +78,7 @@ const CanvasOverlaySVG: Component = () => {
   };
 
   // Memoize handleUpdate to keep a stable reference
-  const handlePathUpdate = ((e: Events['selection:updateSelectionPath']) => {
+  const handlePathUpdate = ((e: { immediate?: boolean }) => {
     setMoveState(floatingMoveManager.getState());
     if (e.immediate) {
       updateSelectionOutline();
@@ -103,14 +107,14 @@ const CanvasOverlaySVG: Component = () => {
   // Events
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:updateSelectionPath', handlePathUpdate);
+    const unsubscribe = selectionManager.subscribe(handlePathUpdate);
     eventBus.on('selection:updateLassoOutline', handleLassoUpdate);
     setSelectionChanged(true);
 
     const updatePatternInterval = setInterval(updatePatternOffset, 30);
 
     return () => {
-      eventBus.off('selection:updateSelectionPath', handlePathUpdate);
+      unsubscribe();
       eventBus.off('selection:updateLassoOutline', handleLassoUpdate);
       stopRenderLoop();
       clearInterval(updatePatternInterval);

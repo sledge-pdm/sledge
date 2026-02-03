@@ -158,7 +158,6 @@ export default class SelectionMask {
     this.minY = Infinity;
     this.maxY = -1;
 
-    // ③ 走査は “行優先” がメモリ連続で最速
     let idx = 0;
     for (let y = 0; y < this.height; y++) {
       let rowSum = 0;
@@ -175,7 +174,6 @@ export default class SelectionMask {
       }
     }
 
-    // ④ minX/maxX は列カウンタを一度だけスキャン
     for (let x = 0; x < this.width; x++)
       if (this.colCnt[x]) {
         this.minX = x;

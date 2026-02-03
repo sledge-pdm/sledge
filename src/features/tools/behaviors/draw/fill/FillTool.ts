@@ -2,7 +2,7 @@
 import { Layer } from '@sledge-pdm/frasco';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo } from '~/features/log';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManagerLegacyYouShouldNotUseThis } from '~/features/selection/SelectionAreaManager';
 import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
@@ -49,7 +49,7 @@ export class FillTool implements ToolBehavior {
         threshold,
       });
     } else {
-      const selectionMask = selectionManager.getSelectionMask();
+      const selectionMask = selectionManagerLegacyYouShouldNotUseThis.getSelectionMask();
       if (selectionFillMode === 'inside') {
         //inside
         fill({

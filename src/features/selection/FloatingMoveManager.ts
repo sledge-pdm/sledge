@@ -3,7 +3,7 @@ import { Vec2 } from '@sledge-pdm/core';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManagerLegacyYouShouldNotUseThis } from '~/features/selection/SelectionAreaManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
@@ -128,7 +128,7 @@ class FloatingMoveManager {
     if (state === 'layer') {
       return new Uint8ClampedArray(width * height * 4);
     } else if (state === 'selection') {
-      const mask = selectionManager.getCombinedMask();
+      const mask = selectionManagerLegacyYouShouldNotUseThis.getCombinedMask();
       const cleared = new Uint8ClampedArray(base);
       clearMaskedPixels(cleared, mask, width, height);
       return cleared;
@@ -213,11 +213,11 @@ class FloatingMoveManager {
     });
 
     if (this.getState() === 'layer' || this.getState() === 'pasted') {
-      selectionManager.clear();
+      selectionManagerLegacyYouShouldNotUseThis.clear();
     } else {
       const newOffset = this.floatingBuffer.offset;
-      selectionManager.shiftOffset(newOffset);
-      selectionManager.commitOffset();
+      selectionManagerLegacyYouShouldNotUseThis.shiftOffset(newOffset);
+      selectionManagerLegacyYouShouldNotUseThis.commitOffset();
     }
 
     // Reset the state

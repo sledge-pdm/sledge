@@ -4,16 +4,8 @@
 
 import { Icon } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
-import { selectionManager, SelectionState } from '~/features/selection/SelectionAreaManager';
-import {
-  cancelMove,
-  cancelSelection,
-  commitMove,
-  convertSelectionToImage,
-  deleteSelectedArea,
-  isSelectionAvailable,
-} from '~/features/selection/SelectionOperator';
-import { eventBus, Events } from '~/utils/EventBus';
+import { selectionManager, SelectionUpdateType } from '~/features/selection/SelectionManager';
+import { cancelMove, cancelSelection, commitMove, convertSelectionToImage, deleteSelectedArea } from '~/features/selection/SelectionOperator';
 
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge-pdm/core';
@@ -89,7 +81,6 @@ const Divider: Component = () => {
   return <div class={divider} />;
 };
 
-const [selectionState, setSelectionState] = createSignal<SelectionState>(selectionManager.getState());
 const [floatingMoveState, setFloatingMoveState] = createSignal<boolean>(false);
 
 const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefined);
@@ -97,6 +88,7 @@ const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefin
 export const OnCanvasSelectionMenu: Component = () => {
   let containerRef: HTMLDivElement;
   let sectionsBetweenAreaRef: HTMLElement | null = null;
+
   const [updatePosition, setUpdatePosition] = createSignal<boolean>(false);
   const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS((timeStamp) => {
@@ -105,8 +97,11 @@ export const OnCanvasSelectionMenu: Component = () => {
       setUpdatePosition(false);
     }, 60)
   );
-  const handleUpdate = (e: Events['selection:updateSelectionMenu']) => {
-    setSelectionState(selectionManager.getState());
+
+  const handleUpdate = (e: { type: SelectionUpdateType; immediate?: boolean }) => {
+    // Menu shouldn't updated for front (preview) updates
+    if (e.type === 'front') return;
+
     setFloatingMoveState(floatingMoveManager.isMoving());
     if (e.immediate) {
       updateMenuPos();
@@ -114,9 +109,10 @@ export const OnCanvasSelectionMenu: Component = () => {
       setUpdatePosition(true);
     }
   };
+
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:updateSelectionMenu', handleUpdate);
+    const unsubscribe = selectionManager.subscribe(handleUpdate);
 
     const observer = new ResizeObserver(() => {
       setUpdatePosition(true);
@@ -128,14 +124,14 @@ export const OnCanvasSelectionMenu: Component = () => {
 
     return () => {
       stopRenderLoop();
-      eventBus.off('selection:updateSelectionMenu', handleUpdate);
+      unsubscribe();
       observer.disconnect();
     };
   });
 
   // Reposition only while a selection is active and transform changes
   createEffect(() => {
-    if (selectionState() === 'idle') return;
+    if (!selectionManager.hasSelection()) return;
     interactStore.rotation;
     interactStore.horizontalFlipped;
     interactStore.verticalFlipped;
@@ -147,10 +143,10 @@ export const OnCanvasSelectionMenu: Component = () => {
   const [selectionMenuPos, setSelectionMenuPos] = createSignal<Vec2>({ x: 0, y: 0 });
 
   const updateMenuPos = () => {
-    if (!isSelectionAvailable()) return;
+    if (!selectionManager.hasSelection()) return;
 
     if (!containerRef) return;
-    const boundbox = selectionManager.getSelectionMask().getBoundBox();
+    const boundbox = selectionManager.getBoundBox();
     if (!boundbox) return;
     const width = boundbox.right - boundbox.left + 1;
     const height = boundbox.bottom - boundbox.top + 1;
@@ -191,8 +187,6 @@ export const OnCanvasSelectionMenu: Component = () => {
   };
 
   const visibility = createMemo(() => {
-    // idle状態の場合は表示しない
-    if (selectionState() === 'idle') return 'collapse';
     // 外側メニューがある場合は表示しない
     if (outerPosition() !== undefined) return 'collapse';
     // キャンバスをリサイズ中の場合は表示しない
@@ -223,8 +217,6 @@ export const OnCanvasSelectionMenu: Component = () => {
 
 export const OuterSelectionMenu: Component = () => {
   const visibility = createMemo(() => {
-    // idle状態の場合は表示しない
-    if (selectionState() === 'idle') return 'collapse';
     // 外側メニューの座標がない場合は表示しない
     if (outerPosition() === undefined) return 'collapse';
     // キャンバスをリサイズ中の場合は表示しない
@@ -259,6 +251,7 @@ const MenuContent = () => {
           onClick={() => {
             commitMove();
             cancelSelection();
+            selectionManager.clearAll();
           }}
           label='commit.'
           title='commit.'
@@ -269,6 +262,7 @@ const MenuContent = () => {
           onClick={() => {
             cancelMove();
             cancelSelection();
+            selectionManager.clearAll();
           }}
           label='cancel.'
           title='cancel.'

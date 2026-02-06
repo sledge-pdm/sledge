@@ -127,9 +127,10 @@ export const OnCanvasSelectionMenu: Component = () => {
     if (!boundbox) return;
     const width = boundbox.right - boundbox.left + 1;
     const height = boundbox.bottom - boundbox.top + 1;
+    const selectionOffset = selectionManager.getOffset();
     const offset = {
-      x: boundbox.left,
-      y: boundbox.top,
+      x: boundbox.left + selectionOffset.x,
+      y: boundbox.top + selectionOffset.y,
     };
 
     const left = offset.x;

@@ -3,7 +3,7 @@ import { clipZoom, rotateInCenter, setOffset, zoomTowardWindowPos } from '~/feat
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { tryRedo, tryUndo } from '~/features/history';
 import { logSystemInfo, logSystemWarn } from '~/features/log';
-import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { WindowPos } from '~/types/CoordinateTypes';
@@ -104,8 +104,6 @@ class CanvasAreaInteract {
     (this.wrapperRef.style as any).msTouchAction = 'none';
     this.canvasStack.style.touchAction = 'none';
     (this.canvasStack.style as any).msTouchAction = 'none';
-
-    // コンポジタ昇格は新しいCanvasAreaで管理
   }
 
   static isDragKey(e: PointerEvent): boolean {
@@ -118,7 +116,7 @@ class CanvasAreaInteract {
     }
 
     if (e.buttons === 1 && CanvasAreaInteract.isDragKey(e)) {
-      if (isSelectionAvailable()) return false;
+      if (selectionManager.hasSelection()) return false;
       // angle-snapped line
       if (toolStore.activeToolCategory === 'pen' || toolStore.activeToolCategory === 'eraser') {
         if (e.shiftKey) return false;

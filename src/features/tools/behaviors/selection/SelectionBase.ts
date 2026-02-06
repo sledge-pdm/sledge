@@ -1,7 +1,6 @@
 import { Vec2 } from '@sledge-pdm/core';
 import { logUserInfo } from '~/features/log/service';
-import { selectionManagerLegacyYouShouldNotUseThis } from '~/features/selection/SelectionAreaManager';
-import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
@@ -33,8 +32,7 @@ export abstract class SelectionBase implements ToolBehavior {
     if (mode === 'move') {
       // 移動モード開始
       this.startPosition = args.position;
-      this.startOffset = selectionManagerLegacyYouShouldNotUseThis.getAreaOffset();
-      selectionManagerLegacyYouShouldNotUseThis.setState('selected');
+      this.startOffset = selectionManager.getOffset();
       this.movePrevMode = interactStore.selectionEditMode;
       setInteractStore('selectionEditMode', 'move');
     } else {
@@ -54,7 +52,7 @@ export abstract class SelectionBase implements ToolBehavior {
       // 移動中のオフセットを反映
       const dx = args.position.x - this.startPosition.x;
       const dy = args.position.y - this.startPosition.y;
-      selectionManagerLegacyYouShouldNotUseThis.setOffset({ x: this.startOffset.x + dx, y: this.startOffset.y + dy });
+      selectionManager.setOffset({ x: this.startOffset.x + dx, y: this.startOffset.y + dy });
     } else {
       // ツール固有の選択更新処理
       this.onMoveSelection(args, mode);
@@ -72,12 +70,11 @@ export abstract class SelectionBase implements ToolBehavior {
     if (mode === 'move') {
       if (this.movePrevMode) setInteractStore('selectionEditMode', this.movePrevMode);
       // 移動確定
-      selectionManagerLegacyYouShouldNotUseThis.commitOffset();
-      if (!isSelectionAvailable()) {
-        selectionManagerLegacyYouShouldNotUseThis.clear();
+      selectionManager.commitOffset();
+      if (!selectionManager.hasSelection()) {
+        selectionManager.clearAll();
         message = 'Selection cleared.';
       } else {
-        selectionManagerLegacyYouShouldNotUseThis.setState('selected');
         message = 'Selection moved.';
       }
     } else {
@@ -111,8 +108,7 @@ export abstract class SelectionBase implements ToolBehavior {
     if (mode === 'move') {
       if (this.movePrevMode) setInteractStore('selectionEditMode', this.movePrevMode);
       // 位置を元に戻す
-      selectionManagerLegacyYouShouldNotUseThis.setOffset(this.startOffset);
-      selectionManagerLegacyYouShouldNotUseThis.setState('selected');
+      selectionManager.setOffset(this.startOffset);
     } else {
       // ツール固有のキャンセル処理
       this.onCancelSelection(args, mode);

@@ -7,12 +7,11 @@ import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/i
 import { activeLayer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo, logUserWarn } from '~/features/log/service';
-import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManagerLegacyYouShouldNotUseThis } from '~/features/selection/SelectionAreaManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
-import { SelectionLimitMode } from '~/stores/editor/ToolStore';
-import { setToolStore, toolStore } from '~/stores/EditorStores';
+import { toolStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
@@ -26,10 +25,6 @@ import { imagePoolImages } from '../image_pool/imageStore';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
 
-export function isSelectionAvailable(): boolean {
-  return selectionManagerLegacyYouShouldNotUseThis.isSelected();
-}
-
 /**
  * 描画制限モードに基づいて描画可能な位置かチェック
  * @param pos チェックする位置
@@ -42,7 +37,7 @@ export function isDrawingAllowed(pos: Vec2, checkState?: boolean): boolean {
       // 制限なし：常に描画可能
       return true;
     }
-    if (!isSelectionAvailable()) {
+    if (!selectionManager.hasSelection()) {
       // 選択範囲がない場合：制限なしとして扱う
       return true;
     }
@@ -61,67 +56,11 @@ export function isDrawingAllowed(pos: Vec2, checkState?: boolean): boolean {
   return true;
 }
 
-export function getSelectionLimitMode(): SelectionLimitMode {
-  return toolStore.selectionLimitMode;
-}
-
 export function isPositionWithinSelection(pos: Vec2) {
   pos.x = Math.floor(pos.x);
   pos.y = Math.floor(pos.y);
 
   return selectionManagerLegacyYouShouldNotUseThis.isMaskOverlap(pos, true);
-}
-
-// 現在の状況からFloat状態を作成
-export function startMove() {
-  const layerId = projectStore.layers.state.activeLayerId;
-  const width = projectStore.canvas.size.width;
-  const height = projectStore.canvas.size.height;
-  if (width == null || height == null) return;
-
-  if (isSelectionAvailable()) {
-    floatingMoveManager.startMove(selectionManagerLegacyYouShouldNotUseThis.getFloatingBuffer(layerId)!, 'selection', layerId);
-  } else {
-    selectionManagerLegacyYouShouldNotUseThis.selectAll();
-    const layerFloatingBuffer: FloatingBuffer = {
-      buffer: layerManager.exportRawCanvas(layerId),
-      width,
-      height,
-      offset: { x: 0, y: 0 },
-      origin: { x: 0, y: 0 },
-    };
-    floatingMoveManager.startMove(layerFloatingBuffer, 'selection', layerId);
-  }
-}
-
-export function startMoveFromPasted(imageData: ImageData, boundBox: { x: number; y: number; width: number; height: number }) {
-  const layerId = activeLayer().id;
-  cancelSelection();
-  setToolStore('activeToolCategory', TOOL_CATEGORIES.MOVE);
-  const pastingOffset = { x: 0, y: 0 };
-  selectionManagerLegacyYouShouldNotUseThis.beginPreview('replace');
-  selectionManagerLegacyYouShouldNotUseThis.setPreviewFragment({
-    kind: 'rect',
-    startPosition: pastingOffset,
-    width: boundBox.width,
-    height: boundBox.height,
-  });
-  selectionManagerLegacyYouShouldNotUseThis.commit();
-  floatingMoveManager.startMove(
-    {
-      buffer: new Uint8ClampedArray(imageData.data),
-      width: boundBox.width,
-      height: boundBox.height,
-      offset: pastingOffset,
-      origin: { x: boundBox.x, y: boundBox.y },
-    },
-    'pasted',
-    layerId
-  );
-}
-
-export function getSelectionOffset() {
-  return floatingMoveManager.isMoving() ? floatingMoveManager.getFloatingBuffer()!.offset : selectionManagerLegacyYouShouldNotUseThis.getAreaOffset();
 }
 
 export function cancelSelection() {
@@ -229,7 +168,7 @@ export function invertSelectionArea() {
   selection.setMask(inverted);
 
   // 4) 状態更新とイベント発火
-  selectionManagerLegacyYouShouldNotUseThis.setState(isSelectionAvailable() ? 'selected' : 'idle');
+  selectionManagerLegacyYouShouldNotUseThis.setState(selectionManager.hasSelection() ? 'selected' : 'idle');
 
   eventBus.emit('selection:updateSelectionMenu', { immediate: true });
   eventBus.emit('selection:updateSelectionPath', { immediate: true });
@@ -328,7 +267,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
     )
   );
 
-  selectionManagerLegacyYouShouldNotUseThis.setState(isSelectionAvailable() ? 'selected' : 'idle');
+  selectionManagerLegacyYouShouldNotUseThis.setState(selectionManager.hasSelection() ? 'selected' : 'idle');
 
   eventBus.emit('selection:updateSelectionMenu', { immediate: true });
   eventBus.emit('selection:updateSelectionPath', { immediate: true });

@@ -1,7 +1,8 @@
 // 新実装の選択範囲マネージャ
 // 既存の実装にこだわらず実装を改築していく
 
-import { Size2D } from '@sledge-pdm/core';
+import { Size2D, Vec2 } from '@sledge-pdm/core';
+import { apply_mask_offset } from '~/utils/wasm';
 import SelectionMask from './SelectionMask';
 
 export type SelectionUpdateType = 'front' | 'back' | 'both';
@@ -13,6 +14,7 @@ class SelectionManager {
   private front: SelectionMask | undefined;
   // committed
   private back: SelectionMask | undefined;
+  private offset: Vec2 = { x: 0, y: 0 };
   private listeners = new Set<SelectionListener>();
 
   constructor() {
@@ -47,6 +49,40 @@ class SelectionManager {
     return this.front?.getMask() ?? this.back?.getMask();
   }
 
+  getOffset() {
+    return this.offset;
+  }
+
+  setOffset(offset: Vec2) {
+    this.offset = offset;
+    this.emitChange(this.front ? 'front' : 'back');
+  }
+
+  shiftOffset(delta: Vec2) {
+    this.offset = { x: this.offset.x + delta.x, y: this.offset.y + delta.y };
+    this.emitChange(this.front ? 'front' : 'back');
+  }
+
+  clearOffset() {
+    this.offset = { x: 0, y: 0 };
+  }
+
+  commitOffset() {
+    const target = this.back ?? this.front;
+    if (!target) {
+      this.clearOffset();
+      return;
+    }
+    if (this.offset.x === 0 && this.offset.y === 0) return;
+
+    const width = target.getWidth();
+    const height = target.getHeight();
+    const newMask = new Uint8Array(apply_mask_offset(target.getMask(), width, height, this.offset.x, this.offset.y));
+    target.setMask(newMask);
+    this.clearOffset();
+    this.emitChange(this.front ? 'front' : 'back');
+  }
+
   getBoundBox() {
     return this.front?.getBoundBox() ?? this.back?.getBoundBox();
   }
@@ -60,6 +96,7 @@ class SelectionManager {
   resize(size: Size2D) {
     this.front?.changeSize(size);
     this.back?.changeSize(size);
+    this.clearOffset();
     this.emitChange('both');
   }
 
@@ -71,17 +108,20 @@ class SelectionManager {
 
   clearFront() {
     this.front = undefined;
+    this.clearOffset();
     this.emitChange('front');
   }
 
   clearBack() {
     this.back = undefined;
+    this.clearOffset();
     this.emitChange('back');
   }
 
   clearAll() {
     this.front = undefined;
     this.back = undefined;
+    this.clearOffset();
     this.emitChange('both');
   }
 

@@ -11,7 +11,6 @@ export class RectSelection extends SelectionBase {
   private baseMaskSnapshot: Uint8Array | undefined;
   private width = 0;
   private height = 0;
-  private beforeBackSnapshot: SelectionMask | undefined;
 
   protected onStartSelection(args: ToolArgs, mode: SelectionEditMode) {
     this.startPosition = args.position;
@@ -20,14 +19,12 @@ export class RectSelection extends SelectionBase {
       this.width = back.getWidth();
       this.height = back.getHeight();
       this.baseMaskSnapshot = new Uint8Array(back.getMask());
-      this.beforeBackSnapshot = cloneMask(back);
     } else {
       const width = projectStore.canvas.size.width ?? 0;
       const height = projectStore.canvas.size.height ?? 0;
       this.width = width;
       this.height = height;
       this.baseMaskSnapshot = undefined;
-      this.beforeBackSnapshot = undefined;
     }
     if (this.width === 0 || this.height === 0) return;
     this.applyRectToSelection(args.position, mode);
@@ -38,27 +35,17 @@ export class RectSelection extends SelectionBase {
   }
 
   protected onEndSelection(args: ToolArgs, mode: SelectionEditMode) {
-    const after = normalizeMask(selectionManager.getFront());
-    if (!after && !this.beforeBackSnapshot) {
-      selectionManager.clearFront();
-      this.baseMaskSnapshot = undefined;
-      this.beforeBackSnapshot = undefined;
-      return;
-    }
     doCommands(
       new SelectionChangeCommand({
-        beforeBack: this.beforeBackSnapshot,
-        afterBack: after,
+        swapBack: selectionManager.getFront(),
       })
     );
     this.baseMaskSnapshot = undefined;
-    this.beforeBackSnapshot = undefined;
   }
 
   protected onCancelSelection(args: ToolArgs, mode: SelectionEditMode) {
     selectionManager.clearFront();
     this.baseMaskSnapshot = undefined;
-    this.beforeBackSnapshot = undefined;
   }
 
   private applyRectToSelection(position: { x: number; y: number }, mode: SelectionEditMode) {
@@ -96,15 +83,3 @@ export class RectSelection extends SelectionBase {
     selectionManager.setFront(front);
   }
 }
-
-const cloneMask = (mask: SelectionMask): SelectionMask => {
-  const cloned = new SelectionMask(mask.getWidth(), mask.getHeight());
-  cloned.setMask(new Uint8Array(mask.getMask()));
-  return cloned;
-};
-
-const normalizeMask = (mask: SelectionMask | undefined): SelectionMask | undefined => {
-  if (!mask) return undefined;
-  if (mask.isCleared()) return undefined;
-  return cloneMask(mask);
-};

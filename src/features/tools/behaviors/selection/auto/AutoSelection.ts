@@ -10,10 +10,7 @@ import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { auto_select_region_mask } from '~/utils/wasm';
 
 export class AutoSelection extends SelectionBase {
-  private beforeBackSnapshot: SelectionMask | undefined;
   protected onStartSelection(args: ToolArgs, mode: SelectionEditMode) {
-    const back = selectionManager.getBack();
-    this.beforeBackSnapshot = back ? cloneMask(back) : undefined;
     // プレビュー開始（add/subtract/replaceをSelectionManagerに伝える）
     this.startPosition = args.position;
 
@@ -23,6 +20,7 @@ export class AutoSelection extends SelectionBase {
     const mask = this.computeRegionMask(args.layerId, args.position, threshold);
     if (!mask) return;
 
+    const back = selectionManager.getBack();
     const layer = layerManager.getLayerOptional(args.layerId);
     const width = back?.getWidth() ?? layer?.getWidth() ?? 0;
     const height = back?.getHeight() ?? layer?.getHeight() ?? 0;
@@ -56,25 +54,16 @@ export class AutoSelection extends SelectionBase {
   }
 
   protected onEndSelection(_args: ToolArgs, mode: SelectionEditMode) {
-    const after = normalizeMask(selectionManager.getFront());
-    if (!after && !this.beforeBackSnapshot) {
-      selectionManager.clearFront();
-      this.beforeBackSnapshot = undefined;
-      return;
-    }
     doCommands(
       new SelectionChangeCommand({
-        beforeBack: this.beforeBackSnapshot,
-        afterBack: after,
+        swapBack: selectionManager.getFront(),
       })
     );
-    this.beforeBackSnapshot = undefined;
   }
 
   protected onCancelSelection(_args: ToolArgs, mode: SelectionEditMode) {
     // 既存と同様、現状はcommit扱い（必要なら cancelPreview に変更）
     selectionManager.clearFront();
-    this.beforeBackSnapshot = undefined;
   }
 
   // 自動選択用 WASM を使って、選択マスク(0/1)を返す
@@ -93,15 +82,3 @@ export class AutoSelection extends SelectionBase {
     return mask;
   }
 }
-
-const cloneMask = (mask: SelectionMask): SelectionMask => {
-  const cloned = new SelectionMask(mask.getWidth(), mask.getHeight());
-  cloned.setMask(new Uint8Array(mask.getMask()));
-  return cloned;
-};
-
-const normalizeMask = (mask: SelectionMask | undefined): SelectionMask | undefined => {
-  if (!mask) return undefined;
-  if (mask.isCleared()) return undefined;
-  return cloneMask(mask);
-};

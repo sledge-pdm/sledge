@@ -28,7 +28,6 @@ export class LassoSelection extends SelectionBase {
   private points: number[] = [];
   private lastUpdateTime = 0;
   private baseMaskSnapshot: Uint8Array | undefined;
-  private beforeBackSnapshot: SelectionMask | undefined;
   private canvasWidth = 0;
   private canvasHeight = 0;
   private readonly UPDATE_INTERVAL = 16; // 60fps相当
@@ -169,7 +168,6 @@ export class LassoSelection extends SelectionBase {
     this.canvasWidth = back?.getWidth() ?? projectStore.canvas.size.width ?? 0;
     this.canvasHeight = back?.getHeight() ?? projectStore.canvas.size.height ?? 0;
     this.baseMaskSnapshot = back ? new Uint8Array(back.getMask()) : undefined;
-    this.beforeBackSnapshot = back ? cloneMask(back) : undefined;
     if (this.canvasWidth === 0 || this.canvasHeight === 0) return;
 
     // 座標追跡を初期化
@@ -256,22 +254,12 @@ export class LassoSelection extends SelectionBase {
     eventBus.emit('selection:updateLassoOutline', {});
 
     this.applyPreviewToFront(mode);
-    const after = normalizeMask(selectionManager.getFront());
-    if (!after && !this.beforeBackSnapshot) {
-      selectionManager.clearFront();
-      this.baseMaskSnapshot = undefined;
-      this.beforeBackSnapshot = undefined;
-      this.previewFragment = undefined;
-      return;
-    }
     doCommands(
       new SelectionChangeCommand({
-        beforeBack: this.beforeBackSnapshot,
-        afterBack: after,
+        swapBack: selectionManager.getFront(),
       })
     );
     this.baseMaskSnapshot = undefined;
-    this.beforeBackSnapshot = undefined;
     this.previewFragment = undefined;
   }
 
@@ -280,19 +268,6 @@ export class LassoSelection extends SelectionBase {
     this.points = [];
     selectionManager.clearFront();
     this.baseMaskSnapshot = undefined;
-    this.beforeBackSnapshot = undefined;
     this.previewFragment = undefined;
   }
 }
-
-const cloneMask = (mask: SelectionMask): SelectionMask => {
-  const cloned = new SelectionMask(mask.getWidth(), mask.getHeight());
-  cloned.setMask(new Uint8Array(mask.getMask()));
-  return cloned;
-};
-
-const normalizeMask = (mask: SelectionMask | undefined): SelectionMask | undefined => {
-  if (!mask) return undefined;
-  if (mask.isCleared()) return undefined;
-  return cloneMask(mask);
-};

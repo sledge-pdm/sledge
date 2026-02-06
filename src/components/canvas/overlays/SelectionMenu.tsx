@@ -98,11 +98,14 @@ export const OnCanvasSelectionMenu: Component = () => {
     }, 60)
   );
 
+  const [showMenu, setShowMenu] = createSignal<boolean>(false);
+
   const handleUpdate = (e: { type: SelectionUpdateType; immediate?: boolean }) => {
+    setShowMenu(selectionManager.hasSelection() && !selectionManager.getFront());
+    setFloatingMoveState(floatingMoveManager.isMoving());
+
     // Menu shouldn't updated for front (preview) updates
     if (e.type === 'front') return;
-
-    setFloatingMoveState(floatingMoveManager.isMoving());
     if (e.immediate) {
       updateMenuPos();
     } else {
@@ -144,7 +147,6 @@ export const OnCanvasSelectionMenu: Component = () => {
 
   const updateMenuPos = () => {
     if (!selectionManager.hasSelection()) return;
-
     if (!containerRef) return;
     const boundbox = selectionManager.getBoundBox();
     if (!boundbox) return;
@@ -187,6 +189,7 @@ export const OnCanvasSelectionMenu: Component = () => {
   };
 
   const visibility = createMemo(() => {
+    if (!showMenu()) return 'collapse';
     // 外側メニューがある場合は表示しない
     if (outerPosition() !== undefined) return 'collapse';
     // キャンバスをリサイズ中の場合は表示しない
@@ -216,7 +219,21 @@ export const OnCanvasSelectionMenu: Component = () => {
 };
 
 export const OuterSelectionMenu: Component = () => {
+  const [showMenu, setShowMenu] = createSignal<boolean>(false);
+
+  const handleUpdate = (e: { type: SelectionUpdateType; immediate?: boolean }) => {
+    setShowMenu(selectionManager.hasSelection() && !selectionManager.getFront());
+  };
+
+  onMount(() => {
+    const unsubscribe = selectionManager.subscribe(handleUpdate);
+    return () => {
+      unsubscribe();
+    };
+  });
+
   const visibility = createMemo(() => {
+    if (!showMenu()) return 'collapse';
     // 外側メニューの座標がない場合は表示しない
     if (outerPosition() === undefined) return 'collapse';
     // キャンバスをリサイズ中の場合は表示しない

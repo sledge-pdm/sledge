@@ -7,8 +7,7 @@ export interface SelectionChangeCommandProps {
   swapBack: SelectionMask | undefined;
 }
 
-// NOTE: This command tracks only "back" (committed) selectionMask.
-export class SelectionChangeCommand extends HistoryCommand {
+export class ApplySelectionFrontToBackCommand extends HistoryCommand {
   private swapBack: SelectionMask | undefined;
 
   constructor(props: SelectionChangeCommandProps) {

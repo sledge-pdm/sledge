@@ -1,5 +1,5 @@
 import { doCommands } from '~/features/history';
-import { SelectionChangeCommand } from '~/features/history/command/selection/SelectionChangeCommand';
+import { ApplySelectionFrontToBackCommand } from '~/features/history/command/selection/SelectionChangeCommand';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
@@ -36,7 +36,7 @@ export class RectSelection extends SelectionBase {
 
   protected onEndSelection(args: ToolArgs, mode: SelectionEditMode) {
     doCommands(
-      new SelectionChangeCommand({
+      new ApplySelectionFrontToBackCommand({
         swapBack: selectionManager.getFront(),
       })
     );

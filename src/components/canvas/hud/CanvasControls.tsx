@@ -64,12 +64,47 @@ const CanvasControls: Component = () => {
   const [activeCanUndo, setActiveCanUndo] = createSignal(historyManager.canUndo());
   const [activeCanRedo, setActiveCanRedo] = createSignal(historyManager.canRedo());
 
+  // const [selectionStore, setSelectionStore] = createStore<{
+  //   selectionBack: SelectionMask | undefined;
+  //   selectionFront: SelectionMask | undefined;
+  //   floatingArea: SelectionMask | undefined;
+  // }>({
+  //   selectionBack: undefined,
+  //   selectionFront: undefined,
+  //   floatingArea: undefined,
+  // });
+
+  // const onSelectionUpdate = (payload: { type: SelectionUpdateType; immediate?: boolean }) => {
+  //   setSelectionStore((s) => {
+  //     return {
+  //       ...s,
+  //       selectionBack: selectionManager.getBack(),
+  //       selectionFront: selectionManager.getFront(),
+  //     };
+  //   });
+  // };
+  // const onFloatingMoveUdpate = (payload: { immediate?: boolean }) => {
+  //   setSelectionStore((s) => {
+  //     return {
+  //       ...s,
+  //       floatingArea: floatingMoveManager.getFloatingArea(),
+  //     };
+  //   });
+  // };
+
   onMount(() => {
+    // const selectionUnsubscribe = selectionManager.subscribe(onSelectionUpdate);
+    // const floatingMoveUnsubscribe = floatingMoveManager.subscribe(onFloatingMoveUdpate);
+
     const dispose = historyManager.onChange((state) => {
       setActiveCanUndo(state.canUndo);
       setActiveCanRedo(state.canRedo);
     });
-    return () => dispose();
+    return () => {
+      // selectionUnsubscribe();
+      // floatingMoveUnsubscribe();
+      dispose();
+    };
   });
 
   createEffect(() => {
@@ -157,6 +192,33 @@ const CanvasControls: Component = () => {
           <FrameResizeMenu />
         </div>
       </Show>
+
+      {/* <div class={flexCol}>
+        <div class={flexRow}>
+          <p>selection back:</p>
+          <Show when={selectionStore.selectionBack} fallback={<p>N/A</p>}>
+            <p>
+              {selectionStore.selectionBack!.getWidth()}x{selectionStore.selectionBack!.getHeight()}
+            </p>
+          </Show>
+        </div>
+        <div class={flexRow}>
+          <p>selection front:</p>
+          <Show when={selectionStore.selectionFront} fallback={<p>N/A</p>}>
+            <p>
+              {selectionStore.selectionFront!.getWidth()}x{selectionStore.selectionFront!.getHeight()}
+            </p>
+          </Show>
+        </div>
+        <div class={flexRow}>
+          <p>floating area:</p>
+          <Show when={selectionStore.floatingArea} fallback={<p>N/A</p>}>
+            <p>
+              {selectionStore.floatingArea!.getWidth()}x{selectionStore.floatingArea!.getHeight()}
+            </p>
+          </Show>
+        </div>
+      </div> */}
     </>
   );
 };

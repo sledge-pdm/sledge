@@ -1,5 +1,5 @@
 import { doCommands } from '~/features/history';
-import { SelectionChangeCommand } from '~/features/history/command/selection/SelectionChangeCommand';
+import { ApplySelectionFrontToBackCommand } from '~/features/history/command/selection/SelectionChangeCommand';
 import { logSystemWarn } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';
@@ -255,7 +255,7 @@ export class LassoSelection extends SelectionBase {
 
     this.applyPreviewToFront(mode);
     doCommands(
-      new SelectionChangeCommand({
+      new ApplySelectionFrontToBackCommand({
         swapBack: selectionManager.getFront(),
       })
     );

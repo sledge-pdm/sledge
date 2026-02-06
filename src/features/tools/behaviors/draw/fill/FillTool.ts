@@ -2,8 +2,7 @@
 import { Layer } from '@sledge-pdm/frasco';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo } from '~/features/log';
-import { selectionManagerLegacyYouShouldNotUseThis } from '~/features/selection/SelectionAreaManager';
-import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { FillPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
@@ -39,7 +38,7 @@ export class FillTool implements ToolBehavior {
     const layer = getLayer(layerId);
 
     const selectionFillMode = preset.selectionFillMode ?? 'inside';
-    if (!isSelectionAvailable() || selectionFillMode === 'ignore') {
+    if (!selectionManager.hasSelection() || selectionFillMode === 'ignore') {
       fill({
         layerId,
         layer,
@@ -49,7 +48,11 @@ export class FillTool implements ToolBehavior {
         threshold,
       });
     } else {
-      const selectionMask = selectionManagerLegacyYouShouldNotUseThis.getSelectionMask();
+      const selectionMask = selectionManager.getSelection();
+      if (!selectionMask)
+        return {
+          shouldUpdate: false,
+        };
       if (selectionFillMode === 'inside') {
         //inside
         fill({

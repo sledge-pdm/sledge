@@ -5,7 +5,7 @@ import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemWarn } from '~/features/log/service';
-import { selectionManagerLegacyYouShouldNotUseThis } from '~/features/selection/SelectionAreaManager';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryContext } from '../../types';
@@ -139,7 +139,7 @@ export class CanvasSizeCommand extends HistoryCommand {
   private applySize(size: Size2D) {
     setProjectStore('canvas', 'size', size);
     adjustZoomToFit();
-    selectionManagerLegacyYouShouldNotUseThis.resizeSelectionMask(size);
+    selectionManager.resize(size);
   }
 
   private restoreSnapshots(snapshots: PackedLayerSnapshot[]) {

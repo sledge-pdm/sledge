@@ -9,6 +9,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo, logUserWarn } from '~/features/log/service';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManagerLegacyYouShouldNotUseThis } from '~/features/selection/SelectionAreaManager';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { SelectionLimitMode } from '~/stores/editor/ToolStore';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
@@ -89,7 +90,7 @@ export function startMove() {
       offset: { x: 0, y: 0 },
       origin: { x: 0, y: 0 },
     };
-    floatingMoveManager.startMove(layerFloatingBuffer, 'layer', layerId);
+    floatingMoveManager.startMove(layerFloatingBuffer, 'selection', layerId);
   }
 }
 
@@ -126,10 +127,11 @@ export function getSelectionOffset() {
 export function cancelSelection() {
   const layerId = floatingMoveManager.getTargetLayerId() ?? undefined;
   const wasMoving = floatingMoveManager.isMoving();
-  const hadSelection = selectionManagerLegacyYouShouldNotUseThis.isSelected();
+  const hadSelection = selectionManagerLegacyYouShouldNotUseThis.isSelected() || selectionManager.hasSelection();
   if (wasMoving) {
     floatingMoveManager.cancel();
   }
+  selectionManager.clearAll();
   selectionManagerLegacyYouShouldNotUseThis.clear();
 
   updateFrascoCanvas('selection cancelled');

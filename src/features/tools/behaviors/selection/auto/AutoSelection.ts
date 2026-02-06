@@ -1,5 +1,5 @@
 import { doCommands } from '~/features/history';
-import { SelectionChangeCommand } from '~/features/history/command/selection/SelectionChangeCommand';
+import { ApplySelectionFrontToBackCommand } from '~/features/history/command/selection/SelectionChangeCommand';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';
@@ -55,7 +55,7 @@ export class AutoSelection extends SelectionBase {
 
   protected onEndSelection(_args: ToolArgs, mode: SelectionEditMode) {
     doCommands(
-      new SelectionChangeCommand({
+      new ApplySelectionFrontToBackCommand({
         swapBack: selectionManager.getFront(),
       })
     );

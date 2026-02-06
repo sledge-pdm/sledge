@@ -17,7 +17,7 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { dialog } from '~/utils/platform';
 import { updateFrascoCanvas } from '~/webgl/service';
-import { selectionManagerLegacyYouShouldNotUseThis } from '../selection/SelectionAreaManager';
+import { selectionManager } from '../selection/SelectionManager';
 import { addLayer, removeLayer, RemoveLayerOptions } from './actions';
 import { changeBaseLayerColor } from './model';
 import { BaseLayerColorMode, Layer, LayerType } from './types';
@@ -313,7 +313,7 @@ export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
   });
 
   setProjectStore('canvas', 'size', afterSize);
-  selectionManagerLegacyYouShouldNotUseThis.resizeSelectionMask(afterSize);
+  selectionManager.resize(afterSize);
   adjustZoomToFit();
 
   command.registerAfter();

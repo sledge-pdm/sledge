@@ -1,8 +1,7 @@
 import { Vec2 } from '@sledge-pdm/core';
 import { historyManager } from '~/features/history';
-import { ConvertSelectionCommand } from '~/features/history/command/selection/ConvertSelectionCommand';
+import { convertSelectionToImageSnippet } from '~/features/history/command/snippet/ConvertSelectionToImageCommands';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
-import { getPackedLayerSnapshot } from '~/features/history/snapshot';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeLayer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
@@ -15,7 +14,6 @@ import { projectStore } from '~/stores/RuntimeProjectStore';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { combine_masks_subtract, flip_pixels_vertically, trim_mask_with_box } from '~/utils/wasm';
 import { updateFrascoCanvas } from '~/webgl/service';
-import { imagePoolImages } from '../image_pool/imageStore';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
 
@@ -211,8 +209,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   if (!selectionData) return;
   const { buffer, bbox } = selectionData;
 
-  const oldEntries = projectStore.imagePool.entries.slice();
-  const oldImages = new Map(imagePoolImages());
+  const selectionBefore = selectionManager.getSelection();
 
   const { entry, image } = await createEntryFromRawBuffer(buffer, bbox.width, bbox.height);
   entry.descriptionName = '[ from selection ]';
@@ -224,31 +221,21 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
   insertEntry(entry, image, { register: false });
   selectEntry(entry.id);
 
-  const newEntries = projectStore.imagePool.entries.slice();
-  const newImages = new Map(imagePoolImages());
-
-  let beforeSnapshot = undefined;
-  let afterSnapshot = undefined;
   if (deleteAfter) {
-    beforeSnapshot = getPackedLayerSnapshot(projectStore.layers.state.activeLayerId);
     deleteSelectedArea({ noAction: true });
-    afterSnapshot = getPackedLayerSnapshot(projectStore.layers.state.activeLayerId);
   }
   cancelSelection();
 
-  historyManager.addEntry(
-    new CommandsHistoryEntry(
-      new ConvertSelectionCommand({
-        layerId: projectStore.layers.state.activeLayerId,
-        oldEntries,
-        newEntries,
-        oldImages,
-        newImages,
-        beforeSnapshot,
-        afterSnapshot,
-      })
-    )
-  );
+  const entryIndex = projectStore.imagePool.entries.findIndex((item) => item.id === entry.id);
+  const { commands, context } = convertSelectionToImageSnippet({
+    entry,
+    image,
+    index: entryIndex,
+    layerId: projectStore.layers.state.activeLayerId,
+    selectionBefore,
+    deleteAfter,
+  });
+  historyManager.addEntry(new CommandsHistoryEntry(commands, context));
 
   if (deleteAfter) {
     updateFrascoCanvas('delete selected area');

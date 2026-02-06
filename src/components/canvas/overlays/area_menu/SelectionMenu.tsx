@@ -71,10 +71,6 @@ const Item: Component<ItemProps> = (props) => {
   );
 };
 
-const Divider: Component = () => {
-  return <div class={divider} />;
-};
-
 const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefined);
 
 export const OnCanvasSelectionMenu: Component = () => {
@@ -245,7 +241,7 @@ const MenuContent = () => {
         label='cancel.'
         title='cancel.'
       />
-      <Divider />
+      <div class={divider} />
       <Item
         src='/assets/icons/selection/to_image_10.png'
         onClick={async () => {
@@ -253,7 +249,7 @@ const MenuContent = () => {
         }}
         title='copy to image.'
       />
-      <Divider />
+      <div class={divider} />
       <Item
         src='/assets/icons/selection/delete_10.png'
         onClick={() => {

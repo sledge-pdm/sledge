@@ -71,10 +71,6 @@ const Item: Component<ItemProps> = (props) => {
   );
 };
 
-const Divider: Component = () => {
-  return <div class={divider} />;
-};
-
 const [isMoving, setIsMoving] = createSignal<boolean>(false);
 
 const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefined);
@@ -229,7 +225,7 @@ const MenuContent = () => {
         label='commit.'
         title='commit.'
       />
-      <Divider />
+      <div class={divider} />
       <Item
         src='/assets/icons/selection/cancel_10.png'
         onClick={() => {

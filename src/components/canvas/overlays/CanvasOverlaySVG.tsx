@@ -68,12 +68,8 @@ const CanvasOverlaySVG: Component = () => {
     setPatternOffset((prev) => (prev + 0.3) % 16);
   };
 
-  const onSelectionUpdate = (e: { immediate?: boolean }) => {
-    if (e.immediate) {
-      updateSelectionOutline();
-    } else {
-      setSelectionChanged(true);
-    }
+  const onSelectionUpdate = (e: {}) => {
+    updateSelectionOutline();
   };
   const updateSelectionOutline = () => {
     const { width, height } = projectStore.canvas.size;
@@ -141,7 +137,6 @@ const CanvasOverlaySVG: Component = () => {
     };
   });
 
-  // Cache local pen shape path
   createEffect(() => {
     const tool = getActiveToolCategoryId();
     const preset = getCurrentPresetConfig(tool) as any;
@@ -168,10 +163,6 @@ const CanvasOverlaySVG: Component = () => {
       cachedPreview &&
       isToolAllowedInCurrentLayer()
     ) {
-      const preset = getCurrentPresetConfig(tool) as any;
-      const size: number = preset?.size ?? 1;
-      // const cx = mouse.x;
-      // const cy = mouse.y;
       const { x: cx, y: cy } = cachedPreview.bitmaskShape.prePositionTransform(mouse);
       const ox = cx + cachedPreview.bitmaskShape.offsetX;
       const oy = cy + cachedPreview.bitmaskShape.offsetY;

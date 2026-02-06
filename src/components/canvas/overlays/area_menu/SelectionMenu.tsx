@@ -6,9 +6,7 @@ import { cancelSelection, convertSelectionToImage, deleteSelectedArea } from '~/
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge-pdm/core';
 import { color } from '@sledge-pdm/ui';
-import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
-import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { interactStore } from '~/stores/EditorStores';
 import { CanvasPos } from '~/types/CoordinateTypes';
 
@@ -83,35 +81,21 @@ export const OnCanvasSelectionMenu: Component = () => {
   let containerRef: HTMLDivElement;
   let sectionsBetweenAreaRef: HTMLElement | null = null;
 
-  const [updatePosition, setUpdatePosition] = createSignal<boolean>(false);
-  const [isRunning, startRenderLoop, stopRenderLoop] = createRAF(
-    targetFPS((timeStamp) => {
-      if (!updatePosition()) return;
-      updateMenuPos();
-      setUpdatePosition(false);
-    }, 60)
-  );
-
   const [showMenu, setShowMenu] = createSignal<boolean>(false);
 
-  const onSelectionUpdate = (e: { type: SelectionUpdateType; immediate?: boolean }) => {
+  const onSelectionUpdate = (e: { type: SelectionUpdateType }) => {
     setShowMenu(selectionManager.hasSelection() && !selectionManager.getFront());
 
     // Menu shouldn't updated for front (preview) updates
     if (e.type === 'front') return;
-    if (e.immediate) {
-      updateMenuPos();
-    } else {
-      setUpdatePosition(true);
-    }
+    updateMenuPos();
   };
 
   onMount(() => {
-    startRenderLoop();
     const unsubscribe = selectionManager.subscribe(onSelectionUpdate);
 
     const observer = new ResizeObserver(() => {
-      setUpdatePosition(true);
+      updateMenuPos();
     });
     sectionsBetweenAreaRef = document.getElementById('sections-between-area') as HTMLElement;
     if (sectionsBetweenAreaRef) {
@@ -119,7 +103,6 @@ export const OnCanvasSelectionMenu: Component = () => {
     }
 
     return () => {
-      stopRenderLoop();
       unsubscribe();
       observer.disconnect();
     };
@@ -127,13 +110,12 @@ export const OnCanvasSelectionMenu: Component = () => {
 
   // Reposition only while a selection is active and transform changes
   createEffect(() => {
-    if (!selectionManager.hasSelection()) return;
     interactStore.rotation;
     interactStore.horizontalFlipped;
     interactStore.verticalFlipped;
     interactStore.offset.x;
     interactStore.offset.y;
-    setUpdatePosition(true);
+    updateMenuPos();
   });
 
   const [selectionMenuPos, setSelectionMenuPos] = createSignal<Vec2>({ x: 0, y: 0 });

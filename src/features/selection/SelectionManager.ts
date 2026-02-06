@@ -5,7 +5,7 @@ import { Size2D } from '@sledge-pdm/core';
 import SelectionMask from './SelectionMask';
 
 export type SelectionUpdateType = 'front' | 'back' | 'both';
-type SelectionListener = (payload: { type: SelectionUpdateType; immediate?: boolean }) => void;
+type SelectionListener = (payload: { type: SelectionUpdateType }) => void;
 
 class SelectionManager {
   // NOTE: "Empty mask" should be undefined as much as possible
@@ -92,9 +92,9 @@ class SelectionManager {
     };
   }
 
-  private emitChange(type: SelectionUpdateType, immediate?: boolean) {
+  private emitChange(type: SelectionUpdateType) {
     for (const listener of this.listeners) {
-      listener({ type, immediate });
+      listener({ type });
     }
   }
 }

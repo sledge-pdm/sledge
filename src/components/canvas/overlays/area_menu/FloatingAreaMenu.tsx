@@ -5,7 +5,6 @@ import { cancelMove, cancelSelection, commitMove } from '~/features/selection/Se
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge-pdm/core';
 import { color } from '@sledge-pdm/ui';
-import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
@@ -85,30 +84,16 @@ export const OnCanvasFloatingAreaMenu: Component = () => {
   let containerRef: HTMLDivElement;
   let sectionsBetweenAreaRef: HTMLElement | null = null;
 
-  const [updatePosition, setUpdatePosition] = createSignal<boolean>(false);
-  const [_isRunning, startRenderLoop, stopRenderLoop] = createRAF(
-    targetFPS((timeStamp) => {
-      if (!updatePosition()) return;
-      updateMenuPos();
-      setUpdatePosition(false);
-    }, 60)
-  );
-
   const onFloatingAreaUpdate = (e: { immediate?: boolean }) => {
     setIsMoving(floatingMoveManager.isMoving());
-    if (e.immediate) {
-      updateMenuPos();
-    } else {
-      setUpdatePosition(true);
-    }
+    updateMenuPos();
   };
 
   onMount(() => {
-    startRenderLoop();
     const unsubscribe = floatingMoveManager.subscribe(onFloatingAreaUpdate);
 
     const observer = new ResizeObserver(() => {
-      setUpdatePosition(true);
+      updateMenuPos();
     });
     sectionsBetweenAreaRef = document.getElementById('sections-between-area') as HTMLElement;
     if (sectionsBetweenAreaRef) {
@@ -116,7 +101,6 @@ export const OnCanvasFloatingAreaMenu: Component = () => {
     }
 
     return () => {
-      stopRenderLoop();
       unsubscribe();
       observer.disconnect();
     };
@@ -129,7 +113,7 @@ export const OnCanvasFloatingAreaMenu: Component = () => {
     interactStore.verticalFlipped;
     interactStore.offset.x;
     interactStore.offset.y;
-    setUpdatePosition(true);
+    updateMenuPos();
   });
 
   const [selectionMenuPos, setSelectionMenuPos] = createSignal<Vec2>({ x: 0, y: 0 });

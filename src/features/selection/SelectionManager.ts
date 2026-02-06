@@ -45,10 +45,6 @@ class SelectionManager {
     return this.back;
   }
 
-  getMaskForDisplay(): Uint8Array | undefined {
-    return this.front?.getMask() ?? this.back?.getMask();
-  }
-
   getOffset() {
     return this.offset;
   }

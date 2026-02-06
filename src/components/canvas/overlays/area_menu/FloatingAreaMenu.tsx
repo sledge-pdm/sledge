@@ -1,13 +1,12 @@
 import { Icon } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
-import { cancelMove, cancelSelection, commitMove } from '~/features/selection/SelectionOperator';
+import { cancelMove, commitMove } from '~/features/selection/service';
 
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge-pdm/core';
 import { color } from '@sledge-pdm/ui';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { selectionManager } from '~/features/selection/SelectionManager';
 import { interactStore } from '~/stores/EditorStores';
 import { CanvasPos } from '~/types/CoordinateTypes';
 
@@ -226,8 +225,6 @@ const MenuContent = () => {
         src='/assets/icons/selection/commit_10.png'
         onClick={() => {
           commitMove();
-          cancelSelection();
-          selectionManager.clearAll();
         }}
         label='commit.'
         title='commit.'
@@ -237,8 +234,6 @@ const MenuContent = () => {
         src='/assets/icons/selection/cancel_10.png'
         onClick={() => {
           cancelMove();
-          cancelSelection();
-          selectionManager.clearAll();
         }}
         label='cancel.'
         title='cancel.'

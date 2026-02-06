@@ -1,7 +1,7 @@
 import { Icon } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionUpdateType } from '~/features/selection/SelectionManager';
-import { cancelSelection, convertSelectionToImage, deleteSelectedArea } from '~/features/selection/SelectionOperator';
+import { cancelSelection, convertSelectionToImage, deleteSelectedArea } from '~/features/selection/service';
 
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge-pdm/core';

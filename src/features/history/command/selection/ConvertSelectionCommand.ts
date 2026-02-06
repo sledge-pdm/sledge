@@ -4,7 +4,7 @@ import { clearImagePoolBlobUrls } from '~/features/image_pool/blobManager';
 import { setImagePoolImages } from '~/features/image_pool/imageStore';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { cancelMove } from '~/features/selection/SelectionOperator';
+import { cancelMove } from '~/features/selection/service';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryContext } from '../../types';

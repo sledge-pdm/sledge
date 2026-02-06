@@ -11,7 +11,7 @@ import { HistoryContext } from '~/features/history/types';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
+import { cancelMove, cancelSelection } from '~/features/selection/service';
 import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';

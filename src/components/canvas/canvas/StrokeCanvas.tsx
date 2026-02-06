@@ -10,7 +10,7 @@ import { clipboardCopy, clipboardCut } from '~/features/io/clipboard/ClipboardAc
 import { activeLayer } from '~/features/layer';
 import { logSystemInfo, logSystemWarn, logUserError } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { convertSelectionToImage, deleteSelectedArea, invertSelectionArea, isPositionWithinSelection } from '~/features/selection/SelectionOperator';
+import { convertSelectionToImage, deleteSelectedArea, invertSelectionArea, isPositionWithinSelection } from '~/features/selection/service';
 import { getActiveToolCategory } from '~/features/tools/ToolController';
 import { TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';

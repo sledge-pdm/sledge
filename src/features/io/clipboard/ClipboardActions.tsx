@@ -6,7 +6,7 @@ import { activeIndex, addLayerTo, findLayerById, setLayerProp } from '~/features
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError, logUserSuccess } from '~/features/log';
 import { selectionManager } from '~/features/selection/SelectionManager';
-import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer } from '~/features/selection/SelectionOperator';
+import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer } from '~/features/selection/service';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { clipboard, image } from '~/utils/platform';

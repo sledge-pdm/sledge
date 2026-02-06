@@ -73,7 +73,7 @@ const CanvasOverlaySVG: Component = () => {
   };
   const updateSelectionOutline = () => {
     const { width, height } = projectStore.canvas.size;
-    const mask = selectionManager.getMaskForDisplay();
+    const mask = selectionManager.getSelection()?.getMask();
     const offset = selectionManager.getOffset();
     if (!mask) {
       setSelectionPath(new PathCmdList([]));

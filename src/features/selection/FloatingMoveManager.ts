@@ -7,7 +7,6 @@ import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { eventBus } from '~/utils/EventBus';
 import { apply_mask_offset } from '~/utils/wasm';
 import { updateFrascoCanvas } from '~/webgl/service';
 
@@ -126,11 +125,7 @@ class FloatingMoveManager {
   constructor() {}
 
   private requestFrame(immediate?: boolean, layerIdOverride?: string) {
-    const layerId = layerIdOverride ?? this.targetLayerId;
     updateFrascoCanvas('floating-move');
-    const payload = immediate ? { immediate: true } : {};
-    eventBus.emit('selection:updateSelectionMenu', payload);
-    eventBus.emit('selection:updateSelectionPath', payload);
     this.emitChange(immediate);
   }
 

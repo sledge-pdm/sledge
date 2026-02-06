@@ -4,7 +4,6 @@ import { coordinateTransform } from '~/features/canvas/transform/CanvasPositionC
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { WindowPos } from '~/types/CoordinateTypes';
-import { eventBus } from '~/utils/EventBus';
 import { dialog } from '~/utils/platform';
 import { frascoRenderer } from '~/webgl/FrascoRenderer';
 
@@ -309,24 +308,20 @@ export function rotateInCenter(centerWindowPosition: WindowPos, rotation: number
 export const toggleVerticalFlip = () => {
   setInteractStore('verticalFlipped', (v) => !v);
   coordinateTransform.clearCache();
-  eventBus.emit('selection:updateSelectionMenu', {});
 };
 
 export const setVerticalFlip = (flipped: boolean) => {
   setInteractStore('verticalFlipped', flipped);
   coordinateTransform.clearCache();
-  eventBus.emit('selection:updateSelectionMenu', {});
 };
 
 export const toggleHorizontalFlip = () => {
   setInteractStore('horizontalFlipped', (v) => !v);
   coordinateTransform.clearCache();
-  eventBus.emit('selection:updateSelectionMenu', {});
 };
 export const setHorizontalFlip = (flipped: boolean) => {
   setInteractStore('horizontalFlipped', flipped);
   coordinateTransform.clearCache();
-  eventBus.emit('selection:updateSelectionMenu', {});
 };
 
 export const resetOrientation = () => {

@@ -2,7 +2,6 @@ import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge-pdm/core';
 import { color, Icon } from '@sledge-pdm/ui';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { logSystemInfo } from '~/features/log/service';
 import { setAppearanceStore } from '~/stores/EditorStores';
 import { OnscreenControlInteract } from './OnscreenControlInteract';
 
@@ -156,23 +155,6 @@ const OnscreenControl: Component = () => {
     }
   });
 
-  const logPointerEvent = (e: PointerEvent) => {
-    logSystemInfo('pointer event', {
-      label: LOG_LABEL,
-      debugOnly: true,
-      details: [
-        {
-          type: e.type,
-          pointerType: e.pointerType,
-          button: e.button,
-          buttons: e.buttons,
-          clientX: e.clientX,
-          clientY: e.clientY,
-        },
-      ],
-    });
-  };
-
   // --- Window (controller) dragging state & handlers (re-implemented to support pen properly) ---
   const windowDragState = {
     pointerId: null as number | null,
@@ -204,7 +186,6 @@ const OnscreenControl: Component = () => {
     // 既に別ポインタでドラッグ中なら無視
     if (windowDragState.pointerId !== null) return;
 
-    logPointerEvent(e);
     windowDragState.pointerId = e.pointerId;
     windowDragState.lastX = e.clientX;
     windowDragState.lastY = e.clientY;

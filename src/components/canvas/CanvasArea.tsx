@@ -10,13 +10,13 @@ import { logSystemWarn } from '~/features/log/service';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
 import { eventBus, Events } from '~/utils/EventBus';
 import { window as platformWindow } from '~/utils/platform';
-import CanvasDebugOverlay from './hud/CanvasDebugOverlay';
+import PerformanceMonitor from './hud/PerformanceMonitor';
 
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import CursorOverlay from '~/components/canvas/hud/CursorOverlay';
+import Cursor from '~/components/canvas/hud/Cursor';
 import Ruler from '~/components/canvas/hud/measures/ruler/Ruler';
 import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/area_menu/SelectionMenu';
-import CanvasError from '~/components/canvas/overlays/CanvasError';
+import CanvasError from '~/components/canvas/hud/CanvasError';
 import CanvasOverlaySVG from '~/components/canvas/overlays/CanvasOverlaySVG';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import SideSectionsOverlay from '~/components/section/SideSectionOverlay';
@@ -232,7 +232,7 @@ const CanvasArea: Component = () => {
           <OnCanvasSelectionMenu />
           <OnCanvasFloatingAreaMenu />
         </div>
-        <CursorOverlay />
+        <Cursor />
       </div>
       <div class={sectionsContainer}>
         <SideSectionsOverlay side='leftSide' />
@@ -247,7 +247,7 @@ const CanvasArea: Component = () => {
             <CanvasControls />
             <OuterSelectionMenu />
             <OuterFloatingAreaMenu />
-            <CanvasDebugOverlay />
+            <PerformanceMonitor />
             <CanvasError />
           </div>
         </div>

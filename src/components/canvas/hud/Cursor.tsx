@@ -9,7 +9,7 @@ import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { interactStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 
-const CursorOverlay: Component = () => {
+const Cursor: Component = () => {
   const canShowCursor = createMemo(() => interactStore.isPointerOnStrokeDetectArea && isToolAllowedInCurrentLayer(getActiveToolCategory()));
   const mousePos = createMemo(() => interactStore.lastPointerWindow);
 
@@ -37,4 +37,4 @@ const CursorOverlay: Component = () => {
   );
 };
 
-export default CursorOverlay;
+export default Cursor;

@@ -187,6 +187,7 @@ const CanvasControls: Component = () => {
           />
         </div>
       </div>
+
       <Show when={interactStore.isCanvasSizeFrameMode}>
         <div class={bottomRightNav} style={{ 'z-index': 'var(--zindex-canvas-overlay)' }}>
           <FrameResizeMenu />

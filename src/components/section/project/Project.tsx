@@ -109,7 +109,7 @@ const Project: Component = () => {
             </Show>
             <p class={locationLabelStyle}>size</p>
             <Show when={savedStat()} fallback={<Nothing>unknown.</Nothing>}>
-              <p class={locationValueStyle}>{toReadableByteStr(savedStat()!.size ?? 0)}</p>
+              <p>{toReadableByteStr(savedStat()!.size ?? 0)}</p>
             </Show>
           </div>
         </Show>

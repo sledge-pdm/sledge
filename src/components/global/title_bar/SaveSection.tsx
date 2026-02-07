@@ -66,9 +66,6 @@ const saveButtonMainButton = css`
 
 const saveButtonSide = css`
   box-sizing: border-box;
-  appearance: none;
-  border: none;
-  background: none;
   cursor: pointer;
   display: flex;
   flex-direction: row;
@@ -225,7 +222,7 @@ const SaveSection: Component = () => {
               </svg>
             </Show>
           </button>
-          <button type='button' class={saveButtonSide} onClick={() => setIsSaveMenuShown(!isSaveMenuShown())} aria-label='toggle save menu'>
+          <a class={saveButtonSide} onClick={() => setIsSaveMenuShown(!isSaveMenuShown())}>
             <Icon
               src={'/assets/icons/misc/triangle_5.png'}
               color={color.onBackground}
@@ -233,7 +230,7 @@ const SaveSection: Component = () => {
               scale={1}
               transform={isSaveMenuShown() ? 'rotate(180deg)' : 'rotate(0deg)'}
             />
-          </button>
+          </a>
         </div>
 
         <Show when={isSaveMenuShown()}>

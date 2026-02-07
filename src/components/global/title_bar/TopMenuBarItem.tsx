@@ -12,8 +12,6 @@ const menuItem = css`
 `;
 
 const menuItemText = css`
-  background: none;
-  border: none;
   font-family: ZFB11;
   font-size: 8px;
   text-rendering: geometricPrecision;
@@ -24,7 +22,6 @@ const menuItemText = css`
   height: 30px;
   padding-left: 6px;
   padding-right: 6px;
-  cursor: pointer;
 `;
 
 const menuItemBackground = css`
@@ -52,8 +49,7 @@ export const TopMenuBarItem: Component<TopMenuBarItemProps> = (props) => {
 
   return (
     <div class={menuItem}>
-      <button
-        type='button'
+      <a
         class={menuItemText}
         style={props.labelStyleOverride ?? {}}
         onClick={async (e) => {
@@ -63,7 +59,7 @@ export const TopMenuBarItem: Component<TopMenuBarItemProps> = (props) => {
         title={props.title}
       >
         {props.label}
-      </button>
+      </a>
       <div class={menuItemBackground} />
       <Show when={props.menu?.() && menuOpen()}>
         <MenuList

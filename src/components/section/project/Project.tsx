@@ -28,13 +28,6 @@ const locationLabelStyle = css`
 
 const locationValueStyle = css`
   overflow-wrap: break-word;
-  appearance: none;
-  border: none;
-  background: none;
-  padding: 0;
-  margin: 0;
-  text-align: left;
-  cursor: pointer;
 `;
 
 const Project: Component = () => {
@@ -95,15 +88,15 @@ const Project: Component = () => {
           <div class={locationGrid}>
             <p class={locationLabelStyle}>path</p>
             <Show when={ioStore.savedLocation.path} fallback={<Nothing>unknown.</Nothing>}>
-              <button type='button' class={locationValueStyle} onClick={() => openFolderInExplorer()} title={'click to open in explorer.'}>
+              <a class={locationValueStyle} onClick={() => openFolderInExplorer()} title={'click to open in explorer.'}>
                 {ioStore.savedLocation.path || '<unknown>'}
-              </button>
+              </a>
             </Show>
             <p class={locationLabelStyle}>file</p>
             <Show when={ioStore.savedLocation.name} fallback={<Nothing>unknown.</Nothing>}>
-              <button type='button' class={locationValueStyle} onClick={() => revealFileInExplorer()} title={'click to open in explorer.'}>
+              <a class={locationValueStyle} onClick={() => revealFileInExplorer()} title={'click to open in explorer.'}>
                 {ioStore.savedLocation.name || '<unknown>'}
-              </button>
+              </a>
             </Show>
             <p class={locationLabelStyle}>size</p>
             <Show when={savedStat()} fallback={<Nothing>unknown.</Nothing>}>

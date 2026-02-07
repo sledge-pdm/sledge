@@ -16,14 +16,6 @@ const resetSkippedVersionsLink = css`
   color: var(--color-muted);
   width: fit-content;
   align-self: flex-end;
-  appearance: none;
-  border: none;
-  background: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
 `;
 
 export const generalMetas: FieldMeta[] = [
@@ -64,9 +56,9 @@ export const generalMetas: FieldMeta[] = [
         <div class={skippedVersionsContainer}>
           <Show when={versions.length > 0} fallback={<Nothing>no skipped versions.</Nothing>}>
             <p>{versions.join(', ')}</p>
-            <button type='button' class={resetSkippedVersionsLink} onClick={handleClick}>
+            <a class={resetSkippedVersionsLink} onClick={handleClick}>
               reset.
-            </button>
+            </a>
           </Show>
         </div>
       );

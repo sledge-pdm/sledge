@@ -40,15 +40,6 @@ const rowValue = css`
   align-content: center;
   width: 100%;
   height: 100%;
-  appearance: none;
-  border: none;
-  background: none;
-  padding: 0;
-  margin: 0;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
 `;
 
 interface Props {
@@ -109,8 +100,7 @@ const KeyConfigSettings: Component<Props> = (props) => {
             return (
               <div class={row}>
                 <p class={rowName}>{name}</p>
-                <button
-                  type='button'
+                <a
                   class={rowValue}
                   onClick={(e) => {
                     if (!isRecording()) startRecord(name as KeyConfigCommands);
@@ -123,7 +113,7 @@ const KeyConfigSettings: Component<Props> = (props) => {
                   {name === recordingName()
                     ? `rec. [${parseKeyConfigEntry(recordedEntry()) ?? 'press any keys'}]`
                     : parseKeyConfigEntry((entry as KeyConfigEntry[])[0])}
-                </button>
+                </a>
               </div>
             );
           }}

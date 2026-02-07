@@ -3,6 +3,7 @@ import { Config } from '~/features/io/types/Config';
 
 function deepObjectAssign(target: any, ...sources: any[]) {
   sources.forEach((source) => {
+    if (!source || typeof source !== 'object') return;
     Object.keys(source).forEach((key) => {
       const s_val = source[key];
       const t_val = target[key];

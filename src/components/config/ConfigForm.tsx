@@ -173,27 +173,12 @@ const configFormInfoAreaBottom = css`
 const configFormLink = css`
   width: fit-content;
   color: #ccc;
-  appearance: none;
-  border: none;
-  background: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
 `;
 
 const configFormAbout = css`
   width: fit-content;
   color: #ccc;
   margin-top: 8px;
-  appearance: none;
-  border: none;
-  background: none;
-  padding: 0;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
 `;
 
 const getValueFromMetaPath = (meta: FieldValueMeta) => getValueAtPath(globalConfig, meta.path);
@@ -383,28 +368,26 @@ const ConfigForm: Component<Props> = (props) => {
       </div>
 
       <div class={configFormInfoAreaBottom}>
-        <button type='button' class={configFormLink} onClick={loadDefaults}>
+        <a class={configFormLink} onClick={loadDefaults}>
           reset to default.
-        </button>
-        <button
-          type='button'
+        </a>
+        <a
           class={configFormLink}
           onClick={async () => {
             await revealInFileBrowser(normalizeJoin(await path.appConfigDir(), Consts.globalConfigFileName));
           }}
         >
           Open Config File.
-        </button>
+        </a>
 
-        <button
-          type='button'
+        <a
           class={configFormAbout}
           onClick={() => {
             openWindow('about');
           }}
         >
           about.
-        </button>
+        </a>
       </div>
     </div>
   );

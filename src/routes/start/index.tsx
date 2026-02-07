@@ -16,7 +16,6 @@ import {
   recentFilesCaption,
   recentFilesContainerScroll,
   rightTopArea,
-  rightTopLinkButton,
   startContent,
   startHeader,
   startRoot,
@@ -42,12 +41,12 @@ export default function Home() {
         <p class={startHeader}>HELLO.</p>
 
         <div class={menuContainer}>
-          <button type='button' class={menuItem} onClick={() => openNewProject()}>
+          <a class={menuItem} onClick={() => openNewProject()}>
             +&ensp;new.
-          </button>
-          <button type='button' class={`${menuItem} ${openButtonMargin}`} onClick={() => openProjectWithExplorer()}>
+          </a>
+          <a class={`${menuItem} ${openButtonMargin}`} onClick={(e) => openProjectWithExplorer()}>
             &gt;&ensp;open.
-          </button>
+          </a>
         </div>
         <p class={recentFilesCaption}>recent files.</p>
 
@@ -57,12 +56,8 @@ export default function Home() {
       </div>
       <div class={rightTopArea}>
         <ThemeToggle noBackground={false} />
-        <button type='button' class={rightTopLinkButton} onClick={() => openWindow('about')}>
-          about.
-        </button>
-        <button type='button' class={rightTopLinkButton} onClick={() => openWindow('settings')}>
-          settings.
-        </button>
+        <a onClick={() => openWindow('about')}>about.</a>
+        <a onClick={() => openWindow('settings')}>settings.</a>
       </div>
     </div>
   );

@@ -40,10 +40,6 @@ const currentColorSharp = css`
 `;
 
 const currentColorLabel = css`
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
   font-family: ZFB21;
   text-transform: uppercase;
   font-size: 16px;
@@ -89,10 +85,6 @@ const tabsContainer = css`
 `;
 
 const tabItem = css`
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
   font-family: ZFB09;
   transform: rotate(180deg);
   white-space: nowrap;
@@ -156,15 +148,14 @@ const Color: Component = () => {
           <div class={tabsContainer}>
             <For each={tabs}>
               {(item) => (
-                <button
-                  type='button'
+                <a
                   class={clsx(tabItem, tab() === item && tabItemActive)}
                   onClick={() => {
                     setTab(item);
                   }}
                 >
                   {item}
-                </button>
+                </a>
               )}
             </For>
           </div>
@@ -195,8 +186,7 @@ const Color: Component = () => {
           <Show
             when={isColorInput()}
             fallback={
-              <button
-                type='button'
+              <a
                 class={currentColorLabel}
                 title='click to input color code.'
                 onClick={() => {
@@ -207,7 +197,7 @@ const Color: Component = () => {
                 }}
               >
                 {displayColorHex()}
-              </button>
+              </a>
             }
           >
             <form

@@ -1,8 +1,10 @@
 import { css } from '@acab/ecsstatic';
+import { FileLocation } from '@sledge-pdm/core';
 import { Nothing } from '@sledge-pdm/ui';
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import SectionItem from '~/components/section/SectionItem';
 import { ioStore } from '~/stores/EditorStores';
+import { eventBus, Events } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { FileInfo, fs } from '~/utils/platform';
@@ -31,13 +33,27 @@ const locationValueStyle = css`
 const Project: Component = () => {
   const [savedStat, setSavedStat] = createSignal<FileInfo>();
 
-  onMount(async () => {
-    const location = ioStore.savedLocation;
+  const updateStat = async (location: FileLocation) => {
     if (location.path && location.name) {
       const path = normalizeJoin(location.path, location.name);
       const fileStat = await fs.stat(path);
       setSavedStat(fileStat);
     }
+  };
+
+  const onProjectSaved = (e: Events['project:saved']) => {
+    updateStat(e.location);
+  };
+
+  onMount(async () => {
+    const location = ioStore.savedLocation;
+    await updateStat(location);
+
+    eventBus.on('project:saved', onProjectSaved);
+  });
+
+  onCleanup(() => {
+    eventBus.off('project:saved', onProjectSaved);
   });
 
   const toReadableByteStr = (bytes: number): string => {
@@ -84,7 +100,7 @@ const Project: Component = () => {
             </Show>
             <p class={locationLabelStyle}>size</p>
             <Show when={savedStat()} fallback={<Nothing>unknown.</Nothing>}>
-              <p class={locationValueStyle}>{toReadableByteStr(savedStat()!.size ?? 0)}</p>
+              <p>{toReadableByteStr(savedStat()!.size ?? 0)}</p>
             </Show>
           </div>
         </Show>

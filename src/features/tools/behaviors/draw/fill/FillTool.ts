@@ -1,10 +1,8 @@
 ﻿import { RGBA, Vec2 } from '@sledge-pdm/core';
 import { Layer } from '@sledge-pdm/frasco';
-import { LayerHistoryAction, projectHistoryController } from '~/features/history';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo } from '~/features/log';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
-import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
 import { FillPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
@@ -40,7 +38,7 @@ export class FillTool implements ToolBehavior {
     const layer = getLayer(layerId);
 
     const selectionFillMode = preset.selectionFillMode ?? 'inside';
-    if (!isSelectionAvailable() || selectionFillMode === 'ignore') {
+    if (!selectionManager.hasSelection() || selectionFillMode === 'ignore') {
       fill({
         layerId,
         layer,
@@ -50,7 +48,11 @@ export class FillTool implements ToolBehavior {
         threshold,
       });
     } else {
-      const selectionMask = selectionManager.getSelectionMask();
+      const selectionMask = selectionManager.getSelection();
+      if (!selectionMask)
+        return {
+          shouldUpdate: false,
+        };
       if (selectionFillMode === 'inside') {
         //inside
         fill({
@@ -135,13 +137,7 @@ function fillArea(args: { layerId: string; layer: Layer; color: RGBA; mask: Uint
   const result = fill_mask_area(buf, mask, ...color);
 
   if (result) {
-    layer.commitHistory(undefined, { silent: true });
+    layer.commitHistory(undefined, { context: { tool: TOOL_CATEGORIES.FILL } });
     layerManager.replaceLayerBuffer(layerId, buf, width, height, { inputSpace: 'canvas' });
-    projectHistoryController.addAction(
-      new LayerHistoryAction({
-        layerId: layerId,
-        context: { tool: TOOL_CATEGORIES.FILL },
-      })
-    );
   }
 }

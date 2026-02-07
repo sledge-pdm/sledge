@@ -1,4 +1,5 @@
 import { Size2D, Vec2 } from '@sledge-pdm/core';
+import { logSystemWarn } from '~/features/log';
 
 export interface BoundBox {
   top: number;
@@ -20,12 +21,23 @@ export default class SelectionMask {
 
   constructor(
     private width: number,
-    private height: number
+    private height: number,
+    initMask?: Uint8Array
   ) {
     // 「幅×高さ」で十分なので、4 倍不要
-    this.mask = new Uint8Array(this.width * this.height);
+    if (initMask) {
+      if (initMask.length === this.width * this.height) this.mask = initMask;
+      else {
+        logSystemWarn('Init mask passed, but length not matches');
+        this.mask = new Uint8Array(this.width * this.height);
+      }
+    } else {
+      this.mask = new Uint8Array(this.width * this.height);
+    }
     this.colCnt = new Uint32Array(width);
     this.rowCnt = new Uint32Array(height);
+
+    this.updateBoundingBox();
   }
 
   private allocateCounters() {
@@ -158,7 +170,6 @@ export default class SelectionMask {
     this.minY = Infinity;
     this.maxY = -1;
 
-    // ③ 走査は “行優先” がメモリ連続で最速
     let idx = 0;
     for (let y = 0; y < this.height; y++) {
       let rowSum = 0;
@@ -175,7 +186,6 @@ export default class SelectionMask {
       }
     }
 
-    // ④ minX/maxX は列カウンタを一度だけスキャン
     for (let x = 0; x < this.width; x++)
       if (this.colCnt[x]) {
         this.minX = x;

@@ -147,7 +147,7 @@ const Color: Component = () => {
         <div class={mainContainer}>
           <div class={tabsContainer}>
             <For each={tabs}>
-              {(item, index) => (
+              {(item) => (
                 <a
                   class={clsx(tabItem, tab() === item && tabItemActive)}
                   onClick={() => {

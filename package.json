@@ -14,16 +14,15 @@
     "prettier": "prettier --write . --config .prettierrc",
     "lint": "eslint .",
     "cargo:format": "cd wasm && cargo fmt && cd ../src-tauri && cargo fmt",
-    "format": "pnpm prettier && pnpm cargo:format",
-    "prepare": ""
+    "format": "pnpm prettier && pnpm cargo:format"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",
     "@jaames/iro": "^5.5.2",
     "@jsquash/webp": "^1.5.0",
-    "@sledge-pdm/core": "^1.2.1",
-    "@sledge-pdm/frasco": "^0.2.2",
-    "@sledge-pdm/ui": "^1.2.4",
+    "@sledge-pdm/core": "^1.2.4",
+    "@sledge-pdm/frasco": "^0.2.4",
+    "@sledge-pdm/ui": "^1.2.7",
     "@solid-primitives/deep": "^0.3.3",
     "@solid-primitives/map": "^0.7.2",
     "@solid-primitives/raf": "^2.3.2",

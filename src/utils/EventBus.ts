@@ -8,17 +8,13 @@ export type Events = {
 
   'canvas:layoutReady': { newSize: Size2D };
 
-  'selection:updateSelectionPath': { immediate?: boolean };
   'selection:updateLassoOutline': {};
-  'selection:updateSelectionMenu': { immediate?: boolean };
 
   'tools:presetLoaded': { toolId?: string };
 
   'webgl:requestUpdate': { context: string };
   'webgl:requestResume': {};
   'webgl:renderPaused': {};
-
-  'preview:requestUpdate': { layerId?: string };
 
   'window:sideSectionSideChanged': {};
 

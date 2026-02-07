@@ -1,26 +1,27 @@
-import { Component, onMount, Show } from 'solid-js';
+import { Component, onCleanup, onMount, Show } from 'solid-js';
+import CanvasStack from './canvas/CanvasStack';
 import CanvasAreaInteract from './CanvasAreaInteract';
-import CanvasControls from './overlays/CanvasControls';
-import CanvasStack from './stacks/CanvasStack';
+import CanvasControls from './hud/CanvasControls';
 
 import { css } from '@acab/ecsstatic';
 import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { logSystemWarn } from '~/features/log/service';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
-import { eventBus } from '~/utils/EventBus';
-import { window as platformWindow } from '~/utils/platform';
-import CanvasDebugOverlay from './overlays/CanvasDebugOverlay';
+import { eventBus, Events } from '~/utils/EventBus';
+import { window as platformWindow, UnlistenFn } from '~/utils/platform';
+import PerformanceMonitor from './hud/PerformanceMonitor';
 
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import Ruler from '~/components/canvas/measures/ruler/Ruler';
-import CanvasError from '~/components/canvas/overlays/CanvasError';
+import CanvasError from '~/components/canvas/hud/CanvasError';
+import Cursor from '~/components/canvas/hud/Cursor';
+import Ruler from '~/components/canvas/hud/measures/ruler/Ruler';
+import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/area_menu/SelectionMenu';
 import CanvasOverlaySVG from '~/components/canvas/overlays/CanvasOverlaySVG';
-import CursorOverlay from '~/components/canvas/overlays/CursorOverlay';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
-import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/SelectionMenu';
 import SideSectionsOverlay from '~/components/section/SideSectionOverlay';
 import { globalConfig } from '~/stores/GlobalStores';
+import { OnCanvasFloatingAreaMenu, OuterFloatingAreaMenu } from './overlays/area_menu/FloatingAreaMenu';
 
 const canvasArea = css`
   display: flex;
@@ -121,6 +122,7 @@ const CanvasArea: Component = () => {
   let canvasStack: HTMLDivElement;
 
   let interact: CanvasAreaInteract | undefined = undefined;
+  let unlistenOnResized: Promise<UnlistenFn> | undefined;
 
   let lastTransformMatrix = '';
   let lastTransformArray: number[] | undefined;
@@ -158,8 +160,14 @@ const CanvasArea: Component = () => {
     }
   };
 
+  const onSideSectionSideChanged = (e: Events['window:sideSectionSideChanged']) => {
+    // 座標変換キャッシュをクリア
+    coordinateTransform.clearCache();
+    centeringCanvas();
+  };
+
   onMount(() => {
-    const unlistenOnResized = platformWindow.getCurrentWindow().onResized(async (e) => {
+    unlistenOnResized = platformWindow.getCurrentWindow().onResized(async (e) => {
       // 座標変換キャッシュをクリア
       coordinateTransform.clearCache();
 
@@ -173,11 +181,7 @@ const CanvasArea: Component = () => {
       }
     });
 
-    eventBus.on('window:sideSectionSideChanged', (e) => {
-      // 座標変換キャッシュをクリア
-      coordinateTransform.clearCache();
-      centeringCanvas();
-    });
+    eventBus.on('window:sideSectionSideChanged', onSideSectionSideChanged);
 
     adjustZoomToFit();
 
@@ -186,12 +190,12 @@ const CanvasArea: Component = () => {
 
     updateTransform();
     startTransformUpdate();
-
-    return () => {
-      unlistenOnResized.then((callback) => callback());
-      interact?.removeInteractListeners();
-      stopTransformUpdate();
-    };
+  });
+  onCleanup(() => {
+    unlistenOnResized?.then((callback) => callback());
+    interact?.removeInteractListeners();
+    eventBus.off('window:sideSectionSideChanged', onSideSectionSideChanged);
+    stopTransformUpdate();
   });
 
   return (
@@ -226,8 +230,9 @@ const CanvasArea: Component = () => {
           </Show>
           <CanvasOverlaySVG />
           <OnCanvasSelectionMenu />
+          <OnCanvasFloatingAreaMenu />
         </div>
-        <CursorOverlay />
+        <Cursor />
       </div>
       <div class={sectionsContainer}>
         <SideSectionsOverlay side='leftSide' />
@@ -241,7 +246,8 @@ const CanvasArea: Component = () => {
 
             <CanvasControls />
             <OuterSelectionMenu />
-            <CanvasDebugOverlay />
+            <OuterFloatingAreaMenu />
+            <PerformanceMonitor />
             <CanvasError />
           </div>
         </div>

@@ -1,0 +1,12 @@
+import './canvas/CanvasSizeCommand';
+import './color/ColorChangeCommand';
+import './frasco/FrascoLayerCommand';
+import './image_pool/ImagePoolAddCommand';
+import './image_pool/ImagePoolPropsCommand';
+import './image_pool/ImagePoolRemoveCommand';
+import './layer/LayerAddCommand';
+import './layer/LayerPropsCommand';
+import './layer/LayerRemoveCommand';
+import './layer/LayerReorderCommand';
+import './layer_list/SetActiveLayerCommand';
+import './selection/SelectionChangeCommand';

@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { color, Icon, MenuList, MenuListOption } from '@sledge-pdm/ui';
 import { makeTimer } from '@solid-primitives/timer';
-import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { saveProject } from '~/features/io/project/save';
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { ioStore } from '~/stores/EditorStores';
@@ -138,18 +138,19 @@ const SaveSection: Component = () => {
   const updatePatternOffset = () => {
     setPatternOffset((prev) => (prev + 0.3) % 16);
   };
+  let updatePatternInterval: ReturnType<typeof setInterval> | undefined;
 
   onMount(() => {
     eventBus.on('project:saved', handleSaved);
     eventBus.on('project:saveFailed', handleSaveFailed);
     eventBus.on('project:saveCancelled', handleSaveCancelled);
-    const updatePatternInterval = setInterval(updatePatternOffset, 30);
-    return () => {
-      eventBus.off('project:saved', handleSaved);
-      eventBus.off('project:saveFailed', handleSaveFailed);
-      eventBus.off('project:saveCancelled', handleSaveCancelled);
-      clearInterval(updatePatternInterval);
-    };
+    updatePatternInterval = setInterval(updatePatternOffset, 30);
+  });
+  onCleanup(() => {
+    eventBus.off('project:saved', handleSaved);
+    eventBus.off('project:saveFailed', handleSaveFailed);
+    eventBus.off('project:saveCancelled', handleSaveCancelled);
+    if (updatePatternInterval) clearInterval(updatePatternInterval);
   });
 
   const saveMenu = createMemo<MenuListOption[]>(() => [
@@ -206,7 +207,7 @@ const SaveSection: Component = () => {
               >
                 <defs>
                   <pattern
-                    id='area-pattern-animate'
+                    id='save-background-animate'
                     x={patternOffset()}
                     y={patternOffset()}
                     width='32'
@@ -218,7 +219,7 @@ const SaveSection: Component = () => {
                     <g innerHTML={areaPatternPath} />
                   </pattern>
                 </defs>
-                <rect width='100%' height='100%' fill='url(#area-pattern-animate)' />
+                <rect width='100%' height='100%' fill='url(#save-background-animate)' />
               </svg>
             </Show>
           </button>

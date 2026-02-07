@@ -1,10 +1,11 @@
 import { css } from '@acab/ecsstatic';
+import { CleanupFn } from '@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types';
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { clsx } from '@sledge-pdm/core';
+import { clsx, Layer } from '@sledge-pdm/core';
 import { Checkbox, color, Icon, Light, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import { allLayers, findLayerById, Layer, mergeToBelowLayer, moveLayer, setActiveLayerId, setLayerName } from '~/features/layer';
+import { allLayers, findLayerById, mergeToBelowLayer, reorderLayer, setActiveLayerId, setLayerProp, toggleLayerVisibility } from '~/features/layer';
 import {
   clearLayersFromUser,
   deselectLayer,
@@ -14,12 +15,12 @@ import {
   removeLayersFromUser,
   selectLayer,
   summarizeLayerNames,
-  toggleLayerVisibility,
 } from '~/features/layer/service';
+import { logUserWarn } from '~/features/log';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { flexRow } from '~/styles/styles';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 
 const root = css`
   width: 100%;
@@ -169,7 +170,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
     if (props.index !== -1) {
       setProjectStore('layers', 'layers', props.index, 'enabled', (v: boolean) => !v);
     }
-    updateWebGLCanvas('layer deactivated from layeritem');
+    updateFrascoCanvas('layer deactivated from layeritem');
   };
 
   const handlePointerDown = (e: PointerEvent) => {
@@ -186,13 +187,13 @@ const LayerItem: Component<LayerItemProps> = (props) => {
 
   const handleMoveUp = (e: MouseEvent) => {
     e.stopPropagation();
-    moveLayer(props.index, props.index - 1);
+    reorderLayer(props.index, props.index - 1);
     highlightLayer();
   };
 
   const handleMoveDown = (e: MouseEvent) => {
     e.stopPropagation();
-    moveLayer(props.index, props.index + 1);
+    reorderLayer(props.index, props.index + 1);
     highlightLayer();
   };
 
@@ -217,8 +218,9 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   let itemEl: HTMLDivElement;
   const [isDragging, setIsDragging] = createSignal(false);
 
+  let cleanDraggable: CleanupFn | undefined;
   onMount(() => {
-    const cleanDraggable = draggable({
+    cleanDraggable = draggable({
       element: itemEl,
       getInitialData: () => ({ type: 'layer', id: props.layer.id }),
       onDragStart() {
@@ -227,9 +229,16 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       onDrag: () => setIsDragging(true),
       onDrop: () => setIsDragging(false),
     });
-
-    return () => cleanDraggable();
   });
+  onCleanup(() => cleanDraggable?.());
+
+  const setLayerName = (layerId: string, newName: string) => {
+    if (!newName || newName.trim() === '') {
+      logUserWarn('Layer name cannot be empty', { label: 'LayerItem' });
+      return false;
+    }
+    setLayerProp(layerId, 'name', newName);
+  };
 
   return (
     <>

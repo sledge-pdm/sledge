@@ -1,7 +1,6 @@
-import { gzipInflate } from '@sledge-pdm/core';
+import { gzipInflate, ImagePoolImage } from '@sledge-pdm/core';
 import { createSignal } from 'solid-js';
 import { getImagePoolImage } from './imageStore';
-import { ImagePoolImage } from './model';
 
 const [imagePoolBlobUrls, setImagePoolBlobUrls] = createSignal<Map<string, string>>(new Map());
 

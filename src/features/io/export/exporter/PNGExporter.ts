@@ -1,5 +1,5 @@
+import { Layer } from '@sledge-pdm/core';
 import { convertCanvasToBlob, convertLayerToBlob, Exporter } from '~/features/io/export/exporter/Exporter';
-import { Layer } from '~/features/layer';
 
 export class PNGExporter extends Exporter {
   async canvasToBlob(quality?: number, scale: number = 1): Promise<Blob> {

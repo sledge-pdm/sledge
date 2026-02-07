@@ -7,18 +7,17 @@ import Editor from './routes/editor/index';
 import Home from './routes/start/index';
 
 import { applyTheme, showContextMenu } from '@sledge-pdm/ui';
-import { createEffect, onMount } from 'solid-js';
+import { createEffect, onCleanup, onMount } from 'solid-js';
 import { loadGlobalConfig } from '~/features/io/config/load';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
-import { event, window as platformWindow, webview } from '~/utils/platform';
+import { event, window as platformWindow, UnlistenFn, webview } from '~/utils/platform';
 import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
 
 import { css } from '@acab/ecsstatic';
-import Restore from '~/routes/restore';
 
 import '@sledge-pdm/ui/global.css';
 
@@ -41,33 +40,16 @@ export default function App() {
     reportCriticalError(event.reason instanceof Error ? event.reason : new Error(String(event.reason)));
   };
 
-  onMount(() => {
+  let unlistenOnSettingsSaved: UnlistenFn | undefined;
+  let unlistenThemeChanged: UnlistenFn | undefined;
+
+  onMount(async () => {
     window.addEventListener('error', handleGlobalError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
-    () => {
-      window.removeEventListener('error', handleGlobalError);
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-    };
-  });
-
-  listenEvent('onSettingsSaved', () => {
-    loadGlobalConfig();
-  });
-
-  const applyThemeToHtml = (osTheme?: 'dark' | 'light') => {
-    if (osTheme && globalConfig.general.theme === 'os') {
-      applyTheme(osTheme);
-    } else {
-      applyTheme(globalConfig.general.theme);
-    }
-  };
-
-  event.listen('tauri://theme-changed', (e) => {
-    applyThemeToHtml(e.payload === 'dark' ? 'dark' : 'light');
-  });
-
-  onMount(async () => {
+    unlistenOnSettingsSaved = await listenEvent('onSettingsSaved', () => {
+      loadGlobalConfig();
+    });
     const currentWebview = webview.getCurrentWebview();
     const currentWindow = platformWindow.getCurrentWindow();
     applyThemeToHtml();
@@ -83,12 +65,29 @@ export default function App() {
       });
       await currentWebview.setZoom(zoomForIntegerize(scaleFactor));
     });
-
+    unlistenThemeChanged = await event.listen('tauri://theme-changed', (e) => {
+      applyThemeToHtml(e.payload === 'dark' ? 'dark' : 'light');
+    });
     // await checkForUpdates();
   });
 
+  onCleanup(() => {
+    window.removeEventListener('error', handleGlobalError);
+    window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    unlistenOnSettingsSaved?.();
+    unlistenThemeChanged?.();
+  });
+
+  const applyThemeToHtml = (osTheme?: 'dark' | 'light') => {
+    if (osTheme && globalConfig.general.theme === 'os') {
+      applyTheme(osTheme);
+    } else {
+      applyTheme(globalConfig.general.theme);
+    }
+  };
+
   createEffect(() => {
-    const theme = globalConfig.general.theme;
+    globalConfig.general.theme;
     applyThemeToHtml();
   });
 
@@ -112,7 +111,6 @@ export default function App() {
     >
       <Route path='/start' component={Home} />
       <Route path='/editor' component={Editor} />
-      <Route path='/restore' component={Restore} />
       <Route path='/settings' component={Settings} />
       <Route path='/about' component={About} />
     </Router>

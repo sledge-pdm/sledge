@@ -3,13 +3,15 @@ import { Vec2 } from '@sledge-pdm/core';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManager } from '~/features/selection/SelectionManager';
+import SelectionMask from '~/features/selection/SelectionMask';
 import { TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { eventBus } from '~/utils/EventBus';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
+import { apply_mask_offset } from '~/utils/wasm';
+import { updateFrascoCanvas } from '~/webgl/service';
 
-export type MoveMode = 'selection' | 'layer' | 'pasted';
+export type MoveMode = 'selection' | 'pasted';
+type FloatingMoveListener = () => void;
 
 export interface FloatingBuffer {
   buffer: Uint8ClampedArray;
@@ -37,9 +39,11 @@ class FloatingMoveManager {
   private targetBuffer: Uint8ClampedArray | undefined = undefined;
   private floatingBuffer: FloatingBuffer | undefined = undefined;
   private compositeBuffer: Uint8ClampedArray | undefined;
+  private floatingArea: SelectionMask | undefined;
 
   private overlayVersion = 0;
   private state: MoveMode | undefined = undefined;
+  private listeners = new Set<FloatingMoveListener>();
 
   public getPreviewBuffer(): Uint8ClampedArray | undefined {
     return this.targetBuffer;
@@ -47,6 +51,14 @@ class FloatingMoveManager {
 
   public getFloatingBuffer() {
     return this.floatingBuffer;
+  }
+
+  public getFloatingArea() {
+    return this.floatingArea;
+  }
+
+  public getOffset() {
+    return this.floatingBuffer?.offset;
   }
 
   public getCompositePreview(): Uint8ClampedArray | undefined {
@@ -112,13 +124,9 @@ class FloatingMoveManager {
 
   constructor() {}
 
-  private requestFrame(immediate?: boolean, layerIdOverride?: string) {
-    const layerId = layerIdOverride ?? this.targetLayerId;
-    updateWebGLCanvas('floating-move');
-    updateLayerPreview(layerId);
-    const payload = immediate ? { immediate: true } : {};
-    eventBus.emit('selection:updateSelectionMenu', payload);
-    eventBus.emit('selection:updateSelectionPath', payload);
+  private requestFrame() {
+    updateFrascoCanvas('floating-move');
+    this.emitChange();
   }
 
   private getBaseBuffer(state: MoveMode, targetLayerId: string): Uint8ClampedArray | undefined {
@@ -126,10 +134,9 @@ class FloatingMoveManager {
     const height = projectStore.canvas.size?.height;
     if (width == null || height == null) return undefined;
     const base = layerManager.exportRawCanvas(targetLayerId);
-    if (state === 'layer') {
-      return new Uint8ClampedArray(width * height * 4);
-    } else if (state === 'selection') {
-      const mask = selectionManager.getCombinedMask();
+    if (state === 'selection') {
+      const mask = this.floatingArea?.getMask() ?? selectionManager.getBack()?.getMask();
+      if (!mask) return new Uint8ClampedArray(base);
       const cleared = new Uint8ClampedArray(base);
       clearMaskedPixels(cleared, mask, width, height);
       return cleared;
@@ -138,8 +145,9 @@ class FloatingMoveManager {
     }
   }
 
-  public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string) {
+  public async startMove(floatingBuffer: FloatingBuffer, state: MoveMode, targetLayerId: string, selectionMask?: SelectionMask) {
     this.compositeBuffer = undefined;
+    this.floatingArea = selectionMask ? cloneMask(selectionMask) : undefined;
     const base = layerManager.exportRawCanvas(targetLayerId);
     this.targetBufferOriginal = {
       buffer: base,
@@ -213,12 +221,23 @@ class FloatingMoveManager {
       inputSpace: 'canvas',
     });
 
-    if (this.getState() === 'layer' || this.getState() === 'pasted') {
-      selectionManager.clear();
+    if (this.getState() === 'pasted') {
+      selectionManager.clearAll();
     } else {
-      const newOffset = this.floatingBuffer.offset;
-      selectionManager.shiftOffset(newOffset);
-      selectionManager.commitOffset();
+      const baseMask = this.floatingArea;
+      if (baseMask) {
+        const width = baseMask.getWidth();
+        const height = baseMask.getHeight();
+        const oldMask = baseMask.getMask();
+        const offset = this.floatingBuffer.offset;
+        const newMask = new Uint8Array(apply_mask_offset(oldMask, width, height, offset.x, offset.y));
+        const updated = new SelectionMask(width, height);
+        updated.setMask(newMask);
+        selectionManager.setBack(updated);
+        selectionManager.clearFront();
+      } else {
+        selectionManager.clearAll();
+      }
     }
 
     // Reset the state
@@ -230,11 +249,20 @@ class FloatingMoveManager {
     this.targetBufferOriginal = undefined;
     this.compositeBuffer = undefined;
     this.overlayVersion++;
+    this.floatingArea = undefined;
 
-    this.requestFrame(true, layerId);
+    this.requestFrame();
   }
 
   public cancel() {
+    if (this.state === 'selection') {
+      if (this.floatingArea) {
+        selectionManager.setBack(cloneMask(this.floatingArea));
+        selectionManager.clearFront();
+      } else {
+        selectionManager.clearAll();
+      }
+    }
     // Reset the state
     const layerId = this.targetLayerId;
     this.state = undefined;
@@ -244,8 +272,16 @@ class FloatingMoveManager {
     this.targetBufferOriginal = undefined;
     this.compositeBuffer = undefined;
     this.overlayVersion++;
+    this.floatingArea = undefined;
 
-    this.requestFrame(true, layerId);
+    this.requestFrame();
+  }
+
+  subscribe(listener: FloatingMoveListener) {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
   }
 
   private debugLog(message: string, ...details: unknown[]) {
@@ -256,9 +292,21 @@ class FloatingMoveManager {
         debugOnly: true,
       });
   }
+
+  private emitChange() {
+    for (const listener of this.listeners) {
+      listener();
+    }
+  }
 }
 
 export const floatingMoveManager = new FloatingMoveManager();
+
+const cloneMask = (mask: SelectionMask): SelectionMask => {
+  const cloned = new SelectionMask(mask.getWidth(), mask.getHeight());
+  cloned.setMask(new Uint8Array(mask.getMask()));
+  return cloned;
+};
 
 function clearMaskedPixels(buffer: Uint8ClampedArray, mask: Uint8Array, width: number, height: number) {
   const expected = width * height;

@@ -1,15 +1,15 @@
-import { getProjectAdapter, gzipDeflate, gzipInflate, ProjectBase } from '@sledge-pdm/core';
+import { getProjectAdapter, gzipDeflate, gzipInflate, ImagePoolImage, ProjectBase } from '@sledge-pdm/core';
 import type { HistoryRawSnapshot } from '@sledge-pdm/frasco';
-import { HistoryStacks } from 'node_modules/@sledge-pdm/core/dist/src/project/adapters/parts/History';
 import { unwrap } from 'solid-js/store';
-import { projectHistoryController } from '~/features/history';
-import { ImagePoolImage } from '~/features/image_pool';
+import { historyManager } from '~/features/history';
+import { inflateHistoryStacks, serializeHistoryStacks } from '~/features/history/serialization';
 import { clearImagePoolBlobUrls } from '~/features/image_pool/blobManager';
 import { imagePoolImages, setImagePoolImages } from '~/features/image_pool/imageStore';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManager } from '~/features/selection/SelectionManager';
+import SelectionMask from '~/features/selection/SelectionMask';
 import { getAllFullSnapshots, RuntimeProjectSnapshot } from '~/features/snapshot';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { setIOStore } from './EditorStores';
@@ -23,14 +23,16 @@ export async function initRuntimeProject(project: ProjectBase) {
     throw new Error('Failed to load project to runtime');
   }
 
+  historyManager.clearHistory();
+
   const versions = adapter.getVersions();
   setIOStore('loadProjectVersion', { sledge: versions?.sledge ?? undefined, project: versions?.project ?? undefined });
 
   const canvasInfo = adapter.getCanvasInfo();
-  selectionManager.resizeSelectionMask(canvasInfo.size);
+  selectionManager.resize(canvasInfo.size);
 
   const layers = adapter.getLayers() ?? [];
-  Promise.all(
+  await Promise.all(
     layers.map(async (layer) => {
       let buffer = await adapter.getRawBufferOf(layer.id);
       if (!buffer) {
@@ -40,11 +42,17 @@ export async function initRuntimeProject(project: ProjectBase) {
     })
   );
 
-  let history: HistoryStacks | null = adapter.getHistory();
-  if (history.undoStack && history.redoStack) {
-    projectHistoryController.setSerialized(history.undoStack, history.redoStack);
+  const selection = adapter.getSelection();
+  if (selection && selection.mask) {
+    selectionManager.setBack(new SelectionMask(canvasInfo.size.width, canvasInfo.size.height, selection.mask));
   }
-  if (history.layerHistories) {
+
+  const history = adapter.getHistory();
+  if (history?.undoStack && history?.redoStack) {
+    const inflated = inflateHistoryStacks({ undoStack: history.undoStack, redoStack: history.redoStack });
+    historyManager.setStacks(inflated.undo, inflated.redo, { emit: true, markDirty: false });
+  }
+  if (history?.layerHistories) {
     for (const [layerId, stacks] of Object.entries(history.layerHistories)) {
       layerManager.importHistoryRaw(layerId, inflateLayerHistory(stacks.undoStack ?? []), inflateLayerHistory(stacks.redoStack ?? []));
     }
@@ -60,7 +68,6 @@ export async function initRuntimeProject(project: ProjectBase) {
   });
   setImagePoolImages(persistedImages);
 
-  // TODO: convert snapshots into lightweight runtime structures
   const runtimeSnapshots = (await adapter.getSnapshots()).map((fullSnapshot) => {
     const { project, ...runtime } = fullSnapshot;
     return runtime as RuntimeProjectSnapshot;
@@ -108,7 +115,9 @@ export async function getProjectFromRuntime(): Promise<CurrentProject> {
     });
   });
 
-  const serializedHistory = projectHistoryController.getSerialized();
+  const selectionMask = selectionManager.getBack();
+
+  const serializedHistory = serializeHistoryStacks(historyManager.getUndoStack(), historyManager.getRedoStack());
   const layerHistories: Record<string, { undoStack: PackedHistorySnapshot[]; redoStack: PackedHistorySnapshot[] }> = {};
   allLayers().forEach((l) => {
     const layer = layerManager.getLayerOptional(l.id);
@@ -128,13 +137,16 @@ export async function getProjectFromRuntime(): Promise<CurrentProject> {
   const project: CurrentProject = {
     version: await getCurrentVersion(),
     projectVersion: CURRENT_PROJECT_VERSION,
-    ...{ ...clonedProjectStore },
+    ...clonedProjectStore,
 
-    history: { ...serializedHistory, layerHistories },
+    history: { ...(serializedHistory as unknown as CurrentProject['history']), layerHistories },
     layers: {
       buffers,
       layers: clonedProjectStore.layers.layers,
       state: clonedProjectStore.layers.state,
+    },
+    selection: {
+      mask: selectionMask?.getMask(),
     },
     imagePool: { images: new Map(imagePoolImages()), ...clonedProjectStore.imagePool },
     snapshots: runtimeSnapshots,

@@ -9,5 +9,5 @@ export const addRecentFile = (fileLocation?: FileLocation) => {
     filtered.push(fileLocation);
     return [...filtered];
   });
-  saveEditorStateDebounced();
+  saveEditorStateDebounced(['recentFiles']);
 };

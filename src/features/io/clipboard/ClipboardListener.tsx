@@ -1,17 +1,21 @@
-﻿import { Component, onMount } from 'solid-js';
+import { Component, onCleanup, onMount } from 'solid-js';
 import { clipboardCopy, clipboardCut, clipboardPaste } from './ClipboardActions';
 
 const ClipboardListener: Component = () => {
-  onMount(() => {
-    document.addEventListener('copy', clipboardCopy);
-    document.addEventListener('cut', clipboardCut);
-    document.addEventListener('paste', clipboardPaste);
+  const copy = (e: ClipboardEvent) => clipboardCopy(e);
+  const cut = (e: ClipboardEvent) => clipboardCut(e);
+  const paste = (e: ClipboardEvent) => clipboardPaste(e);
 
-    return () => {
-      document.removeEventListener('copy', clipboardCopy);
-      document.removeEventListener('cut', clipboardCut);
-      document.removeEventListener('paste', clipboardPaste);
-    };
+  onMount(() => {
+    document.addEventListener('copy', copy);
+    document.addEventListener('cut', cut);
+    document.addEventListener('paste', paste);
+  });
+
+  onCleanup(() => {
+    document.removeEventListener('copy', copy);
+    document.removeEventListener('cut', cut);
+    document.removeEventListener('paste', paste);
   });
 
   return null;

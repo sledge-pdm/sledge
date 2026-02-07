@@ -1,9 +1,9 @@
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { clipZoom, rotateInCenter, setOffset, zoomTowardWindowPos } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
-import { projectHistoryController } from '~/features/history';
+import { tryRedo, tryUndo } from '~/features/history';
 import { logSystemInfo, logSystemWarn } from '~/features/log';
-import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { WindowPos } from '~/types/CoordinateTypes';
@@ -104,8 +104,6 @@ class CanvasAreaInteract {
     (this.wrapperRef.style as any).msTouchAction = 'none';
     this.canvasStack.style.touchAction = 'none';
     (this.canvasStack.style as any).msTouchAction = 'none';
-
-    // コンポジタ昇格は新しいCanvasAreaで管理
   }
 
   static isDragKey(e: PointerEvent): boolean {
@@ -118,7 +116,7 @@ class CanvasAreaInteract {
     }
 
     if (e.buttons === 1 && CanvasAreaInteract.isDragKey(e)) {
-      if (isSelectionAvailable()) return false;
+      if (selectionManager.hasSelection()) return false;
       // angle-snapped line
       if (toolStore.activeToolCategory === 'pen' || toolStore.activeToolCategory === 'eraser') {
         if (e.shiftKey) return false;
@@ -132,14 +130,10 @@ class CanvasAreaInteract {
   private handleMouseDown(e: MouseEvent) {
     if (e.button === 3) {
       e.preventDefault();
-      if (projectHistoryController.canUndo()) {
-        projectHistoryController.undo();
-      }
+      tryUndo();
     } else if (e.button === 4) {
       e.preventDefault();
-      if (projectHistoryController.canRedo()) {
-        projectHistoryController.redo();
-      }
+      tryRedo();
     }
   }
 
@@ -185,16 +179,12 @@ class CanvasAreaInteract {
         if (e.button === 3) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          if (projectHistoryController.canUndo()) {
-            projectHistoryController.undo();
-          }
+          tryUndo();
           return;
         } else if (e.button === 4) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          if (projectHistoryController.canRedo()) {
-            projectHistoryController.redo();
-          }
+          tryRedo();
           return;
         }
       }

@@ -1,9 +1,10 @@
-import { Component, onMount } from 'solid-js';
+import { Component, onCleanup, onMount } from 'solid-js';
 import { clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
-import { projectHistoryController } from '~/features/history';
+import { tryRedo, tryUndo } from '~/features/history';
 import { saveProject } from '~/features/io/project/save';
-import { clearLayersFromUser, duplicateLayers, removeLayersFromUser, toggleLayerVisibility } from '~/features/layer/service';
+import { toggleLayerVisibility } from '~/features/layer';
+import { clearLayersFromUser, duplicateLayers, removeLayersFromUser } from '~/features/layer/service';
 import {
   getActiveToolCategoryId,
   getCurrentPresetConfig,
@@ -13,7 +14,7 @@ import {
 } from '~/features/tools/ToolController';
 import { interactStore, ioStore, setAppearanceStore, toolStore } from '~/stores/EditorStores';
 import { keyConfigStore } from '~/stores/GlobalStores';
-import { window as platformWindow } from '~/utils/platform';
+import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 import { isKeyMatchesToEntry } from '../config/KeyConfigController';
 
 const KeyListener: Component = () => {
@@ -52,11 +53,11 @@ const KeyListener: Component = () => {
 
     if (isKeyMatchesToEntry(e, keyConfigStore()['undo'])) {
       e.preventDefault(); // prevent conflict with input undo/redo
-      projectHistoryController.undo();
+      tryUndo();
     }
     if (isKeyMatchesToEntry(e, keyConfigStore()['redo'])) {
       e.preventDefault(); // prevent conflict with input undo/redo
-      projectHistoryController.redo();
+      tryRedo();
     }
 
     if (isKeyMatchesToEntry(e, keyConfigStore()['sizeIncrease'])) {
@@ -132,20 +133,21 @@ const KeyListener: Component = () => {
     }
   };
 
+  let unlistenUnfocusPipetteObserve: UnlistenFn | undefined;
   onMount(async () => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    const unlistenUnfocusPipetteObserve = await platformWindow.getCurrentWindow().onFocusChanged(({ payload: focused }) => {
+    unlistenUnfocusPipetteObserve = await platformWindow.getCurrentWindow().onFocusChanged(({ payload: focused }) => {
       if (!focused && getActiveToolCategoryId() === 'pipette') {
         setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
       }
     });
+  });
 
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-      unlistenUnfocusPipetteObserve();
-    };
+  onCleanup(() => {
+    window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('keyup', handleKeyUp);
+    unlistenUnfocusPipetteObserve?.();
   });
 
   return null;

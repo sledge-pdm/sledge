@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge-pdm/core';
 import { color, Icon } from '@sledge-pdm/ui';
 import { useLocation } from '@solidjs/router';
-import { createEffect, createMemo, onMount, Show } from 'solid-js';
+import { createEffect, createMemo, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
@@ -11,7 +11,7 @@ import { ioStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexRow } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
-import { window as platformWindow } from '~/utils/platform';
+import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 import './title_bar_region.css';
 
 const titleBarRoot = css`
@@ -133,6 +133,8 @@ export default function TitleBar() {
     title: '',
   });
 
+  let maximizedUnlisten: UnlistenFn | undefined;
+
   onMount(async () => {
     const window = platformWindow.getCurrentWindow();
     setWindowState({
@@ -143,10 +145,14 @@ export default function TitleBar() {
       decorated: await window.isDecorated(),
       title: await window.title(),
     });
+
+    maximizedUnlisten = await platformWindow.getCurrentWindow().onResized(async () => {
+      setWindowState('maximized', await platformWindow.getCurrentWindow().isMaximized());
+    });
   });
 
-  platformWindow.getCurrentWindow().onResized(async () => {
-    setWindowState('maximized', await platformWindow.getCurrentWindow().isMaximized());
+  onCleanup(() => {
+    maximizedUnlisten?.();
   });
 
   // get window title according to current situation.

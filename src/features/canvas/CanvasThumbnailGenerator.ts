@@ -1,8 +1,8 @@
 import { FrascoThumbnail } from '@sledge-pdm/frasco';
-import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import { logSystemWarn } from '~/features/log/service';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { calcThumbnailScale } from '~/utils/ThumbnailUtils';
+import { frascoRenderer } from '~/webgl/FrascoRenderer';
 
 type CacheEntry = {
   thumbnail: FrascoThumbnail;

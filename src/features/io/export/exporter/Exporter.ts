@@ -1,9 +1,8 @@
-﻿import { toUint8ClampedArray } from '@sledge-pdm/core';
-import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
+﻿import { Layer, toUint8ClampedArray } from '@sledge-pdm/core';
 import { EXPORT_TYPES } from '~/features/io/export/types';
-import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';
+import { frascoRenderer } from '~/webgl/FrascoRenderer';
 
 export abstract class Exporter {
   abstract canvasToBlob(quality?: number, scale?: number): Promise<Blob>;

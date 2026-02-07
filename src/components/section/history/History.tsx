@@ -1,11 +1,12 @@
 import { css } from '@acab/ecsstatic';
 import { Nothing } from '@sledge-pdm/ui';
-import { Component, For, onMount, Show } from 'solid-js';
+import { Component, For, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import HistoryItemRow from '~/components/section/history/ProjectHistoryItem';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '~/components/section/SectionStyles';
-import { BaseHistoryAction, projectHistoryController } from '~/features/history';
+import { historyManager } from '~/features/history';
+import { HistoryEntry } from '~/features/history/entry/HistoryEntry';
 
 const historyContentStyle = css`
   margin-top: 8px;
@@ -24,19 +25,21 @@ const undoContentStyle = css`
 
 const History: Component = () => {
   const [historyStore, setHistoryStore] = createStore<{
-    undoStack: BaseHistoryAction[];
-    redoStack: BaseHistoryAction[];
+    undoStack: HistoryEntry[];
+    redoStack: HistoryEntry[];
   }>({
-    undoStack: projectHistoryController.getUndoStack(),
-    redoStack: projectHistoryController.getRedoStack(),
+    undoStack: historyManager.getUndoStack(),
+    redoStack: historyManager.getRedoStack(),
   });
 
+  let dispose: (() => void) | undefined;
   onMount(() => {
-    const dispose = projectHistoryController.onChange(() => {
-      setHistoryStore({ undoStack: [...projectHistoryController.getUndoStack()], redoStack: [...projectHistoryController.getRedoStack()] });
+    dispose = historyManager.onChange(() => {
+      setHistoryStore({ undoStack: [...historyManager.getUndoStack()], redoStack: [...historyManager.getRedoStack()] });
     });
-
-    return () => dispose();
+  });
+  onCleanup(() => {
+    dispose?.();
   });
 
   return (

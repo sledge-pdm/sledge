@@ -55,7 +55,7 @@ export function setActiveToolCategory(toolCategory: ToolCategoryId) {
 export const updateToolPresetConfig = (toolId: ToolCategoryId, presetName: string, key: string, value: any) => {
   setToolStore('tools', toolId, 'presets', 'options', presetName, key, value);
 
-  saveEditorStateDebounced();
+  saveEditorStateDebounced(['presets']);
 };
 
 export const setActiveToolPreset = (toolId: ToolCategoryId, presetName: string) => {

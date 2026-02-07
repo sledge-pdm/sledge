@@ -1,9 +1,7 @@
 import { CircleKernel, SquareKernel } from '@sledge-pdm/frasco';
-import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, JSX, onCleanup, onMount, Show } from 'solid-js';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
-import { getSelectionOffset } from '~/features/selection/SelectionOperator';
+import { selectionManager, SelectionUpdateType } from '~/features/selection/SelectionManager';
 import {
   getActiveToolCategoryId,
   getCurrentPresetConfig,
@@ -23,6 +21,7 @@ import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 
 import { RGBAToHex } from '@sledge-pdm/core';
 import { color } from '@sledge-pdm/ui';
+import createRAF, { targetFPS } from '@solid-primitives/raf';
 import { LassoDisplayMode, LassoSelection } from '~/features/tools/behaviors/selection/lasso/LassoSelection';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import '~/styles/selection_animations.css';
@@ -43,45 +42,61 @@ const CanvasOverlaySVG: Component = () => {
   let cachedLocalPath: PathCmdList | undefined;
   let cachedPreview: PreviewShape | undefined;
   const borderDash = 6;
+  const [selectionPath, setSelectionPath] = createSignal<PathCmdList>(new PathCmdList([]));
+  const [floatingAreaPath, setFloatingAreaPath] = createSignal<PathCmdList>(new PathCmdList([]));
   const [selectionChanged, setSelectionChanged] = createSignal(false);
-  const [pathCmdList, setPathCmdList] = createSignal<PathCmdList>(new PathCmdList([]));
-  const [moveState, setMoveState] = createSignal(floatingMoveManager.getState());
-
-  const [lassoDisplayMode, setLassoDisplayMode] = createSignal<LassoDisplayMode>('fill');
-  const [lassoFillMode, setLassoFillMode] = createSignal<'nonzero' | 'evenodd'>('nonzero');
-  const [lassoOutlinePath, setLassoOutlinePath] = createSignal('');
-
+  const [floatingAreaChanged, setFloatingAreaChanged] = createSignal(false);
   const [_, startRenderLoop, stopRenderLoop] = createRAF(
     targetFPS(() => {
       if (selectionChanged()) {
         updateSelectionOutline();
         setSelectionChanged(false);
       }
+      if (floatingAreaChanged()) {
+        updateFloatingAreaOutline();
+        setFloatingAreaChanged(false);
+      }
     }, 60)
   );
 
-  const updateSelectionOutline = () => {
-    const { width, height } = projectStore.canvas.size;
-    const offset = getSelectionOffset();
-    const mask = selectionManager.getCombinedMask();
-    const pathString = mask_to_path(mask, width, height, offset.x, offset.y);
-    setPathCmdList(PathCmdList.parse(pathString));
-  };
+  const [lassoDisplayMode, setLassoDisplayMode] = createSignal<LassoDisplayMode>('fill');
+  const [lassoFillMode, setLassoFillMode] = createSignal<'nonzero' | 'evenodd'>('nonzero');
+  const [lassoOutlinePath, setLassoOutlinePath] = createSignal('');
 
   const [patternOffset, setPatternOffset] = createSignal(0);
   const updatePatternOffset = () => {
     setPatternOffset((prev) => (prev + 0.3) % 16);
   };
 
-  // Memoize handleUpdate to keep a stable reference
-  const handlePathUpdate = ((e: Events['selection:updateSelectionPath']) => {
-    setMoveState(floatingMoveManager.getState());
-    if (e.immediate) {
-      updateSelectionOutline();
-    } else {
-      setSelectionChanged(true);
+  const onSelectionUpdate = (e: { type: SelectionUpdateType }) => {
+    updateSelectionOutline();
+  };
+  const updateSelectionOutline = () => {
+    const { width, height } = projectStore.canvas.size;
+    const mask = selectionManager.getSelection()?.getMask();
+    const offset = selectionManager.getOffset();
+    if (!mask) {
+      setSelectionPath(new PathCmdList([]));
+      return;
     }
-  }) as (e: Events['selection:updateSelectionPath']) => void;
+    const pathString = mask_to_path(mask, width, height, offset.x, offset.y);
+    setSelectionPath(PathCmdList.parse(pathString));
+  };
+
+  const onFloatingAreaUpdate = () => {
+    updateFloatingAreaOutline();
+  };
+  const updateFloatingAreaOutline = () => {
+    const { width, height } = projectStore.canvas.size;
+    const mask = floatingMoveManager.getFloatingArea()?.getMask();
+    const offset = floatingMoveManager.getOffset() ?? { x: 0, y: 0 };
+    if (!mask) {
+      setFloatingAreaPath(new PathCmdList([]));
+      return;
+    }
+    const pathString = mask_to_path(mask, width, height, offset.x, offset.y);
+    setFloatingAreaPath(PathCmdList.parse(pathString));
+  };
 
   const handleLassoUpdate = ((e: Events['selection:updateLassoOutline']) => {
     if (toolStore.activeToolCategory === TOOL_CATEGORIES.LASSO_SELECTION) {
@@ -100,24 +115,28 @@ const CanvasOverlaySVG: Component = () => {
     }
   }) as (e: Events['selection:updateLassoOutline']) => void;
 
-  // Events
+  let selectionUnsubscribe: () => void | undefined;
+  let floatingMoveUnsubscribe: () => void | undefined;
+  let updatePatternInterval: NodeJS.Timeout | undefined;
+
   onMount(() => {
     startRenderLoop();
-    eventBus.on('selection:updateSelectionPath', handlePathUpdate);
+    selectionUnsubscribe = selectionManager.subscribe(onSelectionUpdate);
+    floatingMoveUnsubscribe = floatingMoveManager.subscribe(onFloatingAreaUpdate);
     eventBus.on('selection:updateLassoOutline', handleLassoUpdate);
     setSelectionChanged(true);
 
-    const updatePatternInterval = setInterval(updatePatternOffset, 30);
-
-    return () => {
-      eventBus.off('selection:updateSelectionPath', handlePathUpdate);
-      eventBus.off('selection:updateLassoOutline', handleLassoUpdate);
-      stopRenderLoop();
-      clearInterval(updatePatternInterval);
-    };
+    updatePatternInterval = setInterval(updatePatternOffset, 30);
   });
 
-  // Cache local pen shape path
+  onCleanup(() => {
+    selectionUnsubscribe?.();
+    floatingMoveUnsubscribe?.();
+    eventBus.off('selection:updateLassoOutline', handleLassoUpdate);
+    stopRenderLoop();
+    clearInterval(updatePatternInterval);
+  });
+
   createEffect(() => {
     const tool = getActiveToolCategoryId();
     const preset = getCurrentPresetConfig(tool) as any;
@@ -144,10 +163,6 @@ const CanvasOverlaySVG: Component = () => {
       cachedPreview &&
       isToolAllowedInCurrentLayer()
     ) {
-      const preset = getCurrentPresetConfig(tool) as any;
-      const size: number = preset?.size ?? 1;
-      // const cx = mouse.x;
-      // const cy = mouse.y;
       const { x: cx, y: cy } = cachedPreview.bitmaskShape.prePositionTransform(mouse);
       const ox = cx + cachedPreview.bitmaskShape.offsetX;
       const oy = cy + cachedPreview.bitmaskShape.offsetY;
@@ -291,11 +306,26 @@ const CanvasOverlaySVG: Component = () => {
               {/* Selection outline */}
               <path
                 id='selection-outline'
-                d={pathCmdList().toString(interactStore.zoom)}
+                d={selectionPath().toString(interactStore.zoom)}
                 fill='url(#area-pattern-animate)'
                 fill-rule='evenodd'
                 clip-rule='evenodd'
-                stroke={moveState() === 'layer' ? '#FF0000' : color.selectionBorder}
+                stroke={color.selectionBorder}
+                stroke-width='1'
+                vector-effect='non-scaling-stroke'
+                pointer-events='none'
+                stroke-dasharray={`${borderDash} ${borderDash}`}
+                class='marching-ants-animation'
+              />
+
+              {/* Floating Area outline */}
+              <path
+                id='floating-area-outline'
+                d={floatingAreaPath().toString(interactStore.zoom)}
+                fill='url(#area-pattern-animate)'
+                fill-rule='evenodd'
+                clip-rule='evenodd'
+                stroke={'#FF0000'}
                 stroke-width='1'
                 vector-effect='non-scaling-stroke'
                 pointer-events='none'

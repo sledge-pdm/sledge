@@ -6,9 +6,9 @@ export const packr = new Packr({ useRecords: true, mapsAsObjects: false });
 export async function unpackFromPath(path: string): Promise<any | null> {
   try {
     const data = await fs.readFile(path);
-    const unpacked = packr.unpack(data) as any;
+    const unpacked = packr.unpack(data);
     return unpacked;
   } catch (error) {
-    return null;
+    throw error;
   }
 }

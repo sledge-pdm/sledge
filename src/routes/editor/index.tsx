@@ -1,8 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge-pdm/ui';
-import { createEffect, onMount, Show } from 'solid-js';
+import { onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
-import { frascoRenderer } from '~/components/canvas/stacks/WebGLCanvas';
 import BottomBar from '~/components/global/BottomBar';
 import Loading from '~/components/global/common/Loading';
 import OnscreenControl from '~/components/global/onscreen_control/OnscreenControl';
@@ -17,16 +16,15 @@ import { isImportableFile, isSledgeProjectFile } from '~/features/io/Extensions'
 import KeyListener from '~/features/io/KeyListener';
 import { ErrorTypes, ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { logUserWarn } from '~/features/log/service';
-import { AutoSnapshotManager } from '~/features/snapshot/AutoSnapshotManager';
 import { handleCloseRequest } from '~/routes/editor/close';
 import { getInitialLoader, InitialLoadTypes } from '~/routes/editor/load';
 import { reportInitialLoadError } from '~/routes/editor/loadError';
 import { appearanceStore, EditorStateStore, ioStore, setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, pageRoot } from '~/styles/styles';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 import { isFirstStartup, showMainWindow } from '~/utils/WindowUtils';
+import { disposeFrascoRenderer } from '~/webgl/FrascoRenderer';
 
 const mainContainer = css`
   display: flex;
@@ -58,7 +56,7 @@ export default function Editor() {
       await reportInitialLoadError(InitialLoadTypes.GLOBAL_CONFIG, configError, undefined);
     }
     if (editorStateError?.type === ErrorTypes.UNKNOWN_ERROR || editorStateError?.type === ErrorTypes.FAILED_LOAD_RUNTIME) {
-      await reportInitialLoadError(InitialLoadTypes.EDITOR_STATE, configError, undefined);
+      await reportInitialLoadError(InitialLoadTypes.EDITOR_STATE, editorStateError, undefined);
     }
 
     return editorStateStore;
@@ -79,7 +77,7 @@ export default function Editor() {
           case InitialLoadTypes.PATH_IMAGE_PROJECT_LAST:
             // Remove lastPath(ioStore.savedLocation) from editorState when failed to load last project.
             setIOStore('savedLocation', { path: undefined, name: undefined });
-            await saveEditorStateImmediate();
+            await saveEditorStateImmediate(['lastPath']);
           case InitialLoadTypes.PATH_PROJECT:
           case InitialLoadTypes.PATH_IMAGE_PROJECT:
             const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();
@@ -133,22 +131,13 @@ export default function Editor() {
     } finally {
       setIOStore('isInInitialLoading', false);
     }
-
-    return () => {
-      unlisten();
-      frascoRenderer?.dispose();
-      AutoSnapshotManager.getInstance().stop();
-      if (import.meta.hot) {
-        window.location.reload();
-      }
-    };
   });
 
-  createEffect(() => {
-    if (projectStore.project.autoSnapshotEnabled && projectStore.project.autoSnapshotInterval) {
-      const manager = AutoSnapshotManager.getInstance();
-      if (projectStore.project.autoSnapshotInterval === manager.getCurrentInterval()) return;
-      manager.start(projectStore.project.autoSnapshotInterval);
+  onCleanup(() => {
+    unlisten();
+    disposeFrascoRenderer();
+    if (import.meta.hot) {
+      window.location.reload();
     }
   });
 

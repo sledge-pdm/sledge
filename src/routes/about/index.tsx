@@ -111,7 +111,14 @@ const About = () => {
             <p class={fontSectionTitle}>fontface</p>
 
             <p class={fontItem}>
-              <a class={`${aboutLink} ${zfb09Style}`} onClick={(e) => openLink('http://www.04.jp.org')}>
+              <a
+                class={`${aboutLink} ${zfb09Style}`}
+                href='http://www.04.jp.org'
+                onClick={(e) => {
+                  e.preventDefault();
+                  openLink('http://www.04.jp.org');
+                }}
+              >
                 04 fonts
               </a>
               <span class={fontDescription}>by yuji oshimoto</span>
@@ -119,7 +126,14 @@ const About = () => {
             </p>
 
             <p class={fontItem}>
-              <a class={`${aboutLink} ${k12x8Style}`} onClick={(e) => openLink('https://littlelimit.net/k12x8.htm')}>
+              <a
+                class={`${aboutLink} ${k12x8Style}`}
+                href='https://littlelimit.net/k12x8.htm'
+                onClick={(e) => {
+                  e.preventDefault();
+                  openLink('https://littlelimit.net/k12x8.htm');
+                }}
+              >
                 {'k12x8 / k8x12'}
               </a>
               <span class={fontDescription}>by num_kadoma</span>
@@ -127,7 +141,14 @@ const About = () => {
             </p>
 
             <p class={fontItem}>
-              <a class={`${aboutLink} ${pm10Style}`} onClick={(e) => openLink('https://itouhiro.hatenablog.com/entry/20130602/font')}>
+              <a
+                class={`${aboutLink} ${pm10Style}`}
+                href='https://itouhiro.hatenablog.com/entry/20130602/font'
+                onClick={(e) => {
+                  e.preventDefault();
+                  openLink('https://itouhiro.hatenablog.com/entry/20130602/font');
+                }}
+              >
                 PixelMPlus
               </a>
               <span class={fontDescription}>by itouhiro</span>
@@ -135,7 +156,14 @@ const About = () => {
             </p>
 
             <p class={fontItem}>
-              <a class={`${aboutLink} ${terminusStyle}`} onClick={(e) => openLink('https://files.ax86.net/terminus-ttf/')}>
+              <a
+                class={`${aboutLink} ${terminusStyle}`}
+                href='https://files.ax86.net/terminus-ttf/'
+                onClick={(e) => {
+                  e.preventDefault();
+                  openLink('https://files.ax86.net/terminus-ttf/');
+                }}
+              >
                 Terminus
               </a>
               <span class={fontDescription}>by Dimitar Zhekov</span>
@@ -145,19 +173,47 @@ const About = () => {
           <div class={linkSection}>
             <p class={fontSectionTitle}>link</p>
             <div class={linkContainer}>
-              <a class={aboutLink} onClick={(e) => openLink('https://github.com/sledge-pdm/sledge')}>
+              <a
+                class={aboutLink}
+                href='https://github.com/sledge-pdm/sledge'
+                onClick={(e) => {
+                  e.preventDefault();
+                  openLink('https://github.com/sledge-pdm/sledge');
+                }}
+              >
                 Source (Github)
               </a>
               <p class={separatorStyle}>/</p>
-              <a class={aboutLink} onClick={(e) => openLink('https://www.sledge-rules.app/')}>
+              <a
+                class={aboutLink}
+                href='https://www.sledge-rules.app/'
+                onClick={(e) => {
+                  e.preventDefault();
+                  openLink('https://www.sledge-rules.app/');
+                }}
+              >
                 website
               </a>
               <p class={separatorStyle}>/</p>
-              <a class={aboutLink} onClick={(e) => openLink('https://www.x.com/sledge_app')}>
+              <a
+                class={aboutLink}
+                href='https://www.x.com/sledge_app'
+                onClick={(e) => {
+                  e.preventDefault();
+                  openLink('https://www.x.com/sledge_app');
+                }}
+              >
                 twitter
               </a>
               <p class={separatorStyle}>/</p>
-              <a class={aboutLink} onClick={(e) => openLink('https://github.com/sledge-pdm/sledge/blob/main/LICENSE')}>
+              <a
+                class={aboutLink}
+                href='https://github.com/sledge-pdm/sledge/blob/main/LICENSE'
+                onClick={(e) => {
+                  e.preventDefault();
+                  openLink('https://github.com/sledge-pdm/sledge/blob/main/LICENSE');
+                }}
+              >
                 License
               </a>
             </div>

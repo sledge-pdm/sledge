@@ -1,86 +1,36 @@
 ﻿// Layer domain service - Stateful layer operations with external dependencies
 
-import { RawPixelData } from '@sledge-pdm/core';
-import { FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
+import { BaseLayerColorMode, HistoryContext, Layer, LayerType } from '@sledge-pdm/core';
+import { BlendMode, FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
 import { adjustZoomToFit } from '~/features/canvas';
-import { CanvasSizeHistoryAction, projectHistoryController } from '~/features/history';
-import { LayerListHistoryAction } from '~/features/history/actions/LayerListHistoryAction';
-import { LayerListReorderHistoryAction } from '~/features/history/actions/LayerListReorderHistoryAction';
-import { LayerPropsHistoryAction } from '~/features/history/actions/LayerPropsHistoryAction';
-import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
+import { historyManager } from '~/features/history';
+import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeCommand';
+import { layerMergeSnippet } from '~/features/history/command/snippet/LayerMergeCommands';
+import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
+import { doCommands } from '~/features/history/service';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { cancelMove, cancelSelection } from '~/features/selection/SelectionOperator';
+import { cancelMove, cancelSelection } from '~/features/selection/service';
 import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { dialog } from '~/utils/platform';
-import LayerMergeRenderer from '~/webgl/LayerMergeRenderer';
-import { updateLayerPreview, updateWebGLCanvas } from '~/webgl/service';
-import { selectionManager } from '../selection/SelectionAreaManager';
-import { changeBaseLayerColor, createLayer } from './model';
-import { BaseLayerColorMode, BlendMode, Layer, LayerType } from './types';
+import { updateFrascoCanvas } from '~/webgl/service';
+import { selectionManager } from '../selection/SelectionManager';
+import { addLayer, removeLayer, RemoveLayerOptions } from './actions';
+import { changeBaseLayerColor } from './model';
 
 const LOG_LABEL = 'LayerService';
 
-// Layer property updates
-const propNamesToUpdate: (keyof Layer)[] = ['mode', 'opacity', 'enabled', 'type'];
-
-export function setLayerName(layerId: string, newName: string): boolean {
-  if (!newName || newName.trim() === '') {
-    logUserWarn('Layer name cannot be empty', { label: LOG_LABEL });
-    return false;
-  }
-  setLayerProp(layerId, 'name', newName);
-  return true;
-}
-
-interface SetLayerPropOptions {
-  noDiff?: boolean;
-}
-
-export function setLayerProp<K extends keyof Layer>(layerId: string, propName: K, newValue: Layer[K], options?: SetLayerPropOptions) {
-  if (propName === 'id') {
-    return;
-  }
-  const layer = findLayerById(layerId);
-  if (!layer) return;
-  const beforeValue = layer[propName];
-  if (beforeValue === newValue) return;
-  const before = { ...layer } as any;
-  const idx = getLayerIndex(layerId);
-  setProjectStore('layers', 'layers', idx, propName, newValue as any);
-  const after = { ...findLayerById(layerId)! } as any;
-  // Remove id from snapshots
-  delete before.id;
-  delete after.id;
-  if (!options?.noDiff) {
-    const act = new LayerPropsHistoryAction({
-      layerId,
-      oldLayerProps: before,
-      newLayerProps: after,
-      context: {
-        from: `LayerService.setLayerProp(${String(propName)}: ${String(beforeValue)} > ${String(newValue)})`,
-        propName,
-        before: String(beforeValue),
-        after: String(newValue),
-      },
-    });
-    projectHistoryController.addAction(act);
-  }
-  if (propNamesToUpdate.indexOf(propName) !== -1) updateWebGLCanvas(`Layer(${layerId}) prop updated(${propName})`);
-}
-
-export function toggleLayerVisibility(layerIds?: string[]) {
-  const targets = getOperationTargetLayerIds(layerIds);
-  if (targets.length === 0) return;
-
-  const shouldEnable = !targets.every((id) => findLayerById(id)?.enabled);
-  targets.forEach((id) => setLayerProp(id, 'enabled', shouldEnable));
-  logUserInfo(`Layer visibility ${shouldEnable ? 'enabled' : 'disabled'} for ${targets.length} layer(s).`, { label: LOG_LABEL });
-  if (targets.length > 0) resetSelectionState();
-}
+export const NEW_LAYER_PROPS: Omit<Layer, 'id'> = {
+  name: 'layer 1',
+  type: LayerType.Dot,
+  enabled: true,
+  opacity: 1,
+  mode: BlendMode.normal,
+  cutFreeze: false,
+};
 
 export function duplicateLayer(layerId: string) {
   const layer = findLayerById(layerId);
@@ -96,7 +46,7 @@ export function duplicateLayer(layerId: string) {
     },
     { initImage: buffer }
   );
-  updateWebGLCanvas(`Layer(${layerId}) duplicated`);
+  updateFrascoCanvas(`Layer(${layerId}) duplicated`);
   logUserInfo(`Layer "${layer.name}" duplicated.`, { label: LOG_LABEL });
 }
 
@@ -113,90 +63,10 @@ export async function mergeToBelowLayer(layerId: string) {
 
   const originLayer = projectStore.layers.layers[originLayerIndex];
   const targetLayer = projectStore.layers.layers[targetLayerIndex];
-
-  const mergeRenderer = new LayerMergeRenderer(originLayer, targetLayer);
-  await mergeRenderer.mergeLayer();
+  const { commands, context } = layerMergeSnippet(originLayer.id, targetLayer.id, { contextTool: 'merge' });
+  doCommands(commands, { context });
   logUserInfo(`Layer "${originLayer.name}" merged into "${targetLayer.name}".`, { label: LOG_LABEL });
 }
-
-// Layer list management
-interface AddLayerOptions {
-  initImage?: RawPixelData;
-  noDiff?: boolean;
-  uniqueName?: boolean;
-}
-
-export const addLayer = (
-  layer: {
-    name?: string;
-    type?: LayerType;
-    enabled?: boolean;
-    opacity?: number;
-    mode?: BlendMode;
-  },
-  options?: AddLayerOptions
-) => {
-  return addLayerTo(0, layer, options);
-};
-
-export const addLayerTo = (
-  index: number,
-  layer: {
-    name?: string;
-    type?: LayerType;
-    enabled?: boolean;
-    opacity?: number;
-    mode?: BlendMode;
-    cutFreeze?: boolean;
-  },
-  options?: AddLayerOptions
-) => {
-  const { name = 'layer 1', type = LayerType.Dot, enabled = true, opacity = 1, mode = BlendMode.normal, cutFreeze = false } = layer;
-  const uniqueName = options?.uniqueName === undefined ? true : options.uniqueName;
-  const newLayer = createLayer(
-    {
-      name,
-      type,
-      enabled,
-      opacity,
-      mode,
-      cutFreeze,
-    },
-    uniqueName
-  );
-
-  // Initialize anvil
-  const width = projectStore.canvas.size.width;
-  const height = projectStore.canvas.size.height;
-  layerManager.registerLayer(newLayer.id, options?.initImage ?? new Uint8ClampedArray(width * height * 4), width, height, {
-    inputSpace: 'canvas',
-  });
-
-  const layers = [...allLayers()];
-  layers.splice(index, 0, newLayer as any);
-
-  setProjectStore('layers', 'layers', layers);
-  setActiveLayerId(newLayer.id);
-
-  updateLayerPreview(newLayer.id);
-  updateWebGLCanvas(`Layer(${newLayer.id}) added`);
-  logUserInfo(`Layer "${newLayer.name}" added.`, { label: LOG_LABEL });
-
-  if (!options?.noDiff) {
-    const snapshot = getPackedLayerSnapshot(newLayer.id);
-    if (snapshot) {
-      const act = new LayerListHistoryAction({
-        kind: 'add',
-        index,
-        packedSnapshot: snapshot,
-        context: { from: 'LayerService.addLayerTo' },
-      });
-      projectHistoryController.addAction(act);
-    }
-  }
-
-  return newLayer;
-};
 
 export function setActiveLayerId(id: string): void {
   const layer = findLayerById(id);
@@ -236,7 +106,7 @@ function normalizeLayerIds(layerIds: string[], order: LayerOrder = 'asc') {
   return withIndex.map((item) => item.id);
 }
 
-function getOperationTargetLayerIds(layerIds?: string[], options?: { fallbackToActive?: boolean; order?: LayerOrder }) {
+export function getOperationTargetLayerIds(layerIds?: string[], options?: { fallbackToActive?: boolean; order?: LayerOrder }) {
   const fallbackToActive = options?.fallbackToActive ?? true;
   const order = options?.order ?? 'asc';
 
@@ -284,36 +154,14 @@ export const resetAllLayers = () => {
       layer.clear([0, 0, 0, 0]);
     }
   });
-  updateWebGLCanvas(`Reset all layers`);
+  updateFrascoCanvas(`Reset all layers`);
 
   adjustZoomToFit();
 };
 
-interface MoveLayerOptions {
-  noDiff?: boolean;
-}
-
-export const moveLayer = (fromIndex: number, targetIndex: number, options?: MoveLayerOptions) => {
-  const { noDiff = false } = options ?? {};
-
-  const beforeOrder = projectStore.layers.layers.map((l) => l.id);
-  const updated = [...projectStore.layers.layers];
-  const [moved] = updated.splice(fromIndex, 1);
-  updated.splice(targetIndex, 0, moved);
-  setProjectStore('layers', 'layers', updated);
-  updateWebGLCanvas(`Layer moved from ${fromIndex} to ${targetIndex}`);
-
-  if (!noDiff) {
-    const afterOrder = updated.map((l) => l.id);
-    const act = new LayerListReorderHistoryAction({ beforeOrder, afterOrder, context: { from: 'LayerService.moveLayer' } });
-    projectHistoryController.addAction(act);
-  }
+export const removeLayerFromUser = async (layerId: string, options?: RemoveLayerOptions) => {
+  await removeLayersFromUser([layerId], options);
 };
-
-interface RemoveLayerOptions {
-  noDiff?: boolean;
-}
-
 export const removeLayersFromUser = async (layerIds?: string[], options?: RemoveLayerOptions) => {
   const targets = getOperationTargetLayerIds(layerIds, { order: 'desc' });
   if (targets.length === 0) {
@@ -340,44 +188,6 @@ export const removeLayersFromUser = async (layerIds?: string[], options?: Remove
   targets.forEach((id) => removeLayer(id, options));
   dropFromSelection(targets);
   resetSelectionState();
-};
-
-export const removeLayerFromUser = async (layerId: string, options?: RemoveLayerOptions) => {
-  await removeLayersFromUser([layerId], options);
-};
-
-export const removeLayer = (layerId?: string, options?: RemoveLayerOptions) => {
-  const { noDiff = false } = options ?? {};
-
-  if (layerId === undefined) return;
-  const layers = [...allLayers()];
-  if (layers.length <= 1) return;
-  const index = layers.findIndex((l) => l.id === layerId);
-  let newActiveIndex = 0;
-  if (index !== 0) newActiveIndex = index - 1;
-
-  // snapshot before removal
-  const toRemove = layers[index];
-  if (!toRemove) return;
-  const snapshot = getPackedLayerSnapshot(toRemove.id);
-  layers.splice(index, 1);
-
-  setProjectStore('layers', 'layers', layers);
-  setProjectStore('layers', 'state', 'activeLayerId', layers[newActiveIndex].id);
-  updateWebGLCanvas(`Layer(${layerId}) removed`);
-  logUserInfo(`Layer "${toRemove.name}" removed.`, { label: LOG_LABEL });
-
-  if (!noDiff && snapshot) {
-    const act = new LayerListHistoryAction({
-      kind: 'delete',
-      index,
-      packedSnapshot: snapshot,
-      context: { from: 'LayerService.removeLayer' },
-    });
-    projectHistoryController.addAction(act);
-  }
-
-  layerManager.removeLayer(layerId);
 };
 
 export const clearLayersFromUser = async (layerIds?: string[]) => {
@@ -411,8 +221,7 @@ export function clearLayer(layerId: string) {
   const layer = getLayer(layerId);
   layer.commitHistory(undefined, { context: { tool: 'clear' } });
   layer.clear([0, 0, 0, 0]);
-  updateWebGLCanvas(`Layer(${layerId}) cleared`);
-  updateLayerPreview(layerId);
+  updateFrascoCanvas(`Layer(${layerId}) cleared`);
   logUserInfo(`Layer "${findLayerById(layerId)?.name ?? layerId}" cleared.`, { label: LOG_LABEL });
 }
 
@@ -424,22 +233,15 @@ export const activeIndex = () => allLayers().findIndex((layer) => layer.id === p
 export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor?: string) {
   const updatedBaseLayer = changeBaseLayerColor(projectStore.layers.state.baseLayer, colorMode, customColor);
   setProjectStore('layers', 'state', 'baseLayer', updatedBaseLayer);
-  updateWebGLCanvas(`BaseLayer color mode changed to ${colorMode}`);
+  updateFrascoCanvas(`BaseLayer color mode changed to ${colorMode}`);
   setIOStore('isProjectChangedAfterSave', true);
 }
 
 export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(projectStore.layers.state.baseLayer, 'custom', customColor);
   setProjectStore('layers', 'state', 'baseLayer', updatedBaseLayer);
-  updateWebGLCanvas(`BaseLayer custom color changed to ${customColor}`);
+  updateFrascoCanvas(`BaseLayer custom color changed to ${customColor}`);
   setIOStore('isProjectChangedAfterSave', true);
-}
-
-export function setSelectionEnabled(enabled: boolean) {
-  setProjectStore('layers', 'state', 'selectionEnabled', enabled);
-}
-export function isSelectionEnabled() {
-  return projectStore.layers.state.selectionEnabled;
 }
 
 export function selectLayer(layerId: string) {
@@ -472,7 +274,7 @@ export const flipLayer = (
   const layer = getLayer(layerId);
   if (!layer) return;
   FlipEffect.apply(layer, { ...options, context: { tool: 'fx', fxName: 'flip' } });
-  updateWebGLCanvas();
+  updateFrascoCanvas();
 };
 
 export const flipAllLayer = (options?: { flipX?: boolean; flipY?: boolean }) => {
@@ -480,7 +282,7 @@ export const flipAllLayer = (options?: { flipX?: boolean; flipY?: boolean }) => 
     const frascoLayer = getLayer(layer.id);
     if (frascoLayer) FlipEffect.apply(frascoLayer, { ...options, context: { tool: 'fx', fxName: 'flip' } });
   });
-  updateWebGLCanvas();
+  updateFrascoCanvas();
 };
 
 /**
@@ -490,10 +292,9 @@ export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
   const beforeSize = { width: projectStore.canvas.size.width, height: projectStore.canvas.size.height };
   const afterSize = { width: beforeSize.height, height: beforeSize.width };
   const layerIds = allLayers().map((l) => l.id);
-  const act = new CanvasSizeHistoryAction({
+  const command = new CanvasSizeCommand({
     beforeSize,
     afterSize,
-    context: { action: 'rotate', layerDirection, from: 'rotateAllLayer' },
     historyMode: 'layer',
     layerIds,
   });
@@ -503,19 +304,22 @@ export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
       frascoLayer.commitHistory(undefined, { silent: true });
     }
   }
-  act.registerBefore();
+  command.registerBefore();
 
   allLayers().forEach((layer) => {
     const frascoLayer = getLayer(layer.id);
     if (frascoLayer) Rotate90Effect.apply(frascoLayer, { direction: layerDirection, silentHistory: true });
-    updateLayerPreview(layer.id);
   });
 
   setProjectStore('canvas', 'size', afterSize);
-  selectionManager.resizeSelectionMask(afterSize);
+  selectionManager.resize(afterSize);
   adjustZoomToFit();
 
-  act.registerAfter();
-  projectHistoryController.addAction(act);
-  updateWebGLCanvas();
+  command.registerAfter();
+  const context: HistoryContext = {
+    icon: layerDirection === 'cw' ? '/assets/icons/actions/canvas_rotate_counterclockwise.png' : '/assets/icons/actions/canvas_rotate_clockwise.png',
+    description: 'rotate canvas',
+  };
+  historyManager.addEntry(new CommandsHistoryEntry(command, context));
+  updateFrascoCanvas();
 };

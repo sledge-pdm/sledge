@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge-pdm/core';
 import { componentProps, ConfigFieldRenderer, getValueAtPath, Icon, Light, pathToArray, type ConfigField } from '@sledge-pdm/ui';
-import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { ConfigSections, FieldMeta, FieldValueMeta, isHeaderMeta } from '~/config/ConfigMeta';
 import { GlobalConfig } from '~/config/GlobalConfig';
 import { canvasMetas } from '~/config/meta/Canvas';
@@ -18,7 +18,7 @@ import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { accentedButton, flexRow } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
-import { dialog, path } from '~/utils/platform';
+import { dialog, path, UnlistenFn } from '~/utils/platform';
 import { listenEvent } from '~/utils/TauriUtils';
 import { openWindow } from '~/utils/WindowUtils';
 import KeyConfigSettings from './KeyConfigSettings';
@@ -248,6 +248,9 @@ const ConfigForm: Component<Props> = (props) => {
   const [grouped, setGrouped] = createSignal<Map<ConfigSections, FieldMeta[]>>(new Map());
 
   let originalConfig: GlobalConfig | undefined;
+
+  let unlistenOnSettingSaved: UnlistenFn | undefined;
+
   onMount(async () => {
     await loadGlobalConfig();
 
@@ -269,12 +272,16 @@ const ConfigForm: Component<Props> = (props) => {
       return map;
     }, new Map<ConfigSections, FieldMeta[]>());
     setGrouped(grouped);
+
+    unlistenOnSettingSaved = await listenEvent('onSettingsSaved', async () => {
+      await loadGlobalConfig();
+      originalConfig = JSON.parse(JSON.stringify(globalConfig));
+      checkDirty();
+    });
   });
 
-  listenEvent('onSettingsSaved', async () => {
-    await loadGlobalConfig();
-    originalConfig = JSON.parse(JSON.stringify(globalConfig));
-    checkDirty();
+  onCleanup(() => {
+    unlistenOnSettingSaved?.();
   });
 
   return (

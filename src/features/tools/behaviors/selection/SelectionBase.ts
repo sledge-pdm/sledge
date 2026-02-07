@@ -1,7 +1,6 @@
 import { Vec2 } from '@sledge-pdm/core';
 import { logUserInfo } from '~/features/log/service';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
-import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
@@ -33,8 +32,7 @@ export abstract class SelectionBase implements ToolBehavior {
     if (mode === 'move') {
       // 移動モード開始
       this.startPosition = args.position;
-      this.startOffset = selectionManager.getAreaOffset();
-      selectionManager.setState('selected');
+      this.startOffset = selectionManager.getOffset();
       this.movePrevMode = interactStore.selectionEditMode;
       setInteractStore('selectionEditMode', 'move');
     } else {
@@ -73,11 +71,10 @@ export abstract class SelectionBase implements ToolBehavior {
       if (this.movePrevMode) setInteractStore('selectionEditMode', this.movePrevMode);
       // 移動確定
       selectionManager.commitOffset();
-      if (!isSelectionAvailable()) {
-        selectionManager.clear();
+      if (!selectionManager.hasSelection()) {
+        selectionManager.clearAll();
         message = 'Selection cleared.';
       } else {
-        selectionManager.setState('selected');
         message = 'Selection moved.';
       }
     } else {
@@ -112,7 +109,6 @@ export abstract class SelectionBase implements ToolBehavior {
       if (this.movePrevMode) setInteractStore('selectionEditMode', this.movePrevMode);
       // 位置を元に戻す
       selectionManager.setOffset(this.startOffset);
-      selectionManager.setState('selected');
     } else {
       // ツール固有のキャンセル処理
       this.onCancelSelection(args, mode);

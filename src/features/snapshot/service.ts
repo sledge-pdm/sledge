@@ -1,8 +1,7 @@
-import { getProjectAdapter, gzipDeflate, Size2D } from '@sledge-pdm/core';
+import { getProjectAdapter, gzipDeflate, ProjectSnapshot, Size2D } from '@sledge-pdm/core';
 import { batch, createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { logSystemError, logUserError } from '~/features/log/service';
-import { AUTOSAVE_SNAPSHOT_NAME } from '~/features/snapshot/AutoSnapshotManager';
 import { ioStore, setIOStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
@@ -10,9 +9,9 @@ import { normalizeJoin } from '~/utils/FileUtils';
 import { unpackFromPath } from '~/utils/msgpackr';
 import { dialog } from '~/utils/platform';
 import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
-import { updateLayerPreviewAll, updateWebGLCanvas } from '~/webgl/service';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { ProjectLoader } from '../io/project/ProjectLoader';
-import { ProjectSnapshot, RuntimeProjectSnapshot } from './types';
+import { RuntimeProjectSnapshot } from './types';
 
 export async function getAllFullSnapshots(): Promise<ProjectSnapshot[]> {
   const fullSnapshots = await Promise.all(projectStore.snapshots.map(async (s) => await loadFullSnapshot(s)));
@@ -139,22 +138,6 @@ This will NOT backup your current state (unless you did manually backup.)`,
     if (!confirmResult) return;
   }
 
-  setProjectStore('snapshots', (snapshots: (ProjectSnapshot | RuntimeProjectSnapshot)[]) => {
-    const filtered = snapshots.map((snapshot) => {
-      if (snapshot.name === AUTOSAVE_SNAPSHOT_NAME) {
-        const now = new Date();
-        return {
-          ...snapshot,
-          name: `${snapshot.name} (${now.toLocaleDateString()} ${now.toLocaleTimeString()})`,
-        };
-      }
-      return snapshot;
-    });
-    return filtered;
-  });
-
-  escapeCurrentAutosave();
-
   const savedSnapshotStore = [...projectStore.snapshots];
 
   const fullSnapshot = await loadFullSnapshot(snapshot);
@@ -168,22 +151,5 @@ This will NOT backup your current state (unless you did manually backup.)`,
   setIOStore('isProjectChangedAfterSave', false);
 
   setProjectStore('snapshots', savedSnapshotStore);
-  updateWebGLCanvas('snapshot loaded');
-  updateLayerPreviewAll();
-}
-
-export function escapeCurrentAutosave() {
-  setProjectStore('snapshots', (snapshots: (ProjectSnapshot | RuntimeProjectSnapshot)[]) => {
-    const filtered = snapshots.map((snapshot) => {
-      if (snapshot.name === AUTOSAVE_SNAPSHOT_NAME) {
-        const now = new Date();
-        return {
-          ...snapshot,
-          name: `${snapshot.name} (${now.toLocaleDateString()} ${now.toLocaleTimeString()})`,
-        };
-      }
-      return snapshot;
-    });
-    return filtered;
-  });
+  updateFrascoCanvas('snapshot loaded');
 }

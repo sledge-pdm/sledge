@@ -1,12 +1,12 @@
 import { toUint8Array } from '@sledge-pdm/core';
-import { projectHistoryController } from '~/features/history';
-import { LayerListCutPasteHistoryAction } from '~/features/history/actions/LayerListCutPasteHistoryAction';
-import { getPackedLayerSnapshot } from '~/features/history/actions/utils';
+import { doCommands } from '~/features/history';
+import { cutPasteSnippet } from '~/features/history/command/snippet/CutPasteCommands';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
-import { activeIndex, activeLayer, addLayerTo, findLayerById, getLayerIndex, removeLayer, setActiveLayerId, setLayerProp } from '~/features/layer';
+import { activeIndex, addLayerTo, findLayerById, setLayerProp } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError, logUserSuccess } from '~/features/log';
-import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer, isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { selectionManager } from '~/features/selection/SelectionManager';
+import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer } from '~/features/selection/service';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { clipboard, image } from '~/utils/platform';
@@ -20,7 +20,7 @@ export async function clipboardCopy(e?: ClipboardEvent): Promise<'layer' | 'sele
   e?.preventDefault();
 
   try {
-    if (isSelectionAvailable()) {
+    if (selectionManager.hasSelection()) {
       const bufData = getCurrentSelectionBuffer();
       if (!bufData) return;
       const { buffer, bbox } = bufData;
@@ -53,8 +53,8 @@ export async function clipboardCut(e?: ClipboardEvent) {
   if (copyMode === 'layer') {
     // this literally delete original layer to copy so cannot paste after.
     // this should be like an "archive" operation, that freezes layer but not delete from list and anvilManager. like below.
-    setLayerProp(projectStore.layers.state.activeLayerId, 'cutFreeze', true, { noDiff: true }); // history added
-    // removeLayer(projectStore.layers.state.activeLayerId, { noDiff: false }); // history added
+    setLayerProp(projectStore.layers.state.activeLayerId, 'cutFreeze', true, { register: false }); // history suppressed
+    // removeLayer(projectStore.layers.state.activeLayerId, { register: true }); // history added
   } else {
     deleteSelectedArea({
       layerId: projectStore.layers.state.activeLayerId,
@@ -69,7 +69,7 @@ export async function clipboardPaste(e?: ClipboardEvent) {
   e?.preventDefault();
 
   try {
-    if (isSelectionAvailable()) cancelSelection();
+    if (selectionManager.hasSelection()) cancelSelection();
 
     // 1. check layer id paste
     const textData = await tryGetTextFromClipboard();
@@ -81,43 +81,20 @@ export async function clipboardPaste(e?: ClipboardEvent) {
           logUserError('layer buffer not found.', { label: LOG_LABEL });
           return;
         }
-        const srcBuffer = new Uint8ClampedArray(srcFrascoLayer.readPixels());
+        const srcBuffer = new Uint8ClampedArray(srcFrascoLayer.readPixels({ flipY: true }));
         const isCut = srcLayer.cutFreeze;
-        // 蛻・ｊ蜿悶ｊ縺ｨ蛻・°縺｣縺滓凾轤ｹ縺ｧcutFreeze縺ｯ蜿悶ｊ荳九￡繧・
-        setLayerProp(srcLayer.id, 'cutFreeze', false, { noDiff: true });
-        const unfreezedSourceLayer = findLayerById(textData);
-        if (unfreezedSourceLayer && isCut) {
-          const activeLayerIdBefore = activeLayer().id;
-          const sourcePackedSnapshot = getPackedLayerSnapshot(unfreezedSourceLayer.id);
-          const sourceIndex = getLayerIndex(unfreezedSourceLayer.id);
+        setLayerProp(srcLayer.id, 'cutFreeze', false, { register: false });
+        if (srcLayer && isCut) {
+          // const activeLayerIdBefore = activeLayer().id;
+          // const sourcePackedSnapshot = getPackedLayerSnapshot(unfreezedSourceLayer.id);
+          // const sourceIndex = getLayerIndex(unfreezedSourceLayer.id);
 
-          const insertionIndex = activeIndex();
-          const inserted = addLayerTo(
-            insertionIndex,
-            { ...unfreezedSourceLayer, cutFreeze: false },
-            { initImage: srcBuffer, noDiff: true, uniqueName: false }
-          );
-
-          removeLayer(unfreezedSourceLayer.id, { noDiff: true });
-
-          const targetPackedSnapshot = getPackedLayerSnapshot(inserted.id);
-          const targetIndex = getLayerIndex(inserted.id);
-          setActiveLayerId(inserted.id);
-
-          const activeLayerIdAfter = activeLayer().id;
-          if (sourcePackedSnapshot && targetPackedSnapshot) {
-            const action = new LayerListCutPasteHistoryAction({
-              sourcePackedSnapshot,
-              sourceIndex, // 謖ｿ蜈･蜑阪↓蜿門ｾ励＠縺・index
-              targetPackedSnapshot,
-              targetIndex, // 蜑企勁蠕後・謖ｿ蜈･繝ｬ繧､繝､繝ｼ index
-              activeLayerIdBefore,
-              activeLayerIdAfter,
-            });
-            projectHistoryController.addAction(action);
-          }
+          const insertIndex = activeIndex();
+          const { commands, context } = cutPasteSnippet(insertIndex, srcLayer, srcBuffer);
+          doCommands(commands, { context });
+          // removeLayer(unfreezedSourceLayer.id, { register: false });
         } else {
-          addLayerTo(activeIndex(), srcLayer, { initImage: srcBuffer, noDiff: false, uniqueName: false });
+          addLayerTo(activeIndex(), srcLayer, { initImage: srcBuffer, register: false, uniqueName: false });
         }
       }
     } else {

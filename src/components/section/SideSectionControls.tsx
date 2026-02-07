@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { CleanupFn } from '@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types';
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { color, Slider } from '@sledge-pdm/ui';
 import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
@@ -117,9 +118,10 @@ const ControlItem: Component<ItemProps> = (props) => {
 
   const selected = () => appearanceStore[side].content === control;
 
+  let cleanup: CleanupFn | undefined;
   onMount(() => {
     if (!props.draggable || !itemEl) return;
-    const cleanup = draggable({
+    cleanup = draggable({
       element: itemEl,
       getInitialData: () => ({ type: 'section-control', id: control, fromSide: side }),
       onDragStart: () => {
@@ -131,8 +133,8 @@ const ControlItem: Component<ItemProps> = (props) => {
         setDraggingCursor(false);
       },
     });
-    onCleanup(() => cleanup());
   });
+  onCleanup(() => cleanup?.());
 
   return (
     <div
@@ -167,10 +169,11 @@ const SideSectionControls: Component<Props> = (props) => {
 
   const getCandidates = (containerEl: HTMLElement, sourceId: SectionTabControl) =>
     getDropCandidates(containerEl, '[data-control-id]', String(sourceId), (el) => el.dataset.controlId);
+  let cleanup: CleanupFn | undefined;
 
   onMount(() => {
     if (!listEl) return;
-    const cleanup = dropTargetForElements({
+    cleanup = dropTargetForElements({
       element: listEl,
       canDrop: ({ source }) => {
         const data = source.data as { type?: string };
@@ -216,9 +219,9 @@ const SideSectionControls: Component<Props> = (props) => {
         hideDropLine(dropLineEl);
       },
     });
-
-    onCleanup(() => cleanup());
   });
+
+  onCleanup(() => cleanup?.());
 
   return (
     <div

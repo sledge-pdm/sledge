@@ -1,8 +1,6 @@
 // Side-effectful operations / state interactions for color feature
 import { colorMatch, RGBA } from '@sledge-pdm/core';
 import { Consts } from '~/Consts';
-import { projectHistoryController } from '~/features/history';
-import { ColorHistoryAction } from '~/features/history/actions/ColorHistoryAction';
 import { saveEditorStateDebounced } from '~/features/io/editor/save';
 import { colorStore, setColorStore } from '~/stores/EditorStores';
 import { PaletteType } from './palette';
@@ -50,27 +48,5 @@ export const addColorHistory = (color: RGBA, options?: AddColorHistoryOptions) =
     return [color, ...old].slice(0, Consts.maxColorHistoryLength);
   });
 
-  saveEditorStateDebounced();
-};
-
-interface RegisterColorChangeOptions {
-  replaceSameColor: boolean;
-}
-
-export const registerColorChange = (oldColor: RGBA, newColor: RGBA, options?: RegisterColorChangeOptions) => {
-  if (oldColor === newColor) return;
-
-  // add project history
-  const action = new ColorHistoryAction({
-    palette: colorStore.currentPalette,
-    oldColor,
-    newColor,
-    context: {
-      from: 'registerColorChange',
-    },
-  });
-  projectHistoryController.addAction(action);
-
-  // add color history
-  addColorHistory(newColor, options);
+  saveEditorStateDebounced(['colorStore']);
 };

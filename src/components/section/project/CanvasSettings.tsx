@@ -7,7 +7,7 @@ import { Button, color, Dropdown, Icon } from '@sledge-pdm/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { Consts } from '~/Consts';
 import { canvasSizePresets, canvasSizePresetsDropdownOptions } from '~/features/canvas';
-import { selectionManager } from '~/features/selection/SelectionAreaManager';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { sectionContent } from '../SectionStyles';
@@ -111,7 +111,7 @@ const CanvasSettings: Component = () => {
     const newSize = { width, height };
 
     const result = changeCanvasSize(newSize, {
-      skipHistory: false,
+      register: true,
     });
     if (result) adjustZoomToFit();
   };
@@ -190,7 +190,7 @@ const CanvasSettings: Component = () => {
                 setInteractStore('horizontalFlipped', false);
                 setInteractStore('verticalFlipped', false);
                 adjustZoomToFit();
-                selectionManager.clear();
+                selectionManager.clearAll();
               }
             }}
           >

@@ -1,11 +1,12 @@
 import { css } from '@acab/ecsstatic';
+import { CleanupFn } from '@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { clsx } from '@sledge-pdm/core';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import LayerListButtonsRow from '~/components/section/editor/layer/row/LayerListButtonsRow';
 import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPropsRow';
 import SectionItem from '~/components/section/SectionItem';
-import { allLayers, moveLayer } from '~/features/layer';
+import { allLayers, reorderLayer } from '~/features/layer';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { ensureDropLine, getDropCandidates, getDropIndex, hideDropLine, updateDropLine } from '~/utils/dndUtils';
 import { sectionContent } from '../../SectionStyles';
@@ -52,9 +53,11 @@ const LayerList: Component = () => {
     return getDropIndex(candidates, clientY);
   };
 
+  let cleanup: CleanupFn | undefined;
+
   onMount(() => {
     if (!listEl) return;
-    const cleanup = dropTargetForElements({
+    cleanup = dropTargetForElements({
       element: listEl,
       canDrop: ({ source }) => {
         const data = source.data as { type?: string };
@@ -68,7 +71,7 @@ const LayerList: Component = () => {
         if (fromIndex < 0) return;
         const toIndex = getDropIndexForLayer(data.id, location.current.input.clientY);
         if (toIndex < 0 || toIndex === fromIndex) return;
-        moveLayer(fromIndex, toIndex);
+        reorderLayer(fromIndex, toIndex);
         hideDropLine(dropLineEl);
       },
       onDrag: ({ source, location }) => {
@@ -90,9 +93,9 @@ const LayerList: Component = () => {
         hideDropLine(dropLineEl);
       },
     });
-
-    onCleanup(() => cleanup());
   });
+
+  onCleanup(() => cleanup?.());
 
   return (
     <SectionItem title='layers.'>

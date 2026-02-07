@@ -1,4 +1,5 @@
 /**
+ * @deprecated DONT USE THIS ANYMORE Because Now History Action is deprecated and currently it's just a command sequence
  * HistoryActionTester
  * 共通の「準備 → 適用 → undo → redo」シーケンスを簡潔に書くためのヘルパー。
  * action の生成関数だけ渡し、任意の前処理・適用処理・アサーションを差し込める。

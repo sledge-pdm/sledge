@@ -1,4 +1,4 @@
-import CanvasSizeInput from '~/components/section/project/item/CanvasSizeInput';
+import CanvasSizeInput from '~/components/section/project/CanvasSizeInput';
 import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
 import { Consts } from '~/Consts';
 

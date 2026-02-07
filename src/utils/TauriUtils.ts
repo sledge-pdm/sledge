@@ -1,4 +1,3 @@
-import { logSystemError, logSystemWarn } from '~/features/log/service';
 import { app, core, event, EventCallback } from './platform';
 
 let _isTauri: boolean | null = null;
@@ -16,16 +15,14 @@ export async function isTauri(): Promise<boolean> {
 
 export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T | undefined> {
   if (!(await isTauri())) {
-    logSystemWarn(`[safeInvoke] '${cmd}' skipped (not in Tauri environment)`, { label: 'TauriUtils', debugOnly: true });
-    return undefined;
+    throw new Error(`[safeInvoke] '${cmd}' skipped (not in Tauri environment)`);
   }
 
   try {
     const result = await core.invoke<T>(cmd, args);
     return result;
   } catch (e) {
-    logSystemError(`[safeInvoke] '${cmd}' failed`, { label: 'TauriUtils', details: [e] });
-    return undefined;
+    throw new Error(`[safeInvoke] '${cmd}' failed.\n${e}`);
   }
 }
 

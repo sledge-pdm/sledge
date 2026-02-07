@@ -45,7 +45,7 @@ const FrameResizeMenu: Component = () => {
               return; // no-op
             }
             changeCanvasSize(newSize, {
-              skipHistory: false,
+              register: true,
               srcOrigin: offset,
               destOrigin: { x: 0, y: 0 },
             });

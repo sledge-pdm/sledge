@@ -1,4 +1,4 @@
-import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { FillPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
 
@@ -27,7 +27,7 @@ export const fillPresetFields: PresetFieldMeta<FillPresetConfig>[] = [
         { value: 'ignore', label: 'ignore selection' },
       ],
     },
-    condition: () => isSelectionAvailable(),
+    condition: () => selectionManager.hasSelection(),
     tips: 'Pen brush shape',
   },
   // {

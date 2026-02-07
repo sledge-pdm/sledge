@@ -11,7 +11,6 @@ use uuid::Uuid;
 pub enum SledgeWindowKind {
     Start,
     Editor,
-    Restore,
     About,
     Settings,
 }
@@ -85,7 +84,6 @@ pub async fn open_window(
     let (label, url) = match kind {
         SledgeWindowKind::Start => ("start".into(), "/start".into()),
         SledgeWindowKind::About => ("about".into(), "/about".into()),
-        SledgeWindowKind::Restore => ("restore".into(), "/restore".into()),
         SledgeWindowKind::Settings => ("settings".into(), "/settings".into()),
         SledgeWindowKind::Editor => {
             let lbl = next_editor_label(&app);
@@ -136,18 +134,6 @@ pub async fn open_window(
                 .maximizable(true)
                 .minimizable(true)
                 .disable_drag_drop_handler();
-        }
-        SledgeWindowKind::Restore => {
-            window_inner_width = 500.0;
-            window_inner_height = 350.0;
-            builder = builder
-                .title("backup restoration.")
-                .resizable(false)
-                .minimizable(false)
-                .maximizable(false)
-                .always_on_top(true)
-                .accept_first_mouse(true)
-                .closable(true);
         }
         SledgeWindowKind::About => {
             window_inner_width = 380.0;

@@ -14,7 +14,7 @@ import { ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { openExistingProject, openNewEditorWindow, openNewProjectWithClipboard, openProjectWithExplorer } from '~/features/io/window';
 import { activeLayer } from '~/features/layer';
 import { flipAllLayer, rotateAllLayer } from '~/features/layer/service';
-import { isSelectionAvailable } from '~/features/selection/SelectionOperator';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
 import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -71,7 +71,7 @@ const TopMenuBar: Component = () => {
   });
 
   const getCurrentEditTarget = () => {
-    if (isSelectionAvailable()) {
+    if (selectionManager.hasSelection()) {
       return 'selection';
     }
     return `layer: ${activeLayer()?.name}`;
@@ -228,7 +228,7 @@ Unsaved changes will be discarded!`);
           onSelect: async () => {
             const sanitizedDefault = sanitizeAppearanceStore(createDefaultAppearanceStore());
             setAppearanceStore(sanitizedDefault);
-            await saveEditorStateImmediate();
+            await saveEditorStateImmediate(['appearanceStore']);
           },
           color: color.muted,
         },

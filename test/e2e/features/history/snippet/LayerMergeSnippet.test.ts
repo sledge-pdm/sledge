@@ -1,31 +1,11 @@
-import { BlendMode } from '@sledge-pdm/frasco';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { layerMergeSnippet } from '~/features/history/command/snippet/LayerMergeCommands';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { LayerType, type Layer } from '~/features/layer/types';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { disposeFrascoRenderer, initFrascoRenderer } from '~/webgl/FrascoRenderer';
 import { createWebGLCanvas } from '../../../../support/e2e';
-
-const buildLayer = (id: string, name = id, opacity = 1, mode: BlendMode = BlendMode.normal): Layer => ({
-  id,
-  name,
-  type: LayerType.Dot,
-  opacity,
-  mode,
-  enabled: true,
-  cutFreeze: false,
-});
-
-const setRuntimeStore = (layers: Layer[]) => {
-  setProjectStore('canvas', 'size', { width: 1, height: 1 });
-  setProjectStore('layers', 'layers', layers);
-  setProjectStore('layers', 'state', 'activeLayerId', layers[0]?.id ?? '');
-  setProjectStore('layers', 'state', 'selectionEnabled', false);
-  setProjectStore('layers', 'state', 'selected', new Set<string>());
-  setProjectStore('layers', 'state', 'baseLayer', { colorMode: 'transparent' });
-};
+import { buildLayer, resetStore } from '../helpers';
 
 const expectPixelNear = (pixel: Uint8Array, expected: [number, number, number, number], tolerance = 1) => {
   const actual = [pixel[0], pixel[1], pixel[2], pixel[3]];
@@ -39,7 +19,9 @@ describe('LayerMergeCommands snippet (e2e)', () => {
 
   beforeEach(async () => {
     document.body.innerHTML = '';
-    setRuntimeStore([buildLayer('origin', 'origin', 0.5), buildLayer('target', 'target')]);
+    const origin = buildLayer('origin', 'origin');
+    origin.opacity = 0.5;
+    resetStore([origin, buildLayer('target', 'target')]);
     layerManager.registerLayer('origin', new Uint8ClampedArray([255, 0, 0, 255]), 1, 1, { inputSpace: 'canvas' });
     layerManager.registerLayer('target', new Uint8ClampedArray([0, 0, 255, 255]), 1, 1, { inputSpace: 'canvas' });
 

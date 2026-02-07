@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { LayerReorderCommand } from '~/features/history/command/layer/LayerReorderCommand';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { buildLayer, resetStore } from '../helpers';
+import { buildLayer, resetStore } from '../../helpers';
 
 describe('LayerReorderCommand (e2e)', () => {
   beforeEach(() => {

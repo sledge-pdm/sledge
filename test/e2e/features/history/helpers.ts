@@ -2,7 +2,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { NEW_LAYER_PROPS } from '~/features/layer/service';
 import { type Layer } from '~/features/layer/types';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { createWebGLCanvas } from '../../../../support/e2e';
+import { createWebGLCanvas } from '../../../support/e2e';
 
 export const buildLayer = (id: string, name = id): Layer => ({
   ...NEW_LAYER_PROPS,

@@ -1,6 +1,3 @@
-// TODO: エラーを構造的な命名で管理する　くれぐれもバラバラな名前にはしないように
-// もしかしたら関数定義でもいい？
-
 import { ErrorTypes, LoadError } from '~/features/io/project/ProjectLoader';
 import { InitialLoadTypes } from '~/routes/editor/load';
 import { revealInFileBrowser } from '~/utils/NativeOpener';

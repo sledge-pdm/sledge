@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SetActiveLayerCommand } from '~/features/history/command/layer_list/SetActiveLayerCommand';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { buildLayer, resetStore } from '../helpers';
+import { buildLayer, resetStore } from '../../helpers';
 
 describe('SetActiveLayerCommand (e2e)', () => {
   beforeEach(() => {

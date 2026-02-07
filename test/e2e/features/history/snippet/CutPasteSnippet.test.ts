@@ -1,30 +1,10 @@
-import { BlendMode } from '@sledge-pdm/frasco';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cutPasteSnippet } from '~/features/history/command/snippet/CutPasteCommands';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { LayerType, type Layer } from '~/features/layer/types';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
+import { projectStore } from '~/stores/RuntimeProjectStore';
 import { createWebGLCanvas } from '../../../../support/e2e';
-
-const buildLayer = (id: string, name = id): Layer => ({
-  id,
-  name,
-  type: LayerType.Dot,
-  opacity: 1,
-  mode: BlendMode.normal,
-  enabled: true,
-  cutFreeze: false,
-});
-
-const setRuntimeStore = (layers: Layer[]) => {
-  setProjectStore('canvas', 'size', { width: 1, height: 1 });
-  setProjectStore('layers', 'layers', layers);
-  setProjectStore('layers', 'state', 'activeLayerId', layers[0]?.id ?? '');
-  setProjectStore('layers', 'state', 'selectionEnabled', false);
-  setProjectStore('layers', 'state', 'selected', new Set<string>());
-  setProjectStore('layers', 'state', 'baseLayer', { colorMode: 'transparent' });
-};
+import { buildLayer, resetStore } from '../helpers';
 
 const readPixel = (layerId: string): Uint8Array => {
   const layer = layerManager.getLayerOptional(layerId);
@@ -40,7 +20,7 @@ describe('CutPasteCommands snippet (e2e)', () => {
     const setup = createWebGLCanvas();
     canvas = setup.canvas;
 
-    setRuntimeStore([buildLayer('a'), buildLayer('b')]);
+    resetStore([buildLayer('a'), buildLayer('b')]);
 
     layerManager.registerLayer('a', new Uint8ClampedArray([0, 0, 255, 255]), 1, 1, { inputSpace: 'canvas' });
     layerManager.registerLayer('b', new Uint8ClampedArray([0, 255, 0, 255]), 1, 1, { inputSpace: 'canvas' });

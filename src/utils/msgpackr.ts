@@ -9,6 +9,7 @@ export async function unpackFromPath(path: string): Promise<any | null> {
     const unpacked = packr.unpack(data) as any;
     return unpacked;
   } catch (error) {
+    throw error;
     return null;
   }
 }

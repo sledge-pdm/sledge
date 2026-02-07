@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { color } from '@sledge-pdm/ui';
-import { createEffect, onMount, Show } from 'solid-js';
+import { createEffect, onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import BottomBar from '~/components/global/BottomBar';
 import Loading from '~/components/global/common/Loading';
@@ -58,7 +58,7 @@ export default function Editor() {
       await reportInitialLoadError(InitialLoadTypes.GLOBAL_CONFIG, configError, undefined);
     }
     if (editorStateError?.type === ErrorTypes.UNKNOWN_ERROR || editorStateError?.type === ErrorTypes.FAILED_LOAD_RUNTIME) {
-      await reportInitialLoadError(InitialLoadTypes.EDITOR_STATE, configError, undefined);
+      await reportInitialLoadError(InitialLoadTypes.EDITOR_STATE, editorStateError, undefined);
     }
 
     return editorStateStore;
@@ -133,7 +133,9 @@ export default function Editor() {
     } finally {
       setIOStore('isInInitialLoading', false);
     }
+  });
 
+  onCleanup(() => {
     return () => {
       unlisten();
       disposeFrascoRenderer();

@@ -70,7 +70,6 @@ export class PenTool implements ToolBehavior {
 
   onMove(args: ToolArgs): ToolResult {
     if (!globalConfig.editor.useRawMove) return this.handleDraw(args);
-    console.log('yea');
     return {
       shouldUpdate: false,
     };
@@ -78,7 +77,6 @@ export class PenTool implements ToolBehavior {
 
   onRawMove(args: ToolArgs): ToolResult {
     if (globalConfig.editor.useRawMove) return this.handleDraw(args);
-
     return {
       shouldUpdate: false,
     };

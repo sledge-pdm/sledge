@@ -4,7 +4,7 @@ import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeC
 import { PackedLayerSnapshot } from '~/features/history/snapshot';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { buildLayer, resetStore, setupWebGL } from '../helpers';
+import { buildLayer, resetStore, setupWebGL } from '../../helpers';
 
 const packSnapshot = (layerId: string, buffer: Uint8ClampedArray, width: number, height: number): PackedLayerSnapshot => ({
   layer: buildLayer(layerId),

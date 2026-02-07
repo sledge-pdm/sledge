@@ -9,5 +9,4 @@ import './layer/LayerPropsCommand';
 import './layer/LayerRemoveCommand';
 import './layer/LayerReorderCommand';
 import './layer_list/SetActiveLayerCommand';
-import './selection/ConvertSelectionCommand';
 import './selection/SelectionChangeCommand';

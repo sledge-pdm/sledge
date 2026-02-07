@@ -32,7 +32,7 @@ export async function initRuntimeProject(project: ProjectBase) {
   selectionManager.resize(canvasInfo.size);
 
   const layers = adapter.getLayers() ?? [];
-  Promise.all(
+  await Promise.all(
     layers.map(async (layer) => {
       let buffer = await adapter.getRawBufferOf(layer.id);
       if (!buffer) {

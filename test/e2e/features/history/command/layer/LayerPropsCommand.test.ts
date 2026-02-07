@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { LayerPropsCommand } from '~/features/history/command/layer/LayerPropsCommand';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { buildLayer, resetStore } from '../helpers';
+import { buildLayer, resetStore } from '../../helpers';
 
 describe('LayerPropsCommand (e2e)', () => {
   beforeEach(() => {

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { LayerAddCommand } from '~/features/history/command/layer/LayerAddCommand';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { buildLayer, registerLayers, resetStore, setupWebGL } from '../helpers';
+import { buildLayer, registerLayers, resetStore, setupWebGL } from '../../helpers';
 
 describe('LayerAddCommand (e2e)', () => {
   let canvas: HTMLCanvasElement;

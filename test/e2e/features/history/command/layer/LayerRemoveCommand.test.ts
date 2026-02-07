@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { LayerRemoveCommand } from '~/features/history/command/layer/LayerRemoveCommand';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { buildLayer, registerLayers, resetStore, setupWebGL } from '../helpers';
+import { buildLayer, registerLayers, resetStore, setupWebGL } from '../../helpers';
 
 describe('LayerRemoveCommand (e2e)', () => {
   let canvas: HTMLCanvasElement;

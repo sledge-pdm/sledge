@@ -336,6 +336,7 @@ async function loadFromClipboard(options: ClipboardLoadOptions): Promise<Interna
         initImage: buffer,
       }
     );
+    setIOStore('isProjectChangedAfterSave', false);
     return {
       ok: true,
     };

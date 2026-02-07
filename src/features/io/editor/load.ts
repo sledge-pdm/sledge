@@ -6,7 +6,7 @@ import { ErrorTypes, LoadError } from '../project/ProjectLoader';
 
 export const EDITOR_STATE_ERROR_FILE_NOT_FOUND = `EditorState file not found.`;
 export const EDITOR_STATE_ERROR_FAILED_FILE_READ = `Failed to read EditorState file.`;
-export const EDITOR_STATE_ERROR_FAILED_PARSE_JSON = `EditorState file not found.`;
+export const EDITOR_STATE_ERROR_FAILED_PARSE_JSON = `Failed to parse EditorState file JSON.`;
 export const EDITOR_STATE_ERROR_INTERNAL = `Internal error while loading EditorState.`;
 export const EDITOR_STATE_ERROR_UNKNOWN = `Unknown error while loading EditorState.`;
 

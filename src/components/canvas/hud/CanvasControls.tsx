@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { historyManager, tryRedo, tryUndo } from '~/features/history';
 
 import { css } from '@acab/ecsstatic';
@@ -63,6 +63,7 @@ const bottomRightNav = css`
 const CanvasControls: Component = () => {
   const [activeCanUndo, setActiveCanUndo] = createSignal(historyManager.canUndo());
   const [activeCanRedo, setActiveCanRedo] = createSignal(historyManager.canRedo());
+  let disposeHistoryListener: (() => void) | undefined;
 
   // const [selectionStore, setSelectionStore] = createStore<{
   //   selectionBack: SelectionMask | undefined;
@@ -93,18 +94,13 @@ const CanvasControls: Component = () => {
   // };
 
   onMount(() => {
-    // const selectionUnsubscribe = selectionManager.subscribe(onSelectionUpdate);
-    // const floatingMoveUnsubscribe = floatingMoveManager.subscribe(onFloatingMoveUdpate);
-
-    const dispose = historyManager.onChange((state) => {
+    disposeHistoryListener = historyManager.onChange((state) => {
       setActiveCanUndo(state.canUndo);
       setActiveCanRedo(state.canRedo);
     });
-    return () => {
-      // selectionUnsubscribe();
-      // floatingMoveUnsubscribe();
-      dispose();
-    };
+  });
+  onCleanup(() => {
+    disposeHistoryListener?.();
   });
 
   createEffect(() => {

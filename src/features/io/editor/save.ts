@@ -2,20 +2,50 @@ import { debounce } from '@solid-primitives/scheduled';
 import { Consts } from '~/Consts';
 import { ensureAppConfigPath } from '~/features/config';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
-import { getEditorStateStore } from '~/stores/EditorStores';
+import { EditorStateStore, getEditorStateStore } from '~/stores/EditorStores';
 import { fs } from '~/utils/platform';
 
 export const saveEditorStateDebounced = debounce(saveEditorStateImmediate, 500);
 
 const LOG_LABEL = 'EditorState';
 
-export async function saveEditorStateImmediate() {
+const pickEditorStateKeys = (state: EditorStateStore, keys: (keyof EditorStateStore)[]): Partial<EditorStateStore> => {
+  return Object.fromEntries(keys.map((key) => [key, state[key]])) as Partial<EditorStateStore>;
+};
+
+const readPersistedEditorState = async (baseDir: unknown): Promise<EditorStateStore | undefined> => {
+  const options = baseDir ? { baseDir } : undefined;
+  const exists = baseDir ? await fs.exists(Consts.editorStateFileName, { baseDir }) : await fs.exists(Consts.editorStateFileName);
+  if (!exists) return undefined;
+
+  const content = await fs.readTextFile(Consts.editorStateFileName, options);
+  const parsed = JSON.parse(content);
+  if (!parsed || typeof parsed !== 'object') return undefined;
+  return parsed as EditorStateStore;
+};
+
+export async function saveEditorStateImmediate(keys?: (keyof EditorStateStore)[]) {
   try {
     await ensureAppConfigPath();
 
-    const editorState = getEditorStateStore();
+    const currentState = getEditorStateStore();
     const baseDir = fs.BaseDirectory?.AppConfig;
-    await fs.writeTextFile(Consts.editorStateFileName, JSON.stringify(editorState, null, 2), {
+    let stateToSave: EditorStateStore = currentState;
+    if (keys && keys.length > 0) {
+      try {
+        const persisted = await readPersistedEditorState(baseDir);
+        if (persisted) {
+          stateToSave = {
+            ...persisted,
+            ...pickEditorStateKeys(currentState, keys),
+          };
+        }
+      } catch {
+        stateToSave = currentState;
+      }
+    }
+
+    await fs.writeTextFile(Consts.editorStateFileName, JSON.stringify(stateToSave, null, 2), {
       baseDir,
       create: true,
     });

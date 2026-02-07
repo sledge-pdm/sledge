@@ -48,5 +48,5 @@ export const addColorHistory = (color: RGBA, options?: AddColorHistoryOptions) =
     return [color, ...old].slice(0, Consts.maxColorHistoryLength);
   });
 
-  saveEditorStateDebounced();
+  saveEditorStateDebounced(['colorStore']);
 };

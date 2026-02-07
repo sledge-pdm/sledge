@@ -77,7 +77,7 @@ export default function Editor() {
           case InitialLoadTypes.PATH_IMAGE_PROJECT_LAST:
             // Remove lastPath(ioStore.savedLocation) from editorState when failed to load last project.
             setIOStore('savedLocation', { path: undefined, name: undefined });
-            await saveEditorStateImmediate();
+            await saveEditorStateImmediate(['lastPath']);
           case InitialLoadTypes.PATH_PROJECT:
           case InitialLoadTypes.PATH_IMAGE_PROJECT:
             const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();

@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import createRAF, { targetFPS } from '@solid-primitives/raf';
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { allLayers } from '~/features/layer';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { interactStore } from '~/stores/EditorStores';
@@ -102,15 +102,14 @@ const FrascoCanvas: Component = () => {
     eventBus.on('canvas:layoutReady', handleCanvasLayoutReady);
     eventBus.on('webgl:requestUpdate', handleUpdateReqEvent);
     eventBus.on('webgl:requestResume', handleResumeRequest);
-
-    return () => {
-      disposeFrascoRenderer();
-      stopRenderLoop();
-      // eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);
-      eventBus.off('canvas:layoutReady', handleCanvasLayoutReady);
-      eventBus.off('webgl:requestUpdate', handleUpdateReqEvent);
-      eventBus.off('webgl:requestResume', handleResumeRequest);
-    };
+  });
+  onCleanup(() => {
+    disposeFrascoRenderer();
+    stopRenderLoop();
+    // eventBus.off('canvas:sizeChanged', handleCanvasSizeChangedEvent);
+    eventBus.off('canvas:layoutReady', handleCanvasLayoutReady);
+    eventBus.off('webgl:requestUpdate', handleUpdateReqEvent);
+    eventBus.off('webgl:requestResume', handleResumeRequest);
   });
 
   createEffect(() => {

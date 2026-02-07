@@ -1,5 +1,5 @@
 import { CircleKernel, SquareKernel } from '@sledge-pdm/frasco';
-import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, JSX, onCleanup, onMount, Show } from 'solid-js';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager, SelectionUpdateType } from '~/features/selection/SelectionManager';
 import {
@@ -124,14 +124,13 @@ const CanvasOverlaySVG: Component = () => {
     setSelectionChanged(true);
 
     const updatePatternInterval = setInterval(updatePatternOffset, 30);
-
-    return () => {
+    onCleanup(() => {
       selectionUnsubscribe();
       floatingMoveUnsubscribe();
       eventBus.off('selection:updateLassoOutline', handleLassoUpdate);
       stopRenderLoop();
       clearInterval(updatePatternInterval);
-    };
+    });
   });
 
   createEffect(() => {

@@ -1,5 +1,5 @@
 import { css } from '@acab/ecsstatic';
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { eventBus, Events } from '~/utils/EventBus';
 
 const errorLayout = css`
@@ -50,9 +50,9 @@ const CanvasError: Component = () => {
 
   onMount(() => {
     eventBus.on('webgl:renderPaused', handleRenderPaused);
-    return () => {
-      eventBus.off('webgl:renderPaused', handleRenderPaused);
-    };
+  });
+  onCleanup(() => {
+    eventBus.off('webgl:renderPaused', handleRenderPaused);
   });
 
   return (

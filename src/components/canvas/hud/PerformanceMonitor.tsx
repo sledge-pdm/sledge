@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { SparkLine } from '@sledge-pdm/ui';
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
 import { logSystemInfo } from '~/features/log/service';
@@ -65,16 +65,18 @@ const PerformanceMonitor: Component = () => {
     }
   };
 
+  let intervalId: NodeJS.Timeout | undefined;
+  let startTimerId: number | undefined;
+
   onMount(() => {
-    let intervalId: NodeJS.Timeout | undefined;
-    const startTimerId = window.setTimeout(() => {
+    startTimerId = window.setTimeout(() => {
       intervalId = setInterval(callback, 500);
     }, 100);
+  });
 
-    return () => {
-      if (startTimerId) clearTimeout(startTimerId);
-      if (intervalId) clearInterval(intervalId);
-    };
+  onCleanup(() => {
+    if (startTimerId) clearTimeout(startTimerId);
+    if (intervalId) clearInterval(intervalId);
   });
 
   return (

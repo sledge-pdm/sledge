@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Nothing } from '@sledge-pdm/ui';
-import { Component, For, onMount, Show } from 'solid-js';
+import { Component, For, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import HistoryItemRow from '~/components/section/history/ProjectHistoryItem';
 import SectionItem from '~/components/section/SectionItem';
@@ -32,12 +32,14 @@ const History: Component = () => {
     redoStack: historyManager.getRedoStack(),
   });
 
+  let dispose: (() => void) | undefined;
   onMount(() => {
-    const dispose = historyManager.onChange(() => {
+    dispose = historyManager.onChange(() => {
       setHistoryStore({ undoStack: [...historyManager.getUndoStack()], redoStack: [...historyManager.getRedoStack()] });
     });
-
-    return () => dispose();
+  });
+  onCleanup(() => {
+    dispose?.();
   });
 
   return (

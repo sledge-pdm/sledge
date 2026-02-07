@@ -260,7 +260,7 @@ const ExportContent: Component = () => {
     }
 
     setLastSettingsStore('exportSettings', settings);
-    await saveEditorStateImmediate();
+    await saveEditorStateImmediate(['lastSettingsStore']);
   };
 
   const [lastExportDirsMenuShown, setLastExportDirsMenuShown] = createSignal(false);
@@ -354,7 +354,7 @@ const ExportContent: Component = () => {
                       fontFamily: fonts.ZFB03,
                       onSelect: async () => {
                         setLastSettingsStore('exportedFolderPaths', []);
-                        await saveEditorStateImmediate();
+                        await saveEditorStateImmediate(['lastSettingsStore']);
                         setLastExportDirsMenuShown(false);
                       },
                     },

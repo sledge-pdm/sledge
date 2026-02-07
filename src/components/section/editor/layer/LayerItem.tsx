@@ -227,8 +227,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       onDrag: () => setIsDragging(true),
       onDrop: () => setIsDragging(false),
     });
-
-    return () => cleanDraggable();
+    onCleanup(() => cleanDraggable());
   });
 
   const setLayerName = (layerId: string, newName: string) => {

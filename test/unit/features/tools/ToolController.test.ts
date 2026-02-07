@@ -16,9 +16,12 @@ vi.mock('~/features/log/service', () => ({
 }));
 
 import {
+  getActiveToolCategoryId,
   getCurrentCanvasMargin,
   getCurrentPresetConfig,
+  getCurrentToolPreset,
   getPresetOf,
+  getPrevActiveToolCategoryId,
   getSelectedPreset,
   getSelectedPresetName,
   getToolCategory,
@@ -71,6 +74,17 @@ describe('features/tools/ToolController', () => {
     expect(getSelectedPreset(getToolCategory('move'))).toBeUndefined();
   });
 
+  it('returns active/previous tool ids and current tool preset', () => {
+    expect(getActiveToolCategoryId()).toBe('pen');
+    expect(getPrevActiveToolCategoryId()).toBeUndefined();
+    expect(getCurrentToolPreset()).toEqual(expect.objectContaining({ size: 1 }));
+
+    setActiveToolCategory('eraser');
+    expect(getActiveToolCategoryId()).toBe('eraser');
+    expect(getPrevActiveToolCategoryId()).toBe('pen');
+    expect(getCurrentToolPreset()).toEqual(expect.objectContaining({ size: 1 }));
+  });
+
   it('updates active tool category and records previous category', () => {
     setActiveToolCategory('eraser');
 
@@ -101,6 +115,10 @@ describe('features/tools/ToolController', () => {
 
     expect(getSelectedPresetName('pen')).toBe('alt');
     expect(getCurrentPresetConfig('pen')).toEqual(expect.objectContaining({ size: 6 }));
+  });
+
+  it('returns undefined current preset config for tools without presets', () => {
+    expect(getCurrentPresetConfig('move')).toBeUndefined();
   });
 
   it('returns brush margin for pen and eraser presets', () => {

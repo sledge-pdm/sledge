@@ -1,4 +1,4 @@
-import { Component, onMount, Show } from 'solid-js';
+import { Component, onCleanup, onMount, Show } from 'solid-js';
 import CanvasStack from './canvas/CanvasStack';
 import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './hud/CanvasControls';
@@ -9,14 +9,14 @@ import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordina
 import { logSystemWarn } from '~/features/log/service';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
 import { eventBus, Events } from '~/utils/EventBus';
-import { window as platformWindow } from '~/utils/platform';
+import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 import PerformanceMonitor from './hud/PerformanceMonitor';
 
 import createRAF, { targetFPS } from '@solid-primitives/raf';
+import CanvasError from '~/components/canvas/hud/CanvasError';
 import Cursor from '~/components/canvas/hud/Cursor';
 import Ruler from '~/components/canvas/hud/measures/ruler/Ruler';
 import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/area_menu/SelectionMenu';
-import CanvasError from '~/components/canvas/hud/CanvasError';
 import CanvasOverlaySVG from '~/components/canvas/overlays/CanvasOverlaySVG';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import SideSectionsOverlay from '~/components/section/SideSectionOverlay';
@@ -122,6 +122,7 @@ const CanvasArea: Component = () => {
   let canvasStack: HTMLDivElement;
 
   let interact: CanvasAreaInteract | undefined = undefined;
+  let unlistenOnResized: Promise<UnlistenFn> | undefined;
 
   let lastTransformMatrix = '';
   let lastTransformArray: number[] | undefined;
@@ -166,7 +167,7 @@ const CanvasArea: Component = () => {
   };
 
   onMount(() => {
-    const unlistenOnResized = platformWindow.getCurrentWindow().onResized(async (e) => {
+    unlistenOnResized = platformWindow.getCurrentWindow().onResized(async (e) => {
       // 座標変換キャッシュをクリア
       coordinateTransform.clearCache();
 
@@ -189,13 +190,12 @@ const CanvasArea: Component = () => {
 
     updateTransform();
     startTransformUpdate();
-
-    return () => {
-      unlistenOnResized.then((callback) => callback());
-      interact?.removeInteractListeners();
-      eventBus.off('window:sideSectionSideChanged', onSideSectionSideChanged);
-      stopTransformUpdate();
-    };
+  });
+  onCleanup(() => {
+    unlistenOnResized?.then((callback) => callback());
+    interact?.removeInteractListeners();
+    eventBus.off('window:sideSectionSideChanged', onSideSectionSideChanged);
+    stopTransformUpdate();
   });
 
   return (

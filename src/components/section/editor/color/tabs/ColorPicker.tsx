@@ -1,7 +1,7 @@
 import iro from '@jaames/iro';
 import { IroColorPicker } from '@jaames/iro/dist/ColorPicker';
 import { hexWithSharpToRGBA, RGBA, RGBAToHex } from '@sledge-pdm/core';
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';
 import { colorStore } from '~/stores/EditorStores';
 
@@ -34,7 +34,9 @@ const ColorPicker: Component<{ width: number }> = (props) => {
 
   onMount(() => {
     window.addEventListener('pointerup', handlePointerUp);
-    return () => window.removeEventListener('pointerup', handlePointerUp);
+  });
+  onCleanup(() => {
+    window.removeEventListener('pointerup', handlePointerUp);
   });
 
   createEffect(() => {

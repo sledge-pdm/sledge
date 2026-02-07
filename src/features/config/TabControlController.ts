@@ -54,7 +54,7 @@ export const moveTabControl = (control: SectionTabControl, targetSide: SectionSi
     setAppearanceStore(sourceSide, 'content', nextSelection);
   }
 
-  saveEditorStateImmediate();
+  saveEditorStateImmediate(['appearanceStore']);
 };
 
 export const isTabControlVisible = (control: SectionTabControl): boolean => {
@@ -82,5 +82,5 @@ export const toggleTabControlVisibility = (control: SectionTabControl) => {
     [control]: !currentlyVisible,
   }));
 
-  saveEditorStateImmediate();
+  saveEditorStateImmediate(['appearanceStore']);
 };

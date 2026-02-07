@@ -1,6 +1,6 @@
 import { RGBA } from '@sledge-pdm/core';
 import { Slider } from '@sledge-pdm/ui';
-import { Component, createSignal, onMount } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { sliderContainer, sliderContentRoot, sliderLabel } from '~/components/section/editor/color/tabs/SliderStyles';
 import { currentColor, registerColorChange, setCurrentColor } from '~/features/color';
 
@@ -17,10 +17,9 @@ const RGB: Component = () => {
 
   onMount(() => {
     window.addEventListener('pointerup', handlePointerUp);
-
-    return () => {
-      window.removeEventListener('pointerup', handlePointerUp);
-    };
+  });
+  onCleanup(() => {
+    window.removeEventListener('pointerup', handlePointerUp);
   });
 
   return (

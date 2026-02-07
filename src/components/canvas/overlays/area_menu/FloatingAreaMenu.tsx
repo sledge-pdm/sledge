@@ -1,5 +1,5 @@
 import { Icon } from '@sledge-pdm/ui';
-import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { cancelMove, commitMove } from '~/features/selection/service';
 
 import { css } from '@acab/ecsstatic';
@@ -78,6 +78,8 @@ const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefin
 export const OnCanvasFloatingAreaMenu: Component = () => {
   let containerRef: HTMLDivElement;
   let sectionsBetweenAreaRef: HTMLElement | null = null;
+  let unsubscribe: (() => void) | undefined;
+  let observer: ResizeObserver | undefined;
 
   const onFloatingAreaUpdate = () => {
     setIsMoving(floatingMoveManager.isMoving());
@@ -85,21 +87,20 @@ export const OnCanvasFloatingAreaMenu: Component = () => {
   };
 
   onMount(() => {
-    const unsubscribe = floatingMoveManager.subscribe(onFloatingAreaUpdate);
+    unsubscribe = floatingMoveManager.subscribe(onFloatingAreaUpdate);
     onFloatingAreaUpdate();
 
-    const observer = new ResizeObserver(() => {
+    observer = new ResizeObserver(() => {
       updateMenuPos();
     });
     sectionsBetweenAreaRef = document.getElementById('sections-between-area') as HTMLElement;
     if (sectionsBetweenAreaRef) {
       observer.observe(sectionsBetweenAreaRef);
     }
-
-    return () => {
-      unsubscribe();
-      observer.disconnect();
-    };
+  });
+  onCleanup(() => {
+    unsubscribe?.();
+    observer?.disconnect();
   });
 
   // Reposition only while a selection is active and transform changes

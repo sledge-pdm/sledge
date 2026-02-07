@@ -22,7 +22,7 @@
     "@jsquash/webp": "^1.5.0",
     "@sledge-pdm/core": "^1.2.4",
     "@sledge-pdm/frasco": "^0.2.4",
-    "@sledge-pdm/ui": "^1.2.6",
+    "@sledge-pdm/ui": "link:..\\..\\packages\\ui",
     "@solid-primitives/deep": "^0.3.3",
     "@solid-primitives/map": "^0.7.2",
     "@solid-primitives/raf": "^2.3.2",

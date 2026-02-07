@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { Layer, Size2D } from '@sledge-pdm/core';
 import { LayerThumbnail } from '@sledge-pdm/frasco';
 import { color } from '@sledge-pdm/ui';
-import { Component, createEffect, createMemo, onMount } from 'solid-js';
+import { Component, createEffect, createMemo, onCleanup, onMount } from 'solid-js';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { calcPreviewSize, calcThumbnailScale } from '~/utils/ThumbnailUtils';
@@ -83,12 +83,13 @@ const LayerPreview: Component<Props> = (props: Props) => {
     };
   };
 
+  let mountCleanup: (() => void) | undefined;
   onMount(() => {
-    const cleanup = setupThumbnail();
-    return () => {
-      cleanup?.();
-      disposeThumbnail();
-    };
+    mountCleanup = setupThumbnail();
+  });
+  onCleanup(() => {
+    mountCleanup?.();
+    disposeThumbnail();
   });
 
   createEffect(() => {

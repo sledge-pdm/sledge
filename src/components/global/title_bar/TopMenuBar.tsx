@@ -228,7 +228,7 @@ Unsaved changes will be discarded!`);
           onSelect: async () => {
             const sanitizedDefault = sanitizeAppearanceStore(createDefaultAppearanceStore());
             setAppearanceStore(sanitizedDefault);
-            await saveEditorStateImmediate();
+            await saveEditorStateImmediate(['appearanceStore']);
           },
           color: color.muted,
         },

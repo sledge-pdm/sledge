@@ -142,8 +142,6 @@ const KeyListener: Component = () => {
         setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
       }
     });
-
-    return () => {};
   });
 
   onCleanup(() => {

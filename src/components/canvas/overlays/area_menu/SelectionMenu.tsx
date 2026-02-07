@@ -1,5 +1,5 @@
 import { Icon } from '@sledge-pdm/ui';
-import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { selectionManager, SelectionUpdateType } from '~/features/selection/SelectionManager';
 import { cancelSelection, convertSelectionToImage, deleteSelectedArea } from '~/features/selection/service';
 
@@ -76,6 +76,8 @@ const [outerPosition, setOuterPosition] = createSignal<Vec2 | undefined>(undefin
 export const OnCanvasSelectionMenu: Component = () => {
   let containerRef: HTMLDivElement;
   let sectionsBetweenAreaRef: HTMLElement | null = null;
+  let unsubscribe: (() => void) | undefined;
+  let observer: ResizeObserver | undefined;
 
   const [showMenu, setShowMenu] = createSignal<boolean>(false);
 
@@ -87,21 +89,20 @@ export const OnCanvasSelectionMenu: Component = () => {
   };
 
   onMount(() => {
-    const unsubscribe = selectionManager.subscribe(onSelectionUpdate);
+    unsubscribe = selectionManager.subscribe(onSelectionUpdate);
     onSelectionUpdate({ type: 'both' });
 
-    const observer = new ResizeObserver(() => {
+    observer = new ResizeObserver(() => {
       updateMenuPos();
     });
     sectionsBetweenAreaRef = document.getElementById('sections-between-area') as HTMLElement;
     if (sectionsBetweenAreaRef) {
       observer.observe(sectionsBetweenAreaRef);
     }
-
-    return () => {
-      unsubscribe();
-      observer.disconnect();
-    };
+  });
+  onCleanup(() => {
+    unsubscribe?.();
+    observer?.disconnect();
   });
 
   // Reposition only while a selection is active and transform changes
@@ -191,17 +192,18 @@ export const OnCanvasSelectionMenu: Component = () => {
 
 export const OuterSelectionMenu: Component = () => {
   const [showMenu, setShowMenu] = createSignal<boolean>(false);
+  let unsubscribe: (() => void) | undefined;
 
   const handleUpdate = (e: { type: SelectionUpdateType }) => {
     setShowMenu(selectionManager.hasSelection() && !selectionManager.getFront());
   };
 
   onMount(() => {
-    const unsubscribe = selectionManager.subscribe(handleUpdate);
+    unsubscribe = selectionManager.subscribe(handleUpdate);
     handleUpdate({ type: 'both' });
-    return () => {
-      unsubscribe();
-    };
+  });
+  onCleanup(() => {
+    unsubscribe?.();
   });
 
   const visibility = createMemo(() => {

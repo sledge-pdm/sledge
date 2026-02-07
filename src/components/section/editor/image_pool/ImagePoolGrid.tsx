@@ -1,0 +1,107 @@
+import { ImagePoolEntry } from '@sledge-pdm/core';
+import { color, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
+import { Component, For } from 'solid-js';
+import { hideEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
+import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
+import { projectStore } from '~/stores/RuntimeProjectStore';
+import { flexCol, flexRow } from '~/styles/styles';
+import { ContextMenuItems } from '~/utils/ContextMenuItems';
+
+const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
+  const imageSrc = useImageBlobUrl(() => props.entry.id);
+
+  return (
+    <div
+      class={flexCol}
+      style={{
+        width: 'fit-content',
+        overflow: 'visible',
+        'box-sizing': 'border-box',
+        cursor: 'pointer',
+        margin: '-1px',
+        border: projectStore.imagePool.state.selectedEntryId === props.entry.id ? `1px solid ${color.active}` : `1px solid ${color.border}`,
+        opacity: props.entry.visible ? 1 : 0.5,
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const entry = props.entry;
+        if (!entry) return;
+        const showHideItem: MenuListOption = props.entry.visible
+          ? {
+              ...ContextMenuItems.BaseImageHide,
+              onSelect: () => {
+                hideEntry(entry.id);
+              },
+            }
+          : {
+              ...ContextMenuItems.BaseImageShow,
+              onSelect: () => {
+                showEntry(entry.id);
+              },
+            };
+        let label = entry.descriptionName ?? '[ unknown ]';
+        if (!props.entry.visible) label += ' (hidden)';
+        showContextMenu(
+          [
+            { type: 'label', label },
+            showHideItem,
+            {
+              ...ContextMenuItems.BaseTransfer,
+              onSelect: () => transferToCurrentLayer(entry.id, false),
+            },
+            {
+              ...ContextMenuItems.BaseTransferRemove,
+              onSelect: () => transferToCurrentLayer(entry.id, true),
+            },
+            {
+              ...ContextMenuItems.BaseRemove,
+              label: 'Remove from pool',
+              onSelect: () => removeEntry(entry.id),
+            },
+          ],
+          e
+        );
+      }}
+    >
+      <div
+        class={flexRow}
+        style={{
+          'align-items': 'center',
+          gap: '8px',
+        }}
+      >
+        <img
+          class={'ignore-image-select'}
+          src={imageSrc()}
+          width={40}
+          height={40}
+          alt={props.entry.descriptionName}
+          title={props.entry.descriptionName}
+          style={{ 'object-fit': 'cover' }}
+          onError={(e) => {
+            e.currentTarget.style.opacity = '0.5';
+            e.currentTarget.alt = 'missing';
+          }}
+          onClick={(e) => {
+            if (projectStore.imagePool.state.selectedEntryId === props.entry.id) {
+              selectEntry(undefined);
+            } else {
+              selectEntry(props.entry.id);
+            }
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
+const ImagePoolGrid: Component = () => {
+  return (
+    <div class={flexRow} style={{ 'flex-wrap': 'wrap', gap: '8px' }}>
+      <For each={projectStore.imagePool.entries}>{(entry) => <Item entry={entry} />}</For>
+    </div>
+  );
+};
+
+export default ImagePoolGrid;

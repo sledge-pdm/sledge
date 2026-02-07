@@ -9,6 +9,7 @@ jobs:
   build:
     permissions:
       contents: write
+      packages: read
     strategy:
       fail-fast: false
       matrix:
@@ -26,19 +27,17 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      - name: Setup pnpm (install first for node cache detection)
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.22.0
+          version: latest
           run_install: false
 
-      # Node & Rust 環境セットアップ
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - uses: pnpm/action-setup@v4
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -52,13 +51,17 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            apps/sledge/src-tauri
+            src-tauri
+            wasm
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Configure pnpm Auth for private registry
+        run: pnpm config set //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}
 
       - name: install frontend dependencies
         run: pnpm install
@@ -71,7 +74,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
-          projectPath: './apps/sledge'
+          projectPath: '.'
           args: ${{ matrix.args }}
 
       - name: Upload dev artifacts
@@ -80,8 +83,8 @@ jobs:
         with:
           name: binaries-linux
           path: |
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.deb
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.rpm
+            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.deb
+            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.rpm
           retention-days: 3
 
       - name: Upload dev artifacts
@@ -90,8 +93,8 @@ jobs:
         with:
           name: binaries-macos
           path: |
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
+            ${{ github.workspace }}/src-tauri/target/universal-apple-darwin/release/bundle/**/*.dmg
+            ${{ github.workspace }}/src-tauri/target/universal-apple-darwin/release/bundle/**/*.app
           retention-days: 3
 
       - name: Upload dev artifacts
@@ -100,5 +103,5 @@ jobs:
         with:
           name: binaries-windows
           path: |
-            ${{ github.workspace }}/apps/sledge/src-tauri/target/release/bundle/**/*.exe
+            ${{ github.workspace }}/src-tauri/target/release/bundle/**/*.exe
           retention-days: 3

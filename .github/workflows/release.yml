@@ -4,13 +4,13 @@ on:
   push:
     tags:
       - 'v*.*.*'
-      - 'v*.*.*-prealpha'
       - '!v*.*.*-dev.*'
 
 jobs:
   build:
     permissions:
       contents: write
+      packages: read
     strategy:
       fail-fast: false
       matrix:
@@ -28,19 +28,17 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      - name: Setup pnpm (install first for node cache detection)
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.22.0
+          version: latest
           run_install: false
 
-      # Node & Rust 環境セットアップ
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'pnpm'
           cache-dependency-path: 'pnpm-lock.yaml'
-      - uses: pnpm/action-setup@v4
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -54,8 +52,8 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            apps/sledge/src-tauri
-            packages/wasm
+            src-tauri
+            wasm
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
@@ -63,11 +61,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-      - name: build wasm
-        run: pnpm wasm:build
+      - name: Configure pnpm Auth for private registry
+        run: pnpm config set //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}
 
       - name: install frontend dependencies
         run: pnpm install
@@ -82,7 +77,7 @@ jobs:
           releaseId: ${{ github.ref_name }}
           tagName: ${{ github.ref_name }}
           releaseName: ${{ github.ref_name }}
-          projectPath: './apps/sledge'
+          projectPath: '.'
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true

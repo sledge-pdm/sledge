@@ -1,0 +1,74 @@
+import { Component } from 'solid-js';
+import Color from '~/components/section/editor/color/Color';
+import Images from '~/components/section/editor/image_pool/Images';
+import LayerList from '~/components/section/editor/layer/LayerList';
+import Tools from '~/components/section/editor/tool/Tools';
+import Effects from '~/components/section/effects/Effects';
+import Explorer from '~/components/section/explorer/Explorer';
+import Export from '~/components/section/export/Export';
+import History from '~/components/section/history/History';
+import PerilousLayers from '~/components/section/perilous/PerilousLayers';
+import CanvasSettings from '~/components/section/project/CanvasSettings';
+import Project from '~/components/section/project/Project';
+import Snapshots from '~/components/section/project/Snapshots';
+
+export const EditorTab: Component = () => {
+  return (
+    <>
+      <Color />
+      <Tools />
+      <Images />
+      <LayerList />
+    </>
+  );
+};
+
+export const EffectsTab: Component = () => {
+  return (
+    <>
+      <Effects />
+    </>
+  );
+};
+
+export const ExplorerTab: Component = () => {
+  return (
+    <>
+      <Explorer />
+    </>
+  );
+};
+
+export const HistoryTab: Component = () => {
+  return (
+    <>
+      <History />
+    </>
+  );
+};
+
+export const ProjectTab: Component = () => {
+  return (
+    <>
+      <Project />
+      <CanvasSettings />
+      <Snapshots />
+    </>
+  );
+};
+
+export const ExportTab: Component = () => {
+  return (
+    <>
+      <Export />
+    </>
+  );
+};
+
+export const PerilousTab: Component = () => {
+  return (
+    <>
+      <PerilousLayers />
+    </>
+  );
+};

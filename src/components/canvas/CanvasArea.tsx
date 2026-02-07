@@ -1,0 +1,260 @@
+import { Component, onCleanup, onMount, Show } from 'solid-js';
+import CanvasStack from './canvas/CanvasStack';
+import CanvasAreaInteract from './CanvasAreaInteract';
+import CanvasControls from './hud/CanvasControls';
+
+import { css } from '@acab/ecsstatic';
+import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
+import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
+import { logSystemWarn } from '~/features/log/service';
+import { appearanceStore, interactStore } from '~/stores/EditorStores';
+import { eventBus, Events } from '~/utils/EventBus';
+import { window as platformWindow, UnlistenFn } from '~/utils/platform';
+import PerformanceMonitor from './hud/PerformanceMonitor';
+
+import createRAF, { targetFPS } from '@solid-primitives/raf';
+import CanvasError from '~/components/canvas/hud/CanvasError';
+import Cursor from '~/components/canvas/hud/Cursor';
+import Ruler from '~/components/canvas/hud/measures/ruler/Ruler';
+import { OnCanvasSelectionMenu, OuterSelectionMenu } from '~/components/canvas/overlays/area_menu/SelectionMenu';
+import CanvasOverlaySVG from '~/components/canvas/overlays/CanvasOverlaySVG';
+import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
+import SideSectionsOverlay from '~/components/section/SideSectionOverlay';
+import { globalConfig } from '~/stores/GlobalStores';
+import { OnCanvasFloatingAreaMenu, OuterFloatingAreaMenu } from './overlays/area_menu/FloatingAreaMenu';
+
+const canvasArea = css`
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+`;
+
+const sectionsContainer = css`
+  display: flex;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+`;
+
+const sectionsBetweenAreaContainer = css`
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex-grow: 1;
+  width: 0;
+  pointer-events: none;
+`;
+
+const sectionsBetweenArea = css`
+  display: flex;
+  flex-direction: row;
+  inset: 0;
+  box-sizing: content-box;
+  flex-grow: 1;
+  position: relative;
+  pointer-events: none;
+`;
+
+const canvasAreaWrapper = css`
+  display: flex;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+  z-index: var(--zindex-zoom-pan-wrapper);
+`;
+
+const outerStrokeDetectArea = css`
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  touch-action: none;
+`;
+
+const canvasStackWrapper = css`
+  width: fit-content;
+  height: fit-content;
+  padding: 0;
+  margin: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  backface-visibility: hidden;
+`;
+
+const canvasOverlayRoot = css`
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: var(--zindex-canvas-overlay);
+`;
+
+const centerMarker = css`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0px;
+  height: 0px;
+  background-color: red;
+`;
+
+const toMatrix3dString = (matrix: DOMMatrix): string => {
+  if (matrix.is2D) {
+    const { a, b, c, d, e, f } = matrix;
+    return `matrix3d(${a},${b},0,0,${c},${d},0,0,0,0,1,0,${e},${f},0,1)`;
+  }
+  const toArray = typeof matrix.toFloat64Array === 'function' ? Array.from(matrix.toFloat64Array()) : [];
+  if (toArray.length === 16) {
+    return `matrix3d(${toArray.join(',')})`;
+  }
+  // 最低限 matrix() を返すフォールバック
+  return matrix.toString();
+};
+
+const CanvasArea: Component = () => {
+  let wrapper: HTMLDivElement;
+  let canvasStack: HTMLDivElement;
+
+  let interact: CanvasAreaInteract | undefined = undefined;
+  let unlistenOnResized: Promise<UnlistenFn> | undefined;
+
+  let lastTransformMatrix = '';
+  let lastTransformArray: number[] | undefined;
+
+  const [isTransformUpdateRunning, startTransformUpdate, stopTransformUpdate] = createRAF(
+    targetFPS(() => {
+      updateTransform();
+    }, 60)
+  );
+
+  const updateTransform = () => {
+    try {
+      const matrix = coordinateTransform.getTransformMatrix();
+      const matrixArray = typeof matrix.toFloat64Array === 'function' ? Array.from(matrix.toFloat64Array()) : undefined;
+      const isSameMatrix =
+        matrixArray &&
+        lastTransformArray &&
+        matrixArray.length === lastTransformArray.length &&
+        matrixArray.every((v, idx) => v === lastTransformArray![idx]);
+      if (isSameMatrix) return;
+
+      const matrixString = toMatrix3dString(matrix);
+
+      if (lastTransformMatrix !== matrixString) {
+        canvasStack.style.transform = matrixString;
+        lastTransformMatrix = matrixString;
+        lastTransformArray = matrixArray;
+      }
+    } catch (error) {
+      logSystemWarn('Transform update failed.', { label: 'CanvasArea', details: [error] });
+      const currentOffsetX = interactStore.offsetOrigin.x + interactStore.offset.x;
+      const currentOffsetY = interactStore.offsetOrigin.y + interactStore.offset.y;
+      const currentZoom = interactStore.zoom;
+      canvasStack.style.transform = `translate3d(${currentOffsetX}px, ${currentOffsetY}px, 0px) scale3d(${currentZoom}, ${currentZoom}, 1)`;
+    }
+  };
+
+  const onSideSectionSideChanged = (e: Events['window:sideSectionSideChanged']) => {
+    // 座標変換キャッシュをクリア
+    coordinateTransform.clearCache();
+    centeringCanvas();
+  };
+
+  onMount(() => {
+    unlistenOnResized = platformWindow.getCurrentWindow().onResized(async (e) => {
+      // 座標変換キャッシュをクリア
+      coordinateTransform.clearCache();
+
+      const isMaximize = await platformWindow.getCurrentWindow().isMaximized();
+      const flag = isMaximize ? globalConfig.editor.centerCanvasOnMaximize : globalConfig.editor.centerCanvasOnResize;
+      if (flag === 'offset') {
+        centeringCanvas();
+      }
+      if (flag === 'offset_zoom') {
+        adjustZoomToFit();
+      }
+    });
+
+    eventBus.on('window:sideSectionSideChanged', onSideSectionSideChanged);
+
+    adjustZoomToFit();
+
+    interact = new CanvasAreaInteract(canvasStack, wrapper);
+    interact.setInteractListeners();
+
+    updateTransform();
+    startTransformUpdate();
+  });
+  onCleanup(() => {
+    unlistenOnResized?.then((callback) => callback());
+    interact?.removeInteractListeners();
+    eventBus.off('window:sideSectionSideChanged', onSideSectionSideChanged);
+    stopTransformUpdate();
+  });
+
+  return (
+    <div class={canvasArea}>
+      <div
+        id='canvas-area'
+        ref={(el) => {
+          wrapper = el;
+        }}
+        class={canvasAreaWrapper}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }}
+      >
+        {/* The area to detect stroke (outerStrokeDetectArea + StrokeCanvas = Entire Area) */}
+        <div
+          id='outer-stroke-detect-area'
+          class={outerStrokeDetectArea}
+          style={{
+            cursor: interactStore.strokeAreaCursor,
+          }}
+        />
+
+        <div ref={(el) => (canvasStack = el)} class={canvasStackWrapper}>
+          <CanvasStack />
+        </div>
+
+        <div id='canvas-overlay-root' class={canvasOverlayRoot}>
+          <Show when={interactStore.isCanvasSizeFrameMode}>
+            <CanvasResizeFrame />
+          </Show>
+          <CanvasOverlaySVG />
+          <OnCanvasSelectionMenu />
+          <OnCanvasFloatingAreaMenu />
+        </div>
+        <Cursor />
+      </div>
+      <div class={sectionsContainer}>
+        <SideSectionsOverlay side='leftSide' />
+        {/* content between side sections */}
+        <div class={sectionsBetweenAreaContainer}>
+          <div id='sections-between-area' class={sectionsBetweenArea}>
+            <Show when={appearanceStore.ruler}>
+              <Ruler />
+            </Show>
+            <div id='between-area-center' class={centerMarker} />
+
+            <CanvasControls />
+            <OuterSelectionMenu />
+            <OuterFloatingAreaMenu />
+            <PerformanceMonitor />
+            <CanvasError />
+          </div>
+        </div>
+        <SideSectionsOverlay side='rightSide' />
+      </div>
+    </div>
+  );
+};
+
+export default CanvasArea;

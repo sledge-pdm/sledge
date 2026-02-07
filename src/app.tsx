@@ -1,0 +1,118 @@
+// @refresh reload
+import { MetaProvider } from '@solidjs/meta';
+import { Route, Router } from '@solidjs/router';
+import TitleBar from './components/global/title_bar/TitleBar';
+import About from './routes/about/index';
+import Editor from './routes/editor/index';
+import Home from './routes/start/index';
+
+import { applyTheme, showContextMenu } from '@sledge-pdm/ui';
+import { createEffect, onCleanup, onMount } from 'solid-js';
+import { loadGlobalConfig } from '~/features/io/config/load';
+import { logSystemError, logSystemInfo } from '~/features/log/service';
+import { globalConfig } from '~/stores/GlobalStores';
+import { ContextMenuItems } from '~/utils/ContextMenuItems';
+import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
+import { event, window as platformWindow, UnlistenFn, webview } from '~/utils/platform';
+import Settings from './routes/settings/index';
+import { listenEvent } from './utils/TauriUtils';
+
+import { css } from '@acab/ecsstatic';
+
+import '@sledge-pdm/ui/global.css';
+
+const appRoot = css`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+export default function App() {
+  const LOG_LABEL = 'App';
+  // グローバルエラーハンドラーを設定
+  const handleGlobalError = (event: ErrorEvent) => {
+    logSystemError('Global error caught.', { label: LOG_LABEL, details: [event.error] });
+    reportCriticalError(event.error || new Error(event.message));
+  };
+
+  const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+    logSystemError('Unhandled promise rejection caught.', { label: LOG_LABEL, details: [event.reason] });
+    reportCriticalError(event.reason instanceof Error ? event.reason : new Error(String(event.reason)));
+  };
+
+  let unlistenOnSettingsSaved: UnlistenFn | undefined;
+  let unlistenThemeChanged: UnlistenFn | undefined;
+
+  onMount(async () => {
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    unlistenOnSettingsSaved = await listenEvent('onSettingsSaved', () => {
+      loadGlobalConfig();
+    });
+    const currentWebview = webview.getCurrentWebview();
+    const currentWindow = platformWindow.getCurrentWindow();
+    applyThemeToHtml();
+
+    await currentWebview.setZoom(zoomForIntegerize(await currentWindow.scaleFactor()));
+
+    currentWindow.onScaleChanged(async ({ payload }) => {
+      const { scaleFactor, size } = payload;
+      logSystemInfo('scale changed', {
+        label: LOG_LABEL,
+        details: [scaleFactor, 'dprzoom', zoomForIntegerize(scaleFactor)],
+        debugOnly: true,
+      });
+      await currentWebview.setZoom(zoomForIntegerize(scaleFactor));
+    });
+    unlistenThemeChanged = await event.listen('tauri://theme-changed', (e) => {
+      applyThemeToHtml(e.payload === 'dark' ? 'dark' : 'light');
+    });
+    // await checkForUpdates();
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('error', handleGlobalError);
+    window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    unlistenOnSettingsSaved?.();
+    unlistenThemeChanged?.();
+  });
+
+  const applyThemeToHtml = (osTheme?: 'dark' | 'light') => {
+    if (osTheme && globalConfig.general.theme === 'os') {
+      applyTheme(osTheme);
+    } else {
+      applyTheme(globalConfig.general.theme);
+    }
+  };
+
+  createEffect(() => {
+    globalConfig.general.theme;
+    applyThemeToHtml();
+  });
+
+  return (
+    <Router
+      root={(props) => (
+        <MetaProvider>
+          <title>Sledge</title>
+          <div
+            class={appRoot}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              showContextMenu(import.meta.env.DEV ? [ContextMenuItems.DevRefresh, ContextMenuItems.DevOpenDevTools] : [], e);
+            }}
+          >
+            <TitleBar />
+            <main>{props.children}</main>
+          </div>
+        </MetaProvider>
+      )}
+    >
+      <Route path='/start' component={Home} />
+      <Route path='/editor' component={Editor} />
+      <Route path='/settings' component={Settings} />
+      <Route path='/about' component={About} />
+    </Router>
+  );
+}

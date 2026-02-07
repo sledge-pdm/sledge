@@ -1,0 +1,59 @@
+import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
+
+export const performanceMetas: FieldMeta[] = [
+  {
+    section: ConfigSections.Performance,
+    kind: 'header',
+    header: 'canvas',
+  },
+  {
+    section: ConfigSections.Performance,
+    path: 'performance/targetFPS',
+    label: 'canvas target fps',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { label: '30', value: '30' },
+        { label: '60', value: '60' },
+        { label: '144', value: '144' },
+      ],
+    },
+    tips: `canvas update FPS.`,
+  },
+  {
+    section: ConfigSections.Performance,
+    path: 'performance/canvasRenderingMode',
+    label: 'rendering mode',
+    component: 'Dropdown',
+    props: {
+      options: [
+        { label: 'adaptive', value: 'adaptive' },
+        { label: 'pixelated', value: 'pixelated' },
+        { label: 'crispEdges', value: 'crisp-edges' },
+      ],
+    },
+    tips: `determines rendering mode of canvas.
+"pixelated" shows sharp edges but misses some lines/shapes when zoomed out.
+"crispEdges" is stable, but does not show edges of pixels when zoomed in.
+"adaptive" will automatically changes those 2 modes (recommended).`,
+  },
+  {
+    section: ConfigSections.Performance,
+    kind: 'header',
+    header: 'history',
+  },
+  {
+    section: ConfigSections.Performance,
+    path: 'editor/maxHistoryItemsCount',
+    label: 'max history items count',
+    component: 'Slider',
+    props: {
+      min: 10,
+      max: 100,
+      step: 1,
+      labelWidth: 32,
+      allowFloat: false,
+    },
+    tips: `the maximum number of history items to keep.`,
+  },
+];

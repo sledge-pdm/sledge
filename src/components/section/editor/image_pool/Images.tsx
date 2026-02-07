@@ -1,0 +1,122 @@
+import { css } from '@acab/ecsstatic';
+import { clsx, ImagePoolEntry } from '@sledge-pdm/core';
+import { Checkbox, Nothing } from '@sledge-pdm/ui';
+import { Component, createMemo, JSX, Show } from 'solid-js';
+import ImagePoolGrid from '~/components/section/editor/image_pool/ImagePoolGrid';
+import SectionItem from '~/components/section/SectionItem';
+import { sectionContent } from '~/components/section/SectionStyles';
+import { addImagesFromLocal, getEntry, removeEntry } from '~/features/image_pool';
+import { openImageImportDialog } from '~/features/io/image_pool/import';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
+
+const imagesSectionsContent = css`
+  margin-top: 8px;
+`;
+
+const gridContainer = css`
+  margin: 4px 0;
+`;
+
+const optionsContainer = css`
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  gap: 8px;
+`;
+const infoContainer = css`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const Images: Component = () => {
+  const selectedEntry = createMemo<ImagePoolEntry | undefined>(() =>
+    projectStore.imagePool.state.selectedEntryId ? getEntry(projectStore.imagePool.state.selectedEntryId) : undefined
+  );
+
+  return (
+    <SectionItem
+      title='images.'
+      subHeaderIcons={[
+        {
+          src: '/assets/icons/misc/add.png',
+          onClick: async () => {
+            const path = await openImageImportDialog();
+            if (path !== undefined) {
+              addImagesFromLocal(path);
+            }
+          },
+        },
+        {
+          src: '/assets/icons/misc/minus.png',
+          onClick: async () => {
+            const id = selectedEntry()?.id;
+            if (id) removeEntry(id);
+          },
+          disabled: selectedEntry() === undefined,
+        },
+      ]}
+    >
+      <div class={clsx('ignore-image-select', sectionContent, imagesSectionsContent)}>
+        <Show when={projectStore.imagePool.entries.length > 0} fallback={<Nothing>no images.</Nothing>}>
+          <div class={gridContainer}>
+            <ImagePoolGrid />
+          </div>
+          <Show when={projectStore.imagePool.state.selectedEntryId !== undefined}>
+            <div class={optionsContainer}>
+              <Checkbox
+                checked={projectStore.imagePool.state.preserveAspectRatio}
+                label='preserve ratio.'
+                labelMode='right'
+                onChange={(checked) => setProjectStore('imagePool', 'state', 'preserveAspectRatio', checked)}
+              />
+              <div class={infoContainer}>
+                <InfoRow label='image size'>
+                  {selectedEntry()?.base.width}, {selectedEntry()?.base.height}
+                </InfoRow>
+                <InfoRow label='offset'>
+                  {selectedEntry()?.transform.x.toFixed(2)}, {selectedEntry()?.transform.y.toFixed(2)}
+                </InfoRow>
+                <InfoRow label='scale'>
+                  {selectedEntry()?.transform.scaleX.toFixed(2)}, {selectedEntry()?.transform.scaleY.toFixed(2)}
+                </InfoRow>
+                <InfoRow label='rotation'>{selectedEntry()?.transform.rotation.toFixed(1)}</InfoRow>
+              </div>
+            </div>
+          </Show>
+        </Show>
+      </div>
+    </SectionItem>
+  );
+};
+
+const rowRoot = css`
+  display: flex;
+  flex-direction: row;
+`;
+const infoRowLabel = css`
+  font-family: ZFB03;
+  color: var(--color-muted);
+  width: 80px;
+`;
+
+const infoRowValue = css`
+  font-family: ZFB03;
+  color: var(--color-muted);
+  flex-grow: 1;
+`;
+
+interface InfoRowProps {
+  label: string;
+  children: JSX.Element | JSX.ArrayElement;
+}
+const InfoRow: Component<InfoRowProps> = (props) => {
+  return (
+    <div class={rowRoot}>
+      <p class={infoRowLabel}>{props.label}</p>
+      <p class={infoRowValue}>{props.children}</p>
+    </div>
+  );
+};
+
+export default Images;

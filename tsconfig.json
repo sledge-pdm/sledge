@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "esModuleInterop": true,
+    "jsxImportSource": "solid-js",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/*"],
+      "@sledge/wasm": ["wasm/pkg/sledge_wasm.js"],
+      "@assets/*": ["./public/assets/*"]
+    },
+    "types": ["vite/client"],
+    "rootDirs": ["src"]
+  },
+  "include": ["src", "test", "vitest.config.ts", "vitest-bench.config.ts"],
+  "exclude": ["src-tauri/target", "**/out/tauri-codegen-assets/**"]
+}

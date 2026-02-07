@@ -1,0 +1,45 @@
+import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge-pdm/core';
+import { color, Icon } from '@sledge-pdm/ui';
+import { Component } from 'solid-js';
+
+const iconContainer = css`
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+  pointer-events: auto;
+  padding: 2px;
+  opacity: 1;
+  cursor: pointer;
+`;
+
+const iconContainerDisabled = css`
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.5;
+`;
+
+interface Props {
+  iconSrc: string;
+  iconColor?: string;
+  hoverColor?: string;
+  title?: string;
+  disabled?: boolean;
+  onClick?: () => void;
+}
+
+const LayerListIconButton: Component<Props> = (props) => {
+  return (
+    <div
+      class={clsx(iconContainer, props.disabled && iconContainerDisabled)}
+      title={props.title}
+      onClick={(e) => {
+        props.onClick?.();
+      }}
+    >
+      <Icon src={props.iconSrc} base={9} scale={1} color={props.iconColor ?? color.onBackground} hoverColor={props.hoverColor ?? color.active} />
+    </div>
+  );
+};
+export default LayerListIconButton;

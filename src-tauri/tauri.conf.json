@@ -1,0 +1,50 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "sledge",
+  "mainBinaryName": "sledge",
+  "identifier": "com.innsbluck.sledge",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "pnpm vite:dev",
+    "beforeBuildCommand": "pnpm vite:build"
+  },
+  "app": {
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["*/**"]
+      }
+    }
+  },
+  "plugins": {
+    "PreventOverflow": true,
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY0QTVCQjg5NDQ0OUEyMDYKUldRR29rbEVpYnVsWkFXWjBwRU8yYVVEbGpsTFJuYndEaDJBaHl4NXlyekxUZlcxeVFnUC9VdWwK",
+      "endpoints": ["https://github.com/sledge-pdm/sledge/releases/latest/download/latest.json"],
+      "windows": { "installMode": "passive" }
+    },
+    "fs": {
+      "requireLiteralLeadingDot": false
+    }
+  },
+  "bundle": {
+    "createUpdaterArtifacts": true,
+    "fileAssociations": [
+      {
+        "ext": ["sledge"],
+        "description": "Sledge Project",
+        "rank": "Default"
+      },
+      {
+        "ext": ["png", "jpg", "jpeg"],
+        "description": "Image File",
+        "rank": "Alternate"
+      }
+    ],
+    "resources": ["resources/**/*", "icons/**/*"],
+    "active": true,
+    "icon": ["icons/icon.ico", "icons/icon.icns", "icons/icon.png", "icons/32x32.png", "icons/64x64.png", "icons/128x128.png", "icons/128x128@2x.png"]
+  }
+}

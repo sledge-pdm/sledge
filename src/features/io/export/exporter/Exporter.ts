@@ -1,0 +1,111 @@
+﻿import { Layer, toUint8ClampedArray } from '@sledge-pdm/core';
+import { EXPORT_TYPES } from '~/features/io/export/types';
+import { getLayer } from '~/features/layer/frasco/LayerManager';
+import { projectStore } from '~/stores/RuntimeProjectStore';
+import { frascoRenderer } from '~/webgl/FrascoRenderer';
+
+export abstract class Exporter {
+  abstract canvasToBlob(quality?: number, scale?: number): Promise<Blob>;
+  abstract layerToBlob(layer: Layer, quality?: number, scale?: number): Promise<Blob>;
+}
+
+export async function convertCanvasToBlob(format: 'png' | 'jpeg' | 'webp_lossy', quality: number = 0.92, scale: number = 1): Promise<Blob> {
+  if (frascoRenderer === undefined) throw new Error('Export Error: Renderer not defined');
+
+  const buffer: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(frascoRenderer.readPixelsFlipped());
+  const offscreen = getScaledCanvas(buffer, scale);
+  const mimeType = EXPORT_TYPES[format].mimeType;
+  if (!mimeType) {
+    throw new Error('Export Error: Mime Type not found.');
+  }
+  return new Promise<Blob>((resolve, reject) => {
+    offscreen.toBlob(
+      (blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('Export Error: toBlob returned null'));
+      },
+      mimeType,
+      quality
+    );
+  });
+}
+
+export async function convertLayerToBlob(
+  layer: Layer,
+  format: 'png' | 'jpeg' | 'webp_lossy',
+  quality: number = 0.92,
+  scale: number = 1
+): Promise<Blob> {
+  if (frascoRenderer === undefined) throw new Error('Export Error: Renderer not defined');
+
+  const buffer = toUint8ClampedArray(getLayer(layer.id).readPixels()) as Uint8ClampedArray<ArrayBuffer>;
+
+  const offscreen = getScaledCanvas(buffer, scale);
+  const mimeType = EXPORT_TYPES[format].mimeType;
+  if (!mimeType) {
+    throw new Error('Export Error: Mime Type not found.');
+  }
+  return new Promise<Blob>((resolve, reject) => {
+    offscreen.toBlob(
+      (blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('Export Error: toBlob returned null'));
+      },
+      mimeType,
+      quality
+    );
+  });
+}
+
+export function getScaledCanvas(buffer: Uint8ClampedArray<ArrayBuffer>, scale: number = 1) {
+  const { width, height } = projectStore.canvas.size;
+
+  const offscreen = document.createElement('canvas');
+  offscreen.width = width;
+  offscreen.height = height;
+  const ctx2d = offscreen.getContext('2d')!;
+
+  const imgData = new ImageData(buffer, width, height);
+  ctx2d.putImageData(imgData, 0, 0);
+
+  let target = offscreen;
+  if (scale !== 1) {
+    const scaled = document.createElement('canvas');
+    scaled.width = Math.round(width * scale);
+    scaled.height = Math.round(height * scale);
+    const ctxScaled = scaled.getContext('2d')!;
+    ctxScaled.imageSmoothingEnabled = false;
+    ctxScaled.drawImage(offscreen, 0, 0, scaled.width, scaled.height);
+    target = scaled;
+  }
+
+  return target;
+}
+
+export function getScaledBuffer(buffer: Uint8ClampedArray<ArrayBuffer>, scale: number = 1): ImageData {
+  const { width, height } = projectStore.canvas.size;
+
+  const offscreen = document.createElement('canvas');
+  offscreen.width = width;
+  offscreen.height = height;
+  const ctx2d = offscreen.getContext('2d')!;
+  const imgData = new ImageData(buffer, width, height);
+  ctx2d.putImageData(imgData, 0, 0);
+
+  let target = offscreen;
+  const scaled = document.createElement('canvas');
+
+  const scaledWidth = Math.round(width * scale);
+  const scaledHeight = Math.round(height * scale);
+
+  scaled.width = scaledWidth;
+  scaled.height = scaledHeight;
+  const ctxScaled = scaled.getContext('2d')!;
+  ctxScaled.imageSmoothingEnabled = false;
+  ctxScaled.drawImage(offscreen, 0, 0, scaled.width, scaled.height);
+  target = scaled;
+
+  const imageData = target.getContext('2d')!.getImageData(0, 0, scaledWidth, scaledHeight);
+
+  return imageData;
+}

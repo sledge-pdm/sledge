@@ -1,11 +1,9 @@
-import { type RawPixelData } from '@sledge-pdm/core';
+import { HistoryContext, Layer, LayerType, type RawPixelData } from '@sledge-pdm/core';
 import { BlendMode } from '@sledge-pdm/frasco';
 import { getPackedLayerSnapshot, inflateLayerSnapshot, PackedLayerSnapshot } from '~/features/history/snapshot';
-import { HistoryContext } from '~/features/history/types';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { createLayer } from '~/features/layer/model';
 import { NEW_LAYER_PROPS } from '~/features/layer/service';
-import { LayerType, type Layer } from '~/features/layer/types';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';

@@ -1,6 +1,7 @@
+import { ImagePoolEntry } from '@sledge-pdm/core';
 import { color, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, For } from 'solid-js';
-import { hideEntry, ImagePoolEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
+import { hideEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, flexRow } from '~/styles/styles';

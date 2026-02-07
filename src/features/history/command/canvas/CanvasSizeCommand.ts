@@ -1,4 +1,4 @@
-import { gzipDeflate, Size2D } from '@sledge-pdm/core';
+import { gzipDeflate, HistoryContext, Size2D } from '@sledge-pdm/core';
 import { adjustZoomToFit } from '~/features/canvas';
 import { inflateLayerSnapshot, PackedLayerSnapshot } from '~/features/history/snapshot';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
@@ -8,7 +8,6 @@ import { logSystemWarn } from '~/features/log/service';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
-import { HistoryContext } from '../../types';
 import { HistoryCommand } from '../HistoryCommand';
 import { registerHistoryCommand } from '../registry';
 

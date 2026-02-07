@@ -1,4 +1,4 @@
-import { gzipInflate, type RawPixelData } from '@sledge-pdm/core';
+import { gzipInflate, HistoryContext, ImagePoolEntry, ImagePoolImage, type RawPixelData } from '@sledge-pdm/core';
 import { normalizeRotation } from '~/features/canvas';
 import { historyManager } from '~/features/history';
 import { FrascoLayerCommand } from '~/features/history/command/frasco/FrascoLayerCommand';
@@ -6,7 +6,6 @@ import { ImagePoolAddCommand } from '~/features/history/command/image_pool/Image
 import { ImagePoolPropsCommand } from '~/features/history/command/image_pool/ImagePoolPropsCommand';
 import { ImagePoolRemoveCommand } from '~/features/history/command/image_pool/ImagePoolRemoveCommand';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
-import { HistoryContext } from '~/features/history/types';
 import { activeLayer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserInfo } from '~/features/log/service';
@@ -17,14 +16,7 @@ import { flip_pixels_vertically } from '~/utils/wasm';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { removeImagePoolBlobUrl } from './blobManager';
 import { getImagePoolImage, removeImagePoolImage, setImagePoolImage } from './imageStore';
-import type { ImagePoolEntry, ImagePoolImage } from './model';
-import { createEntryFromFile, createEntryFromLocalImage, createEntryFromRawBuffer, getEntry } from './service';
-
-export const cloneEntry = (entry: ImagePoolEntry): ImagePoolEntry => ({
-  ...entry,
-  base: { ...entry.base },
-  transform: { ...entry.transform },
-});
+import { cloneEntry, createEntryFromFile, createEntryFromLocalImage, createEntryFromRawBuffer, getEntry } from './service';
 
 const isSameEntryProps = (a: ImagePoolEntry, b: ImagePoolEntry): boolean => {
   if (a.id !== b.id) return false;

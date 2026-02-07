@@ -1,4 +1,4 @@
-import { HistoryContext } from '~/features/history/types';
+import { HistoryContext } from '@sledge-pdm/core';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { findLayerById } from '~/features/layer/service';
 import { toolCategories } from '~/features/tools/Tools';

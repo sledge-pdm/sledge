@@ -1,10 +1,3 @@
-// Layer feature - Main public interface
-
-// Types
-export type { BaseLayer, BaseLayerColorMode, Layer } from './types';
-
-export { LayerType } from './types';
-
 // Model functions (pure utilities)
 export {
   blendModeIds,

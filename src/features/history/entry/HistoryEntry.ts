@@ -1,7 +1,7 @@
 // History entry that is accumulated in the undo/redo stack.
 // HistoryEntry should be described as a wrapper around one command or a composition of multiple commands.
 
-import { HistoryContext } from '~/features/history/types';
+import { HistoryContext } from '@sledge-pdm/core';
 
 export type HistoryEntryTypes =
   | 'canvas_size'

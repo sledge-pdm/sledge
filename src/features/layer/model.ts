@@ -1,11 +1,10 @@
 // Layer domain models - Pure layer utilities and factories
 
-import { hexWithSharpToRGBA } from '@sledge-pdm/core';
+import { BaseLayer, BaseLayerColorMode, hexWithSharpToRGBA, Layer, LayerType } from '@sledge-pdm/core';
 import { BlendMode } from '@sledge-pdm/frasco';
 import { DropdownOption } from '@sledge-pdm/ui';
 import { v4 } from 'uuid';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { BaseLayer, BaseLayerColorMode, Layer, LayerType } from './types';
 
 // BlendMode utilities
 export const blendModeIds = {

@@ -1,5 +1,5 @@
+import { HistoryContext } from '@sledge-pdm/core';
 import { getPackedLayerSnapshot, inflateLayerSnapshot, PackedLayerSnapshot } from '~/features/history/snapshot';
-import { HistoryContext } from '~/features/history/types';
 import { findLayerById } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';

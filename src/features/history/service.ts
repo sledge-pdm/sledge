@@ -1,4 +1,4 @@
-import { HistoryContext } from '~/features/history/types';
+import { HistoryContext } from '@sledge-pdm/core';
 import { logUserWarn } from '../log';
 import { HistoryCommand } from './command/HistoryCommand';
 import { CommandLine, CommandsHistoryEntry } from './entry/CommandsHistoryEntry';

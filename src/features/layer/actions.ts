@@ -1,4 +1,4 @@
-import { RawPixelData } from '@sledge-pdm/core';
+import { Layer, LayerType, RawPixelData } from '@sledge-pdm/core';
 import { BlendMode } from '@sledge-pdm/frasco';
 import { logUserInfo } from '~/features/log/service';
 import { projectStore } from '~/stores/RuntimeProjectStore';
@@ -8,7 +8,6 @@ import { LayerRemoveCommand } from '../history/command/layer/LayerRemoveCommand'
 import { LayerReorderCommand } from '../history/command/layer/LayerReorderCommand';
 import { doCommands } from '../history/service';
 import { findLayerById, getOperationTargetLayerIds, resetSelectionState } from './service';
-import { Layer, LayerType } from './types';
 
 const LOG_LABEL = 'LayerActions';
 

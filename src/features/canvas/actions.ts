@@ -1,8 +1,7 @@
-import { Size2D, Vec2 } from '@sledge-pdm/core';
+import { HistoryContext, Size2D, Vec2 } from '@sledge-pdm/core';
 import { historyManager } from '~/features/history';
 import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeCommand';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
-import { HistoryContext } from '~/features/history/types';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { setInteractStore } from '~/stores/EditorStores';

@@ -1,11 +1,11 @@
 import { css } from '@acab/ecsstatic';
-import { clsx } from '@sledge-pdm/core';
+import { clsx, ImagePoolEntry } from '@sledge-pdm/core';
 import { Checkbox, Nothing } from '@sledge-pdm/ui';
 import { Component, createMemo, JSX, Show } from 'solid-js';
 import ImagePoolGrid from '~/components/section/editor/image_pool/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '~/components/section/SectionStyles';
-import { addImagesFromLocal, getEntry, ImagePoolEntry, removeEntry } from '~/features/image_pool';
+import { addImagesFromLocal, getEntry, removeEntry } from '~/features/image_pool';
 import { openImageImportDialog } from '~/features/io/image_pool/import';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 

@@ -1,6 +1,5 @@
-﻿import { toUint8Array, toUint8ClampedArray } from '@sledge-pdm/core';
+﻿import { Layer, toUint8Array, toUint8ClampedArray } from '@sledge-pdm/core';
 import { Exporter } from '~/features/io/export/exporter/Exporter';
-import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { create_opacity_mask, mask_to_path } from '~/utils/wasm';

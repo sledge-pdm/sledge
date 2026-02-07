@@ -1,7 +1,6 @@
-import { ProjectV2 } from '@sledge-pdm/core';
+import { CanvasInfo, ImagePoolEntry, ImagePoolState, Layer, LayerListState, ProjectInfo, ProjectSnapshot, ProjectV2 } from '@sledge-pdm/core';
 import { createStore } from 'solid-js/store';
-import { Layer } from '~/features/layer';
-import { ProjectSnapshot, RuntimeProjectSnapshot } from '~/features/snapshot';
+import { RuntimeProjectSnapshot } from '~/features/snapshot';
 
 export type CurrentProject = ProjectV2;
 
@@ -9,10 +8,16 @@ export type CurrentProject = ProjectV2;
  * @description Project that projected into SolidJS Store. Do not include props that doesn't use SolidJS Store.
  */
 export type RuntimeProject = {
-  canvas: CurrentProject['canvas'];
-  layers: Pick<CurrentProject['layers'], 'layers' | 'state'>;
-  imagePool: Pick<CurrentProject['imagePool'], 'entries' | 'state'>;
-  project: CurrentProject['project'];
+  canvas: CanvasInfo;
+  layers: {
+    layers: Layer[];
+    state: LayerListState;
+  };
+  imagePool: {
+    entries: ImagePoolEntry[];
+    state: ImagePoolState;
+  };
+  project: ProjectInfo;
   snapshots: (ProjectSnapshot | RuntimeProjectSnapshot)[];
 };
 

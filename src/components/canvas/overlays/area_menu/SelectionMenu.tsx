@@ -81,7 +81,6 @@ export const OnCanvasSelectionMenu: Component = () => {
 
   const onSelectionUpdate = (e: { type: SelectionUpdateType }) => {
     setShowMenu(selectionManager.hasSelection() && !selectionManager.getFront());
-
     // Menu shouldn't updated for front (preview) updates
     if (e.type === 'front') return;
     updateMenuPos();
@@ -89,6 +88,7 @@ export const OnCanvasSelectionMenu: Component = () => {
 
   onMount(() => {
     const unsubscribe = selectionManager.subscribe(onSelectionUpdate);
+    onSelectionUpdate({ type: 'both' });
 
     const observer = new ResizeObserver(() => {
       updateMenuPos();
@@ -192,12 +192,13 @@ export const OnCanvasSelectionMenu: Component = () => {
 export const OuterSelectionMenu: Component = () => {
   const [showMenu, setShowMenu] = createSignal<boolean>(false);
 
-  const handleUpdate = (e: { type: SelectionUpdateType; immediate?: boolean }) => {
+  const handleUpdate = (e: { type: SelectionUpdateType }) => {
     setShowMenu(selectionManager.hasSelection() && !selectionManager.getFront());
   };
 
   onMount(() => {
     const unsubscribe = selectionManager.subscribe(handleUpdate);
+    handleUpdate({ type: 'both' });
     return () => {
       unsubscribe();
     };

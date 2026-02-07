@@ -1,19 +1,10 @@
 import { css } from '@acab/ecsstatic';
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { clsx } from '@sledge-pdm/core';
+import { clsx, Layer } from '@sledge-pdm/core';
 import { Checkbox, color, Icon, Light, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import {
-  allLayers,
-  findLayerById,
-  Layer,
-  mergeToBelowLayer,
-  reorderLayer,
-  setActiveLayerId,
-  setLayerProp,
-  toggleLayerVisibility,
-} from '~/features/layer';
+import { allLayers, findLayerById, mergeToBelowLayer, reorderLayer, setActiveLayerId, setLayerProp, toggleLayerVisibility } from '~/features/layer';
 import {
   clearLayersFromUser,
   deselectLayer,

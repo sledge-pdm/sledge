@@ -1,5 +1,5 @@
-import { HistoryContext } from '~/features/history/types';
-import { ImagePoolEntry } from '~/features/image_pool';
+import { HistoryContext, ImagePoolEntry } from '@sledge-pdm/core';
+import { cloneEntry } from '~/features/image_pool/service';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { HistoryCommand } from '../HistoryCommand';
 import { registerHistoryCommand } from '../registry';
@@ -9,12 +9,6 @@ export interface ImagePoolPropsCommandProps {
   before?: ImagePoolEntry;
   after?: ImagePoolEntry;
 }
-
-const cloneEntry = (entry: ImagePoolEntry): ImagePoolEntry => ({
-  ...entry,
-  base: { ...entry.base },
-  transform: { ...entry.transform },
-});
 
 export class ImagePoolPropsCommand extends HistoryCommand {
   private readonly props: ImagePoolPropsCommandProps;

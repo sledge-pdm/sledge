@@ -1,6 +1,6 @@
+import { ImagePoolEntry } from '@sledge-pdm/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ImagePoolPropsCommand } from '~/features/history/command/image_pool/ImagePoolPropsCommand';
-import { ImagePoolEntry } from '~/features/image_pool';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 
 const buildEntry = (id: string, name = id): ImagePoolEntry => ({

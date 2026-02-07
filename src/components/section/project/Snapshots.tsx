@@ -1,11 +1,11 @@
 import { Component, createEffect, createMemo, createSignal, For, Show } from 'solid-js';
 
 import { css } from '@acab/ecsstatic';
-import { clsx, getProjectAdapter, gzipInflate, ProjectAdapter, toUint8ClampedArray } from '@sledge-pdm/core';
+import { clsx, getProjectAdapter, gzipInflate, ProjectAdapter, ProjectSnapshot, toUint8ClampedArray } from '@sledge-pdm/core';
 import { Icon, Nothing } from '@sledge-pdm/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { logSystemWarn } from '~/features/log';
-import { deleteSnapshot, loadSnapshot, ProjectSnapshot, registerCurrentProjectSnapshot, RuntimeProjectSnapshot } from '~/features/snapshot';
+import { deleteSnapshot, loadSnapshot, registerCurrentProjectSnapshot, RuntimeProjectSnapshot } from '~/features/snapshot';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { enabledButton, errorButton } from '~/styles/styles';
 import { useTimeAgoText } from '~/utils/TimeUtils';

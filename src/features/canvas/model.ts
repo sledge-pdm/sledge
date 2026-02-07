@@ -1,15 +1,11 @@
+import { Size2D } from '@sledge-pdm/core';
 import { DropdownOption } from '@sledge-pdm/ui';
-
-export type Canvas = {
-  width: number;
-  height: number;
-};
 
 export type ImageRenderingAttribute = 'auto' | 'pixelated' | 'crisp-edges';
 export type CanvasRenderingMode = 'adaptive' | 'pixelated' | 'crisp-edges';
 export type CanvasCenteringMode = 'disabled' | 'offset' | 'offset_zoom';
 
-export const canvasSizePresets: Record<string, Canvas | undefined> = {
+export const canvasSizePresets: Record<string, Size2D | undefined> = {
   custom: undefined,
 
   Icon_XS: { width: 8, height: 8 },

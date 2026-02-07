@@ -1,9 +1,5 @@
+import { SerializedHistoryCommand } from '@sledge-pdm/core';
 import { HistoryCommand, HistoryCommandType } from './HistoryCommand';
-
-export type SerializedHistoryCommand = {
-  type: HistoryCommandType;
-  props: unknown;
-};
 
 type CommandDeserializer = (props: unknown) => HistoryCommand;
 type CommandSerializer = (command: HistoryCommand) => SerializedHistoryCommand;
@@ -22,7 +18,7 @@ export const serializeHistoryCommand = (command: HistoryCommand): SerializedHist
 };
 
 export const deserializeHistoryCommand = (serialized: SerializedHistoryCommand): HistoryCommand | undefined => {
-  const entry = registry.get(serialized.type);
+  const entry = registry.get(serialized.type as unknown as HistoryCommandType);
   if (!entry) return;
   return entry.deserialize(serialized.props);
 };

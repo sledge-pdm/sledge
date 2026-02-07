@@ -1,6 +1,5 @@
-import { HistoryContext } from '~/features/history/types';
+import { HistoryContext, Layer } from '@sledge-pdm/core';
 import { findLayerById } from '~/features/layer';
-import { type Layer } from '~/features/layer/types';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';

@@ -1,22 +1,8 @@
+import { SerializedCommandLine, SerializedHistoryEntry } from '@sledge-pdm/core';
 import './command/registerAll';
-import { deserializeHistoryCommand, SerializedHistoryCommand, serializeHistoryCommand } from './command/registry';
+import { deserializeHistoryCommand, serializeHistoryCommand } from './command/registry';
 import { CommandLine, CommandsHistoryEntry } from './entry/CommandsHistoryEntry';
 import { HistoryEntry } from './entry/HistoryEntry';
-import { HistoryContext } from './types';
-
-export type SerializedCommandLine = {
-  command: SerializedHistoryCommand;
-  undoOrder?: number;
-  redoOrder?: number;
-};
-
-export type SerializedCommandsHistoryEntry = {
-  entryType: 'commands';
-  commands: SerializedCommandLine[];
-  context?: HistoryContext;
-};
-
-export type SerializedHistoryEntry = SerializedCommandsHistoryEntry;
 
 export type SerializedHistoryStacks = {
   undoStack: SerializedHistoryEntry[];

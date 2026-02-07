@@ -1,6 +1,6 @@
 // HistoryCommand is an atomic action that can be executed forward and backward.
 
-import { HistoryContext } from '~/features/history/types';
+import { HistoryContext } from '@sledge-pdm/core';
 
 export type HistoryCommandType =
   | 'canvas_size'

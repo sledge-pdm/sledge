@@ -1,7 +1,7 @@
 import { CircleKernel, SquareKernel } from '@sledge-pdm/frasco';
 import { Component, createEffect, createSignal, For, JSX, onMount, Show } from 'solid-js';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { selectionManager } from '~/features/selection/SelectionManager';
+import { selectionManager, SelectionUpdateType } from '~/features/selection/SelectionManager';
 import {
   getActiveToolCategoryId,
   getCurrentPresetConfig,
@@ -68,7 +68,7 @@ const CanvasOverlaySVG: Component = () => {
     setPatternOffset((prev) => (prev + 0.3) % 16);
   };
 
-  const onSelectionUpdate = (e: {}) => {
+  const onSelectionUpdate = (e: { type: SelectionUpdateType }) => {
     updateSelectionOutline();
   };
   const updateSelectionOutline = () => {
@@ -83,12 +83,8 @@ const CanvasOverlaySVG: Component = () => {
     setSelectionPath(PathCmdList.parse(pathString));
   };
 
-  const onFloatingAreaUpdate = (e: { immediate?: boolean }) => {
-    if (e.immediate) {
-      updateFloatingAreaOutline();
-    } else {
-      setFloatingAreaChanged(true);
-    }
+  const onFloatingAreaUpdate = () => {
+    updateFloatingAreaOutline();
   };
   const updateFloatingAreaOutline = () => {
     const { width, height } = projectStore.canvas.size;

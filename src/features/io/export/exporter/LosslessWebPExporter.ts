@@ -1,6 +1,6 @@
 import { encode as encodeWebp } from '@jsquash/webp';
+import { Layer } from '@sledge-pdm/core';
 import { Exporter, getScaledBuffer } from '~/features/io/export/exporter/Exporter';
-import { Layer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { frascoRenderer } from '~/webgl/FrascoRenderer';
 

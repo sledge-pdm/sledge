@@ -79,13 +79,14 @@ export const OnCanvasFloatingAreaMenu: Component = () => {
   let containerRef: HTMLDivElement;
   let sectionsBetweenAreaRef: HTMLElement | null = null;
 
-  const onFloatingAreaUpdate = (e: { immediate?: boolean }) => {
+  const onFloatingAreaUpdate = () => {
     setIsMoving(floatingMoveManager.isMoving());
     updateMenuPos();
   };
 
   onMount(() => {
     const unsubscribe = floatingMoveManager.subscribe(onFloatingAreaUpdate);
+    onFloatingAreaUpdate();
 
     const observer = new ResizeObserver(() => {
       updateMenuPos();

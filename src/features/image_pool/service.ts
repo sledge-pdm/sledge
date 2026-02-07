@@ -1,6 +1,5 @@
-﻿import { gzipDeflate, type RawPixelData } from '@sledge-pdm/core';
+﻿import { gzipDeflate, ImagePoolEntry, ImagePoolImage, type RawPixelData } from '@sledge-pdm/core';
 import { v4 } from 'uuid';
-import { ImagePoolEntry, ImagePoolImage } from '~/features/image_pool/model';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { bufferToBlob } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';
@@ -26,6 +25,12 @@ const guessMimeFromPath = (filePath?: string): ImageMimeType => {
   if (ext === 'webp') return 'image/webp';
   return DEFAULT_MIME;
 };
+
+export const cloneEntry = (entry: ImagePoolEntry): ImagePoolEntry => ({
+  ...entry,
+  base: { ...entry.base },
+  transform: { ...entry.transform },
+});
 
 const createPersistedImage = (bytes: Uint8Array, mimeType: ImageMimeType): ImagePoolImage => {
   const deflatedBuffer = gzipDeflate(bytes);

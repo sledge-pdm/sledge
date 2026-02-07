@@ -1,9 +1,8 @@
 import { css } from '@acab/ecsstatic';
-import { Size2D } from '@sledge-pdm/core';
+import { Layer, Size2D } from '@sledge-pdm/core';
 import { LayerThumbnail } from '@sledge-pdm/frasco';
 import { color } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
-import { Layer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { calcPreviewSize, calcThumbnailScale } from '~/utils/ThumbnailUtils';

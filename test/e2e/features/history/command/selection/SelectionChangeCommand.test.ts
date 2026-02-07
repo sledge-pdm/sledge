@@ -94,7 +94,7 @@ describe('SelectionChangeCommand (e2e)', () => {
 
     selectionManager.clearAll();
     const swapBack = buildMask(width, height, [{ x: 1, y: 1 }]);
-    const command2 = new ApplySelectionFrontToBackCommand({ swapBack });
+    const command2 = new ApplySelectionFrontToBackCommand({ swapBack: swapBack });
     command2.forward();
     expect(selectionManager.getBack()).toBeDefined();
     expect(selectionManager.getFront()).toBeUndefined();

@@ -1,14 +1,12 @@
-import { transparent } from '@sledge-pdm/core';
+import { HistoryContext, Layer, transparent } from '@sledge-pdm/core';
 import { BlendMode } from '@sledge-pdm/frasco';
 import { FrascoLayerCommand } from '~/features/history/command/frasco/FrascoLayerCommand';
 import { LayerPropsCommand } from '~/features/history/command/layer/LayerPropsCommand';
 import { LayerRemoveCommand } from '~/features/history/command/layer/LayerRemoveCommand';
 import { SetActiveLayerCommand } from '~/features/history/command/layer_list/SetActiveLayerCommand';
 import { CommandLine } from '~/features/history/entry/CommandsHistoryEntry';
-import { HistoryContext } from '~/features/history/types';
 import { findLayerById, getLayerIndex } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import type { Layer } from '~/features/layer/types';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { frascoRenderer } from '~/webgl/FrascoRenderer';
 

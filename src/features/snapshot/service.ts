@@ -1,4 +1,4 @@
-import { getProjectAdapter, gzipDeflate, Size2D } from '@sledge-pdm/core';
+import { getProjectAdapter, gzipDeflate, ProjectSnapshot, Size2D } from '@sledge-pdm/core';
 import { batch, createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { logSystemError, logUserError } from '~/features/log/service';
@@ -11,7 +11,7 @@ import { dialog } from '~/utils/platform';
 import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { ProjectLoader } from '../io/project/ProjectLoader';
-import { ProjectSnapshot, RuntimeProjectSnapshot } from './types';
+import { RuntimeProjectSnapshot } from './types';
 
 export async function getAllFullSnapshots(): Promise<ProjectSnapshot[]> {
   const fullSnapshots = await Promise.all(projectStore.snapshots.map(async (s) => await loadFullSnapshot(s)));

@@ -1,16 +1,10 @@
+import { HistoryContext, ImagePoolEntry, ImagePoolImage } from '@sledge-pdm/core';
 import { FrascoLayerCommand } from '~/features/history/command/frasco/FrascoLayerCommand';
 import { ImagePoolAddCommand } from '~/features/history/command/image_pool/ImagePoolAddCommand';
 import { ApplySelectionFrontToBackCommand } from '~/features/history/command/selection/SelectionChangeCommand';
 import { CommandLine } from '~/features/history/entry/CommandsHistoryEntry';
-import { HistoryContext } from '~/features/history/types';
-import type { ImagePoolEntry, ImagePoolImage } from '~/features/image_pool';
+import { cloneEntry } from '~/features/image_pool/service';
 import SelectionMask from '~/features/selection/SelectionMask';
-
-const cloneEntry = (entry: ImagePoolEntry): ImagePoolEntry => ({
-  ...entry,
-  base: { ...entry.base },
-  transform: { ...entry.transform },
-});
 
 const cloneSelection = (selection?: SelectionMask): SelectionMask | undefined => {
   if (!selection) return;

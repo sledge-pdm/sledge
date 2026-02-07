@@ -1,5 +1,6 @@
 ﻿// Layer domain service - Stateful layer operations with external dependencies
 
+import { BaseLayerColorMode, HistoryContext, Layer, LayerType } from '@sledge-pdm/core';
 import { BlendMode, FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
 import { adjustZoomToFit } from '~/features/canvas';
 import { historyManager } from '~/features/history';
@@ -7,7 +8,6 @@ import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeC
 import { layerMergeSnippet } from '~/features/history/command/snippet/LayerMergeCommands';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { doCommands } from '~/features/history/service';
-import { HistoryContext } from '~/features/history/types';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -20,7 +20,6 @@ import { updateFrascoCanvas } from '~/webgl/service';
 import { selectionManager } from '../selection/SelectionManager';
 import { addLayer, removeLayer, RemoveLayerOptions } from './actions';
 import { changeBaseLayerColor } from './model';
-import { BaseLayerColorMode, Layer, LayerType } from './types';
 
 const LOG_LABEL = 'LayerService';
 

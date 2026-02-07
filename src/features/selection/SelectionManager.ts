@@ -1,6 +1,3 @@
-// 新実装の選択範囲マネージャ
-// 既存の実装にこだわらず実装を改築していく
-
 import { Size2D, Vec2 } from '@sledge-pdm/core';
 import { apply_mask_offset } from '~/utils/wasm';
 import SelectionMask from './SelectionMask';

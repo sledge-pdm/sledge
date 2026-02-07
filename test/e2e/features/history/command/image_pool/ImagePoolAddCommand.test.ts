@@ -1,6 +1,6 @@
+import { ImagePoolEntry, ImagePoolImage } from '@sledge-pdm/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ImagePoolAddCommand } from '~/features/history/command/image_pool/ImagePoolAddCommand';
-import { ImagePoolEntry, ImagePoolImage } from '~/features/image_pool';
 import { imagePoolImages, setImagePoolImages } from '~/features/image_pool/imageStore';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 

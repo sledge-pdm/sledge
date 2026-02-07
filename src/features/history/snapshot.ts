@@ -1,5 +1,5 @@
-import { gzipDeflate, gzipInflate } from '@sledge-pdm/core';
-import { findLayerById, type Layer } from '~/features/layer';
+import { gzipDeflate, gzipInflate, Layer } from '@sledge-pdm/core';
+import { findLayerById } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 
 export interface LayerSnapshot {

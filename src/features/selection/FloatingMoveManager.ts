@@ -11,7 +11,7 @@ import { apply_mask_offset } from '~/utils/wasm';
 import { updateFrascoCanvas } from '~/webgl/service';
 
 export type MoveMode = 'selection' | 'pasted';
-type FloatingMoveListener = (payload: { immediate?: boolean }) => void;
+type FloatingMoveListener = () => void;
 
 export interface FloatingBuffer {
   buffer: Uint8ClampedArray;
@@ -124,9 +124,9 @@ class FloatingMoveManager {
 
   constructor() {}
 
-  private requestFrame(immediate?: boolean, layerIdOverride?: string) {
+  private requestFrame() {
     updateFrascoCanvas('floating-move');
-    this.emitChange(immediate);
+    this.emitChange();
   }
 
   private getBaseBuffer(state: MoveMode, targetLayerId: string): Uint8ClampedArray | undefined {
@@ -251,7 +251,7 @@ class FloatingMoveManager {
     this.overlayVersion++;
     this.floatingArea = undefined;
 
-    this.requestFrame(true, layerId);
+    this.requestFrame();
   }
 
   public cancel() {
@@ -274,7 +274,7 @@ class FloatingMoveManager {
     this.overlayVersion++;
     this.floatingArea = undefined;
 
-    this.requestFrame(true, layerId);
+    this.requestFrame();
   }
 
   subscribe(listener: FloatingMoveListener) {
@@ -293,9 +293,9 @@ class FloatingMoveManager {
       });
   }
 
-  private emitChange(immediate?: boolean) {
+  private emitChange() {
     for (const listener of this.listeners) {
-      listener({ immediate });
+      listener();
     }
   }
 }

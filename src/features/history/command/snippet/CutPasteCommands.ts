@@ -1,8 +1,6 @@
-import { RawPixelData } from '@sledge-pdm/core';
+import { HistoryContext, Layer, RawPixelData } from '@sledge-pdm/core';
 import { LayerAddCommand } from '~/features/history/command/layer/LayerAddCommand';
 import { LayerRemoveCommand } from '~/features/history/command/layer/LayerRemoveCommand';
-import { HistoryContext } from '~/features/history/types';
-import { Layer } from '~/features/layer';
 import { CommandLine } from '../../entry/CommandsHistoryEntry';
 
 export function cutPasteSnippet(

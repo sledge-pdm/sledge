@@ -1,6 +1,5 @@
-import { RGBA, RGBAToHex } from '@sledge-pdm/core';
+import { HistoryContext, RGBA, RGBAToHex } from '@sledge-pdm/core';
 import { PaletteType, setPaletteColor } from '~/features/color';
-import { HistoryContext } from '~/features/history/types';
 import { HistoryCommand } from '../HistoryCommand';
 import { registerHistoryCommand } from '../registry';
 

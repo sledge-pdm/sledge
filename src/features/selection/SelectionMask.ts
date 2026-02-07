@@ -1,4 +1,5 @@
 import { Size2D, Vec2 } from '@sledge-pdm/core';
+import { logSystemWarn } from '~/features/log';
 
 export interface BoundBox {
   top: number;
@@ -20,12 +21,23 @@ export default class SelectionMask {
 
   constructor(
     private width: number,
-    private height: number
+    private height: number,
+    initMask?: Uint8Array
   ) {
     // 「幅×高さ」で十分なので、4 倍不要
-    this.mask = new Uint8Array(this.width * this.height);
+    if (initMask) {
+      if (initMask.length === this.width * this.height) this.mask = initMask;
+      else {
+        logSystemWarn('Init mask passed, but length not matches');
+        this.mask = new Uint8Array(this.width * this.height);
+      }
+    } else {
+      this.mask = new Uint8Array(this.width * this.height);
+    }
     this.colCnt = new Uint32Array(width);
     this.rowCnt = new Uint32Array(height);
+
+    this.updateBoundingBox();
   }
 
   private allocateCounters() {

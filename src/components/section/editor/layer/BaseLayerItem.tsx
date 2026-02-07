@@ -1,6 +1,7 @@
+import { BaseLayerColorMode } from '@sledge-pdm/core';
 import { color, ColorBox, Dropdown, spacing, text } from '@sledge-pdm/ui';
 import { Component, createSignal } from 'solid-js';
-import { BaseLayerColorMode, setBaseLayerColorMode, setBaseLayerCustomColor } from '~/features/layer';
+import { setBaseLayerColorMode, setBaseLayerCustomColor } from '~/features/layer';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexRow } from '~/styles/styles';
 

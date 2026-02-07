@@ -1,5 +1,4 @@
-import { HistoryContext } from '~/features/history/types';
-import { ImagePoolEntry, ImagePoolImage } from '~/features/image_pool';
+import { HistoryContext, ImagePoolEntry, ImagePoolImage } from '@sledge-pdm/core';
 import { removeImagePoolBlobUrl } from '~/features/image_pool/blobManager';
 import { removeImagePoolImage, setImagePoolImage } from '~/features/image_pool/imageStore';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';

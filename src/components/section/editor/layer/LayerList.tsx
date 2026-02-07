@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { CleanupFn } from '@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { clsx } from '@sledge-pdm/core';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
@@ -52,9 +53,11 @@ const LayerList: Component = () => {
     return getDropIndex(candidates, clientY);
   };
 
+  let cleanup: CleanupFn | undefined;
+
   onMount(() => {
     if (!listEl) return;
-    const cleanup = dropTargetForElements({
+    cleanup = dropTargetForElements({
       element: listEl,
       canDrop: ({ source }) => {
         const data = source.data as { type?: string };
@@ -90,9 +93,9 @@ const LayerList: Component = () => {
         hideDropLine(dropLineEl);
       },
     });
-
-    onCleanup(() => cleanup());
   });
+
+  onCleanup(() => cleanup?.());
 
   return (
     <SectionItem title='layers.'>

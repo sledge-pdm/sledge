@@ -115,22 +115,26 @@ const CanvasOverlaySVG: Component = () => {
     }
   }) as (e: Events['selection:updateLassoOutline']) => void;
 
-  // Events
+  let selectionUnsubscribe: () => void | undefined;
+  let floatingMoveUnsubscribe: () => void | undefined;
+  let updatePatternInterval: NodeJS.Timeout | undefined;
+
   onMount(() => {
     startRenderLoop();
-    const selectionUnsubscribe = selectionManager.subscribe(onSelectionUpdate);
-    const floatingMoveUnsubscribe = floatingMoveManager.subscribe(onFloatingAreaUpdate);
+    selectionUnsubscribe = selectionManager.subscribe(onSelectionUpdate);
+    floatingMoveUnsubscribe = floatingMoveManager.subscribe(onFloatingAreaUpdate);
     eventBus.on('selection:updateLassoOutline', handleLassoUpdate);
     setSelectionChanged(true);
 
-    const updatePatternInterval = setInterval(updatePatternOffset, 30);
-    onCleanup(() => {
-      selectionUnsubscribe();
-      floatingMoveUnsubscribe();
-      eventBus.off('selection:updateLassoOutline', handleLassoUpdate);
-      stopRenderLoop();
-      clearInterval(updatePatternInterval);
-    });
+    updatePatternInterval = setInterval(updatePatternOffset, 30);
+  });
+
+  onCleanup(() => {
+    selectionUnsubscribe?.();
+    floatingMoveUnsubscribe?.();
+    eventBus.off('selection:updateLassoOutline', handleLassoUpdate);
+    stopRenderLoop();
+    clearInterval(updatePatternInterval);
   });
 
   createEffect(() => {

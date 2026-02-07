@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { CleanupFn } from '@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types';
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { clsx, Layer } from '@sledge-pdm/core';
 import { Checkbox, color, Icon, Light, showContextMenu } from '@sledge-pdm/ui';
@@ -217,8 +218,9 @@ const LayerItem: Component<LayerItemProps> = (props) => {
   let itemEl: HTMLDivElement;
   const [isDragging, setIsDragging] = createSignal(false);
 
+  let cleanDraggable: CleanupFn | undefined;
   onMount(() => {
-    const cleanDraggable = draggable({
+    cleanDraggable = draggable({
       element: itemEl,
       getInitialData: () => ({ type: 'layer', id: props.layer.id }),
       onDragStart() {
@@ -227,8 +229,8 @@ const LayerItem: Component<LayerItemProps> = (props) => {
       onDrag: () => setIsDragging(true),
       onDrop: () => setIsDragging(false),
     });
-    onCleanup(() => cleanDraggable());
   });
+  onCleanup(() => cleanDraggable?.());
 
   const setLayerName = (layerId: string, newName: string) => {
     if (!newName || newName.trim() === '') {

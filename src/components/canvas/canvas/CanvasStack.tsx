@@ -32,16 +32,16 @@ const CanvasStack: Component = () => {
     let gridSize = Math.pow(10, order);
     return Math.min(100, Math.max(1, gridSize));
   });
-
+  let rafId: number | undefined;
   createEffect(() => {
     const { width, height } = projectStore.canvas.size;
-    const frame = requestAnimationFrame(() => {
+    rafId = requestAnimationFrame(() => {
       notifyCanvasLayoutReady({ width, height });
     });
+  });
 
-    onCleanup(() => {
-      cancelAnimationFrame(frame);
-    });
+  onCleanup(() => {
+    if (rafId) cancelAnimationFrame(rafId);
   });
 
   return (

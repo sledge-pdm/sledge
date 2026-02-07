@@ -157,6 +157,8 @@ const toSnapshot = (rect: DOMRectReadOnly): RectSnapshot => ({
 const createRectSignal = (elementId: string) => {
   const [rect, setRect] = createSignal<RectSnapshot | null>(null);
 
+  let attachUnlisten: () => void | undefined;
+
   const attach = () => {
     const element = document.getElementById(elementId) as HTMLElement | null;
     if (!element) return false;
@@ -164,26 +166,26 @@ const createRectSignal = (elementId: string) => {
     const updateRect = () => setRect(toSnapshot(element.getBoundingClientRect()));
     const resizeHandler = () => updateRect();
     const scrollHandler = () => updateRect();
-    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateRect) : null;
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateRect) : undefined;
     observer?.observe(element);
+
+    attachUnlisten = () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', resizeHandler);
+      window.removeEventListener('scroll', scrollHandler, true);
+    };
 
     window.addEventListener('resize', resizeHandler);
     window.addEventListener('scroll', scrollHandler, true);
     updateRect();
 
-    onCleanup(() => {
-      observer?.disconnect();
-      window.removeEventListener('resize', resizeHandler);
-      window.removeEventListener('scroll', scrollHandler, true);
-    });
-
     return true;
   };
 
+  let rafId: number | null = null;
   onMount(() => {
     if (attach()) return;
 
-    let rafId: number | null = null;
     const retry = () => {
       if (attach()) {
         if (rafId !== null) {
@@ -195,11 +197,13 @@ const createRectSignal = (elementId: string) => {
       rafId = requestAnimationFrame(retry);
     };
     rafId = requestAnimationFrame(retry);
-    onCleanup(() => {
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-      }
-    });
+  });
+
+  onCleanup(() => {
+    attachUnlisten?.();
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+    }
   });
 
   return rect;

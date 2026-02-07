@@ -33,8 +33,6 @@ const locationValueStyle = css`
   background: none;
   padding: 0;
   margin: 0;
-  color: inherit;
-  font: inherit;
   text-align: left;
   cursor: pointer;
 `;

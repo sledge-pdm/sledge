@@ -8,7 +8,7 @@ import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { logSystemWarn } from '~/features/log/service';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
-import { eventBus } from '~/utils/EventBus';
+import { eventBus, Events } from '~/utils/EventBus';
 import { window as platformWindow } from '~/utils/platform';
 import CanvasDebugOverlay from './hud/CanvasDebugOverlay';
 
@@ -159,6 +159,12 @@ const CanvasArea: Component = () => {
     }
   };
 
+  const onSideSectionSideChanged = (e: Events['window:sideSectionSideChanged']) => {
+    // 座標変換キャッシュをクリア
+    coordinateTransform.clearCache();
+    centeringCanvas();
+  };
+
   onMount(() => {
     const unlistenOnResized = platformWindow.getCurrentWindow().onResized(async (e) => {
       // 座標変換キャッシュをクリア
@@ -174,11 +180,7 @@ const CanvasArea: Component = () => {
       }
     });
 
-    eventBus.on('window:sideSectionSideChanged', (e) => {
-      // 座標変換キャッシュをクリア
-      coordinateTransform.clearCache();
-      centeringCanvas();
-    });
+    eventBus.on('window:sideSectionSideChanged', onSideSectionSideChanged);
 
     adjustZoomToFit();
 
@@ -191,6 +193,7 @@ const CanvasArea: Component = () => {
     return () => {
       unlistenOnResized.then((callback) => callback());
       interact?.removeInteractListeners();
+      eventBus.off('window:sideSectionSideChanged', onSideSectionSideChanged);
       stopTransformUpdate();
     };
   });

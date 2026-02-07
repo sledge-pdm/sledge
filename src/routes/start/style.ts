@@ -117,6 +117,17 @@ export const rightTopArea = css`
   align-items: end;
 `;
 
+export const rightTopLinkButton = css`
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+`;
+
 export const openButtonMargin = css`
   margin-left: 2px;
 `;

@@ -33,6 +33,10 @@ const item = css`
 `;
 
 const name = css`
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   font-family: ZFB09;
   font-size: 8px;
   text-overflow: ellipsis;
@@ -60,9 +64,10 @@ const ListFileItem: Component<FileItemProps> = (props) => {
 
   return (
     <div class={item}>
-      <a
+      <button
+        type='button'
         class={name}
-        onClick={(e) => {
+        onClick={() => {
           if (props.onClick) props.onClick(props.file);
         }}
         onMouseEnter={(e) => {
@@ -75,7 +80,7 @@ const ListFileItem: Component<FileItemProps> = (props) => {
         onMouseLeave={() => setHovered(false)}
       >
         {props.file.name?.substring(0, props.file.name.lastIndexOf('.'))}
-      </a>
+      </button>
       <p class={path}>{props.file.path}</p>
       <Show when={hovered()}>
         <div

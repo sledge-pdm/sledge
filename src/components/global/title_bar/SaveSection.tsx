@@ -66,6 +66,9 @@ const saveButtonMainButton = css`
 
 const saveButtonSide = css`
   box-sizing: border-box;
+  appearance: none;
+  border: none;
+  background: none;
   cursor: pointer;
   display: flex;
   flex-direction: row;
@@ -206,7 +209,7 @@ const SaveSection: Component = () => {
               >
                 <defs>
                   <pattern
-                    id='area-pattern-animate'
+                    id='save-background-animate'
                     x={patternOffset()}
                     y={patternOffset()}
                     width='32'
@@ -218,11 +221,11 @@ const SaveSection: Component = () => {
                     <g innerHTML={areaPatternPath} />
                   </pattern>
                 </defs>
-                <rect width='100%' height='100%' fill='url(#area-pattern-animate)' />
+                <rect width='100%' height='100%' fill='url(#save-background-animate)' />
               </svg>
             </Show>
           </button>
-          <a class={saveButtonSide} onClick={() => setIsSaveMenuShown(!isSaveMenuShown())}>
+          <button type='button' class={saveButtonSide} onClick={() => setIsSaveMenuShown(!isSaveMenuShown())} aria-label='toggle save menu'>
             <Icon
               src={'/assets/icons/misc/triangle_5.png'}
               color={color.onBackground}
@@ -230,7 +233,7 @@ const SaveSection: Component = () => {
               scale={1}
               transform={isSaveMenuShown() ? 'rotate(180deg)' : 'rotate(0deg)'}
             />
-          </a>
+          </button>
         </div>
 
         <Show when={isSaveMenuShown()}>

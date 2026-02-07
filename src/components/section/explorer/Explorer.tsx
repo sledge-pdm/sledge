@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { FileLocation } from '@sledge-pdm/core';
 import { color, Dropdown, DropdownOption, Icon, MenuList, Nothing } from '@sledge-pdm/ui';
-import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import Breadcrumbs from '~/components/section/explorer/Breadcrumbs';
 import FileItem, { FilesConfig } from '~/components/section/explorer/item/FileItem';
@@ -346,10 +346,10 @@ const Explorer: Component = () => {
     setDriveLetters(await getDefinedDriveLetters());
 
     window.addEventListener('mousedown', handleMouseDown);
+  });
 
-    return () => {
-      window.removeEventListener('mousedown', handleMouseDown);
-    };
+  onCleanup(() => {
+    window.removeEventListener('mousedown', handleMouseDown);
   });
 
   const [isMenuOpened, setMenuOpened] = createSignal<boolean>(false);

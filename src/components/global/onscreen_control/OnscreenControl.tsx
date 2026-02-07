@@ -51,6 +51,9 @@ const titlebarSpacer = css`
   flex-grow: 1;
 `;
 const controlZoomText = css`
+  background: none;
+  border: none;
+  padding: 0;
   color: var(--color-muted);
   pointer-events: all;
   cursor: pointer;
@@ -298,7 +301,8 @@ const OnscreenControl: Component = () => {
       <div class={rootBackground} />
       <div class={titlebar}>
         <Show when={!positionLocked()}>
-          <a
+          <button
+            type='button'
             class={controlZoomText}
             onClick={() => {
               const idx = zoomToggles.indexOf(controlZoom());
@@ -311,7 +315,7 @@ const OnscreenControl: Component = () => {
             }}
           >
             x{controlZoom()}
-          </a>
+          </button>
         </Show>
         <div class={titlebarSpacer} />
 

@@ -61,7 +61,6 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
 pub fn run() {
     let builder = tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
-        .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_os::init())
@@ -89,6 +88,9 @@ pub fn run() {
                 .level_for("egui_glow", log::LevelFilter::Warn)
                 .level_for("egui_winit", log::LevelFilter::Warn)
                 .level_for("tao", log::LevelFilter::Error)
+                .format(|out, message, record| {
+                    out.finish(format_args!("[{}] {}", record.level(), message))
+                })
                 .build(),
         )
         .plugin(tauri_plugin_fs::init())

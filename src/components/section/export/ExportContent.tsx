@@ -1,12 +1,13 @@
 import { css } from '@acab/ecsstatic';
-import { clsx, Vec2 } from '@sledge-pdm/core';
+import { clsx, FileLocation, Vec2 } from '@sledge-pdm/core';
 import { Checkbox, color, Dropdown, DropdownOption, fonts, Icon, MenuList, MenuListOption, Slider } from '@sledge-pdm/ui';
-import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { CanvasExportOptions, exportImage } from '~/features/io/export/export';
 import { EXPORT_TYPES, ExportableTypes } from '~/features/io/export/types';
 import { allLayers } from '~/features/layer';
+import { logUserError } from '~/features/log';
 import { lastSettingsStore, setLastSettingsStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { accentedButton, flexCol } from '~/styles/styles';
@@ -184,18 +185,17 @@ const ExportContent: Component = () => {
     | undefined
   >(undefined);
 
+  const handleRequestExportPath = (e: Events['export:requestExportPath']) => {
+    setSettings('folderPath', e.newPath);
+  };
+
   onMount(async () => {
     setSettings('folderPath', await exportDir());
-
-    const handleRequestExportPath = (e: Events['export:requestExportPath']) => {
-      setSettings('folderPath', e.newPath);
-    };
-
     eventBus.on('export:requestExportPath', handleRequestExportPath);
+  });
 
-    return () => {
-      eventBus.off('export:requestExportPath', handleRequestExportPath);
-    };
+  onCleanup(() => {
+    eventBus.off('export:requestExportPath', handleRequestExportPath);
   });
 
   const openDirSelectionDialog = async () => {
@@ -229,7 +229,12 @@ const ExportContent: Component = () => {
       return;
     }
     if (settings.folderPath) {
-      const location = await exportImage(settings.folderPath, name, settings.exportOptions);
+      let location: FileLocation | undefined;
+      try {
+        location = await exportImage(settings.folderPath, name, settings.exportOptions);
+      } catch (e) {
+        logUserError(`Failed to export: ${e}`);
+      }
       if (location && location.path && location.name) {
         const exportedFolderPath = normalizePath(location.path);
         setExportResult({
@@ -238,7 +243,7 @@ const ExportContent: Component = () => {
         });
         setLastSettingsStore('exportedFolderPaths', (prev) => {
           prev = [exportedFolderPath, ...prev.filter((p) => p !== exportedFolderPath)];
-          if (prev.length >= 10) prev.unshift();
+          if (prev.length >= 10) prev.pop();
           return prev;
         });
 

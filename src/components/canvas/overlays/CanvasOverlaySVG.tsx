@@ -317,7 +317,7 @@ const CanvasOverlaySVG: Component = () => {
 
               {/* Floating Area outline */}
               <path
-                id='selection-outline'
+                id='floating-area-outline'
                 d={floatingAreaPath().toString(interactStore.zoom)}
                 fill='url(#area-pattern-animate)'
                 fill-rule='evenodd'

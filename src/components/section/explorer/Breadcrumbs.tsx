@@ -22,8 +22,17 @@ const breadcrumbItem = css`
 `;
 
 const breadcrumbLink = css`
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   font-family: PM10;
   font-size: 10px;
+
+  &:disabled {
+    cursor: default;
+    opacity: 1;
+  }
 `;
 
 interface BreadcrumbsProps {
@@ -40,19 +49,20 @@ const Breadcrumbs: Component<BreadcrumbsProps> = (props) => {
         {(item, index) => (
           <div class={breadcrumbItem}>
             {index() > 0 && <p>&gt;</p>}
-            <a
+            <button
+              type='button'
+              disabled={index() === items().length - 1}
               onClick={() => {
                 if (index() === items().length - 1) return;
                 props.onNavigate(item.value);
               }}
               class={breadcrumbLink}
               style={{
-                'pointer-events': index() === items().length - 1 ? 'none' : 'auto',
                 color: index() === items().length - 1 ? color.accent : color.onBackground,
               }}
             >
               {item.label}
-            </a>
+            </button>
           </div>
         )}
       </For>

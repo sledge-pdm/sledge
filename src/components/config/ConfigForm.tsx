@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge-pdm/core';
 import { componentProps, ConfigFieldRenderer, getValueAtPath, Icon, Light, pathToArray, type ConfigField } from '@sledge-pdm/ui';
-import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { ConfigSections, FieldMeta, FieldValueMeta, isHeaderMeta } from '~/config/ConfigMeta';
 import { GlobalConfig } from '~/config/GlobalConfig';
 import { canvasMetas } from '~/config/meta/Canvas';
@@ -18,7 +18,7 @@ import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 import { accentedButton, flexRow } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
-import { dialog, path } from '~/utils/platform';
+import { dialog, path, UnlistenFn } from '~/utils/platform';
 import { listenEvent } from '~/utils/TauriUtils';
 import { openWindow } from '~/utils/WindowUtils';
 import KeyConfigSettings from './KeyConfigSettings';
@@ -173,12 +173,27 @@ const configFormInfoAreaBottom = css`
 const configFormLink = css`
   width: fit-content;
   color: #ccc;
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 `;
 
 const configFormAbout = css`
   width: fit-content;
   color: #ccc;
   margin-top: 8px;
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 `;
 
 const getValueFromMetaPath = (meta: FieldValueMeta) => getValueAtPath(globalConfig, meta.path);
@@ -248,6 +263,9 @@ const ConfigForm: Component<Props> = (props) => {
   const [grouped, setGrouped] = createSignal<Map<ConfigSections, FieldMeta[]>>(new Map());
 
   let originalConfig: GlobalConfig | undefined;
+
+  let unlistenOnSettingSaved: UnlistenFn | undefined;
+
   onMount(async () => {
     await loadGlobalConfig();
 
@@ -269,12 +287,16 @@ const ConfigForm: Component<Props> = (props) => {
       return map;
     }, new Map<ConfigSections, FieldMeta[]>());
     setGrouped(grouped);
+
+    unlistenOnSettingSaved = await listenEvent('onSettingsSaved', async () => {
+      await loadGlobalConfig();
+      originalConfig = JSON.parse(JSON.stringify(globalConfig));
+      checkDirty();
+    });
   });
 
-  listenEvent('onSettingsSaved', async () => {
-    await loadGlobalConfig();
-    originalConfig = JSON.parse(JSON.stringify(globalConfig));
-    checkDirty();
+  onCleanup(() => {
+    unlistenOnSettingSaved?.();
   });
 
   return (
@@ -361,26 +383,28 @@ const ConfigForm: Component<Props> = (props) => {
       </div>
 
       <div class={configFormInfoAreaBottom}>
-        <a class={configFormLink} onClick={loadDefaults}>
+        <button type='button' class={configFormLink} onClick={loadDefaults}>
           reset to default.
-        </a>
-        <a
+        </button>
+        <button
+          type='button'
           class={configFormLink}
           onClick={async () => {
             await revealInFileBrowser(normalizeJoin(await path.appConfigDir(), Consts.globalConfigFileName));
           }}
         >
           Open Config File.
-        </a>
+        </button>
 
-        <a
+        <button
+          type='button'
           class={configFormAbout}
           onClick={() => {
             openWindow('about');
           }}
         >
           about.
-        </a>
+        </button>
       </div>
     </div>
   );

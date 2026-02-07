@@ -134,13 +134,11 @@ export default function Editor() {
   });
 
   onCleanup(() => {
-    return () => {
-      unlisten();
-      disposeFrascoRenderer();
-      if (import.meta.hot) {
-        window.location.reload();
-      }
-    };
+    unlisten();
+    disposeFrascoRenderer();
+    if (import.meta.hot) {
+      window.location.reload();
+    }
   });
 
   const isFileDrag = (event: DragEvent) => {

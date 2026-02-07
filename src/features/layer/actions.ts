@@ -78,7 +78,9 @@ export function reorderLayer(fromIndex: number, targetIndex: number, options?: R
 
   const beforeOrder = projectStore.layers.layers.map((l) => l.id);
   const updated = [...projectStore.layers.layers];
-  const [moved] = updated.splice(fromIndex, 1);
+  const moveds = updated.splice(fromIndex, 1);
+  if (moveds.length <= 0) return;
+  const moved = moveds[0];
   updated.splice(targetIndex, 0, moved);
   const afterOrder = updated.map((l) => l.id);
 

@@ -216,10 +216,10 @@ async function loadFromPathProject(path: string): Promise<InternalLoadResult> {
     setIOStore('openAs', 'project');
     if (!applyProjectLocationFromPath(path, 'project')) applyProjectLocation(undefined, 'project');
     const unpacked = await unpackFromPath(path);
-    setSavedLocation(path);
     const result = await loadFromProjectObj({
       project: unpacked,
     });
+    if (result.ok) setSavedLocation(path);
     return {
       ...result,
       path,

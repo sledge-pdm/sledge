@@ -3,7 +3,6 @@ import { Component, createEffect, createMemo, createSignal, For, Show } from 'so
 import { css } from '@acab/ecsstatic';
 import { clsx, getProjectAdapter, gzipInflate, ProjectAdapter, toUint8ClampedArray } from '@sledge-pdm/core';
 import { Icon, Nothing } from '@sledge-pdm/ui';
-import AutoSnapshot from '~/components/section/project/item/AutoSnapshot';
 import SectionItem from '~/components/section/SectionItem';
 import { logSystemWarn } from '~/features/log';
 import { deleteSnapshot, loadSnapshot, ProjectSnapshot, registerCurrentProjectSnapshot, RuntimeProjectSnapshot } from '~/features/snapshot';
@@ -13,21 +12,15 @@ import { useTimeAgoText } from '~/utils/TimeUtils';
 import { sectionContent } from '../SectionStyles';
 
 const snapshotSectionContent = css`
-  margin-top: 12px;
+  margin-top: 8px;
   gap: 8px;
-`;
-const settingsContainer = css`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  justify-content: start;
 `;
 const buttonsContainer = css`
   display: flex;
   flex-direction: row;
   gap: 8px;
   justify-content: end;
-  margin-top: 8px;
+  margin-bottom: 4px;
 `;
 const snapshotsContainer = css`
   display: flex;
@@ -43,18 +36,6 @@ const Snapshots: Component = () => {
   return (
     <SectionItem title='snapshots.'>
       <div class={clsx(sectionContent, snapshotSectionContent)}>
-        <div class={settingsContainer}>
-          <AutoSnapshot />
-          {/* <ToggleSwitch
-            checked={backupBeforeRestore()}
-            onChange={(v) => {
-              setBackupBeforeRestore(v);
-            }}
-            labelMode='right'
-          >
-            backup before restore.
-          </ToggleSwitch> */}
-        </div>
         <div class={buttonsContainer}>
           <button
             class={enabledButton}

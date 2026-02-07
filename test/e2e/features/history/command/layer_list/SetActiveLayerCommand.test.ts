@@ -19,5 +19,16 @@ describe('SetActiveLayerCommand (e2e)', () => {
 
     command.backward();
     expect(projectStore.layers.state.activeLayerId).toBe('a');
+
+    const context = command.getContext();
+    expect(context.icon).toBe('/assets/icons/actions/layer.png');
+    expect(context.description).toContain('change active layer');
+  });
+
+  it('no-ops backward when pastActiveLayerId is missing', () => {
+    resetStore([buildLayer('base')]);
+    const command = new SetActiveLayerCommand({ layerId: 'base' });
+    command.backward();
+    expect(projectStore.layers.state.activeLayerId).toBe('base');
   });
 });

@@ -32,4 +32,33 @@ describe('LayerRemoveCommand (e2e)', () => {
     command.backward();
     expect(projectStore.layers.layers.map((l) => l.id)).toEqual(['base', 'layer-2']);
   });
+
+  it('updates active layer when preserveActive is false', () => {
+    const a = buildLayer('a');
+    const b = buildLayer('b');
+    const c = buildLayer('c');
+    resetStore([a, b, c]);
+    registerLayers([a, b, c], projectStore.canvas.size.width, projectStore.canvas.size.height);
+    setProjectStore('layers', 'state', 'activeLayerId', 'c');
+
+    const command = new LayerRemoveCommand({ layerId: 'b', preserveActive: false });
+    command.forward();
+    expect(projectStore.layers.layers.map((l) => l.id)).toEqual(['a', 'c']);
+    expect(projectStore.layers.state.activeLayerId).toBe('a');
+  });
+
+  it('restores packedSnapshot pixels on undo', () => {
+    const base = buildLayer('base');
+    const target = buildLayer('target');
+    resetStore([base, target]);
+    const buffer = new Uint8ClampedArray([4, 5, 6, 255]);
+    registerLayers([base, target], projectStore.canvas.size.width, projectStore.canvas.size.height, buffer);
+
+    const command = new LayerRemoveCommand({ layerId: 'target' });
+    command.forward();
+    expect(layerManager.getLayerOptional('target')).toBeUndefined();
+
+    command.backward();
+    expect(layerManager.readPixelCanvas('target', 0, 0)).toEqual([4, 5, 6, 255]);
+  });
 });

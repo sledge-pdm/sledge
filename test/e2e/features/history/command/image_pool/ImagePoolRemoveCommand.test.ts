@@ -40,4 +40,22 @@ describe('ImagePoolRemoveCommand (e2e)', () => {
     expect(imagePoolImages().get('entry-2')).toEqual(image);
     expect(command.getContext().description).toContain('sample');
   });
+
+  it('restores by index and clamps when image is missing', () => {
+    const entries = [buildEntry('a'), buildEntry('b'), buildEntry('c')];
+    setProjectStore('imagePool', 'entries', entries);
+
+    const command = new ImagePoolRemoveCommand({ entry: entries[1], index: 1 });
+    command.forward();
+    expect(projectStore.imagePool.entries.map((e) => e.id)).toEqual(['a', 'c']);
+
+    command.backward();
+    expect(projectStore.imagePool.entries.map((e) => e.id)).toEqual(['a', 'b', 'c']);
+    expect(imagePoolImages().get('b')).toBeUndefined();
+
+    const clampCommand = new ImagePoolRemoveCommand({ entry: entries[1], index: 999 });
+    clampCommand.forward();
+    clampCommand.backward();
+    expect(projectStore.imagePool.entries.map((e) => e.id)).toEqual(['a', 'c', 'b']);
+  });
 });

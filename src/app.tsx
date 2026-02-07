@@ -18,7 +18,6 @@ import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
 
 import { css } from '@acab/ecsstatic';
-import Restore from '~/routes/restore';
 
 import '@sledge-pdm/ui/global.css';
 
@@ -112,7 +111,6 @@ export default function App() {
     >
       <Route path='/start' component={Home} />
       <Route path='/editor' component={Editor} />
-      <Route path='/restore' component={Restore} />
       <Route path='/settings' component={Settings} />
       <Route path='/about' component={About} />
     </Router>

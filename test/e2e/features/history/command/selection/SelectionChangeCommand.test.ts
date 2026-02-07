@@ -76,4 +76,31 @@ describe('SelectionChangeCommand (e2e)', () => {
     expect(getPixel(buffer, width, 0, 0)).toEqual([0, 0, 0, 0]);
     expect(getPixel(buffer, width, 1, 0)).toEqual([0, 10, 0, 255]);
   });
+
+  it('handles undefined swapBack and empty back selection', () => {
+    const width = 2;
+    const height = 2;
+
+    const mask = buildMask(width, height, [{ x: 0, y: 0 }]);
+    selectionManager.setBack(mask);
+
+    const command = new ApplySelectionFrontToBackCommand({ swapBack: undefined });
+    command.forward();
+    expect(selectionManager.getBack()).toBeUndefined();
+    expect(selectionManager.getFront()).toBeUndefined();
+
+    command.backward();
+    expect(selectionManager.getBack()).toBeDefined();
+
+    selectionManager.clearAll();
+    const swapBack = buildMask(width, height, [{ x: 1, y: 1 }]);
+    const command2 = new ApplySelectionFrontToBackCommand({ swapBack });
+    command2.forward();
+    expect(selectionManager.getBack()).toBeDefined();
+    expect(selectionManager.getFront()).toBeUndefined();
+
+    const context = command2.getContext();
+    expect(context.icon).toBe('/assets/icons/actions/layer.png');
+    expect(context.description).toBe('selection change');
+  });
 });

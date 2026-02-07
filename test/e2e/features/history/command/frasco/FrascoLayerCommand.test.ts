@@ -1,7 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FrascoLayerCommand } from '~/features/history/command/frasco/FrascoLayerCommand';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { updateFrascoCanvas } from '~/webgl/service';
 import { buildLayer, registerLayers, resetStore, setupWebGL } from '../../helpers';
+
+vi.mock('~/webgl/service', () => ({
+  updateFrascoCanvas: vi.fn(),
+}));
 
 describe('FrascoLayerCommand (e2e)', () => {
   let canvas: HTMLCanvasElement;
@@ -38,5 +43,28 @@ describe('FrascoLayerCommand (e2e)', () => {
 
     command.forward();
     expect(layerManager.readPixelCanvas('layer-1', 0, 0)).toEqual([200, 100, 50, 255]);
+  });
+
+  it('builds context icons and descriptions with fallbacks', () => {
+    const categoryCommand = new FrascoLayerCommand({ layerId: 'missing', context: { tool: 'pen' } });
+    const categoryContext = categoryCommand.getContext();
+    expect(categoryContext.icon).toBe('/assets/icons/tools/pen.png');
+    expect(categoryContext.description).toContain('unknown / pen');
+
+    const unknownCommand = new FrascoLayerCommand({ layerId: 'missing', context: { tool: 'unknown-tool' } });
+    const unknownContext = unknownCommand.getContext();
+    expect(unknownContext.icon).toBe('/assets/icons/actions/unknown.png');
+  });
+
+  it('calls updateFrascoCanvas twice on forward and once on backward', () => {
+    const updateSpy = vi.mocked(updateFrascoCanvas);
+    updateSpy.mockClear();
+
+    const command = new FrascoLayerCommand({ layerId: 'layer-1', context: { tool: 'pen' } });
+    command.forward();
+    expect(updateSpy).toHaveBeenCalledTimes(2);
+
+    command.backward();
+    expect(updateSpy).toHaveBeenCalledTimes(3);
   });
 });

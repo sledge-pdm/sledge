@@ -36,12 +36,18 @@ describe('CutPasteCommands snippet (e2e)', () => {
     const { commands, context } = cutPasteSnippet(1, projectStore.layers.layers[0], srcBuffer);
     const entry = new CommandsHistoryEntry(commands, context);
 
+    const lines = entry.getCommandLines();
+    expect(lines.map((line) => line.redoOrder)).toEqual([0, 1]);
+    expect(lines.map((line) => line.undoOrder)).toEqual([1, 0]);
+
     entry.redo();
     expect(projectStore.layers.layers.map((layer) => layer.id)).toEqual(['b', 'a']);
+    expect(projectStore.layers.state.activeLayerId).toBe('a');
     expect(Array.from(readPixel('a').slice(0, 4))).toEqual([255, 0, 0, 255]);
 
     entry.undo();
     expect(projectStore.layers.layers.map((layer) => layer.id)).toEqual(['a', 'b']);
+    expect(projectStore.layers.state.activeLayerId).toBe('b');
     expect(Array.from(readPixel('a').slice(0, 4))).toEqual([0, 0, 255, 255]);
   });
 });

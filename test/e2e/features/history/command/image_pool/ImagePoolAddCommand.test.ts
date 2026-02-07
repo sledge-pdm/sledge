@@ -38,4 +38,23 @@ describe('ImagePoolAddCommand (e2e)', () => {
     expect(imagePoolImages().get('entry-1')).toBeUndefined();
     expect(command.getContext().description).toContain('sample');
   });
+
+  it('clamps index and supports missing images', () => {
+    const existing = [buildEntry('a'), buildEntry('b')];
+    setProjectStore('imagePool', 'entries', existing);
+
+    const endEntry = buildEntry('end');
+    const endCommand = new ImagePoolAddCommand({ entry: endEntry, index: 999 });
+    endCommand.forward();
+    expect(projectStore.imagePool.entries.map((e) => e.id)).toEqual(['a', 'b', 'end']);
+    expect(imagePoolImages().get('end')).toBeUndefined();
+
+    endCommand.backward();
+    expect(projectStore.imagePool.entries.map((e) => e.id)).toEqual(['a', 'b']);
+
+    const headEntry = buildEntry('head');
+    const headCommand = new ImagePoolAddCommand({ entry: headEntry, index: -1 });
+    headCommand.forward();
+    expect(projectStore.imagePool.entries.map((e) => e.id)).toEqual(['head', 'a', 'b']);
+  });
 });

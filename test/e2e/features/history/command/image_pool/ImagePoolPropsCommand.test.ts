@@ -40,6 +40,27 @@ describe('ImagePoolPropsCommand (e2e)', () => {
     expect(projectStore.imagePool.entries[0].opacity).toBe(1);
     expect(projectStore.imagePool.entries[0].transform.x).toBe(0);
 
-    expect(command.getContext().description).toContain('sample');
+    const context = command.getContext();
+    expect(context.description).toContain('sample');
+    expect(context.icon).toBe('/assets/icons/actions/image.png');
+  });
+
+  it('no-ops when missing before/after or entry', () => {
+    const entry = buildEntry('entry-1', 'sample');
+    setProjectStore('imagePool', 'entries', [entry]);
+
+    const noProps = new ImagePoolPropsCommand({ entryId: entry.id });
+    noProps.forward();
+    noProps.backward();
+    expect(projectStore.imagePool.entries[0]).toEqual(entry);
+
+    const missing = new ImagePoolPropsCommand({
+      entryId: 'missing',
+      before: entry,
+      after: { ...entry, opacity: 0.5 },
+    });
+    missing.forward();
+    missing.backward();
+    expect(projectStore.imagePool.entries[0]).toEqual(entry);
   });
 });

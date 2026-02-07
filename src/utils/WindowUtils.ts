@@ -13,7 +13,7 @@ export function zoomForIntegerize(dpr: number) {
 
 export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'height'> & WindowOptions;
 
-export type WindowKind = 'start' | 'editor' | 'restore' | 'settings' | 'about';
+export type WindowKind = 'start' | 'editor' | 'settings' | 'about';
 
 export async function openWindow(kind: Exclude<WindowKind, 'editor'>): Promise<void> {
   const parent = kind === 'settings' || kind === 'about' ? platformWindow.getCurrentWindow().label : undefined;

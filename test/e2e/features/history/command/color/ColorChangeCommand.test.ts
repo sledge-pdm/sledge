@@ -34,5 +34,20 @@ describe('ColorChangeCommand (e2e)', () => {
 
     const context = command.getContext();
     expect(context.description).toContain('->');
+    expect(context.icon).toBe('/assets/icons/actions/color_change.png');
+  });
+
+  it('supports secondary palette updates', () => {
+    const command = new ColorChangeCommand({
+      palette: PaletteType.secondary,
+      oldColor: [255, 255, 255, 255],
+      newColor: [5, 6, 7, 255],
+    });
+
+    command.forward();
+    expect(colorStore.palettes.secondary).toEqual([5, 6, 7, 255]);
+
+    command.backward();
+    expect(colorStore.palettes.secondary).toEqual([255, 255, 255, 255]);
   });
 });

@@ -29,6 +29,7 @@ export async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>)
 export type TauriGlobalEvent = 'onSettingsSaved';
 
 export async function emitGlobalEvent(event: TauriGlobalEvent, msg?: Object) {
+  if (!(await isTauri())) return undefined;
   return await safeInvoke('emit_global_event', { event, msg });
 }
 

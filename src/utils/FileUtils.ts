@@ -1,5 +1,5 @@
 import { ioStore, lastSettingsStore } from '~/stores/EditorStores';
-import { safeInvoke } from '~/utils/TauriUtils';
+import { isTauri, safeInvoke } from '~/utils/TauriUtils';
 
 import { FileLocation } from '@sledge-pdm/core';
 import { fs, os, path } from './platform';
@@ -181,6 +181,7 @@ export const getAvailableDriveLetters = async (): Promise<string[] | undefined> 
     // console.warn('getAvailableDriveLetters is only available on Windows ');
     return undefined;
   }
+  if (!(await isTauri())) return undefined;
 
   return await safeInvoke('get_available_drive_letters');
 };
@@ -191,6 +192,7 @@ export const getDefinedDriveLetters = async (): Promise<string[] | undefined> =>
     // console.warn('getAvailableDriveLetters is only available on Windows ');
     return undefined;
   }
+  if (!(await isTauri())) return undefined;
 
   return await safeInvoke('get_defined_drive_letters');
 };

@@ -14,10 +14,19 @@ import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { platform as osPlatform } from '@tauri-apps/plugin-os';
 import { exit, relaunch } from '@tauri-apps/plugin-process';
 import { open as openShell } from '@tauri-apps/plugin-shell';
-import { check } from '@tauri-apps/plugin-updater';
+import { Update as PluginUpdate } from '@tauri-apps/plugin-updater';
 import { DirEntry, FileInfo } from './plugins/fs';
 import { Update } from './plugins/updater';
 import type { Platform } from './types';
+
+type UpdaterMetadata = {
+  rid: number;
+  currentVersion: string;
+  version: string;
+  date?: string;
+  body?: string;
+  rawJson: Record<string, unknown>;
+};
 
 export const createTauriPlatform = (): Platform => ({
   os: {
@@ -82,7 +91,11 @@ export const createTauriPlatform = (): Platform => ({
     getAllWebviewWindows,
   },
   updater: {
-    check: (options) => check(options) as unknown as Promise<Update | null>,
+    check: async (options) => {
+      const metadata = await invoke<UpdaterMetadata | null>('check_update_with_channel', options ?? {});
+      if (!metadata) return null;
+      return new PluginUpdate(metadata) as unknown as Update;
+    },
   },
   shell: {
     open: openShell,

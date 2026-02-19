@@ -2,7 +2,7 @@
 import { InitialLoadRequest } from '~/features/io/project/ProjectLoader';
 import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
-import { safeInvoke } from './TauriUtils';
+import { isTauri, safeInvoke } from './TauriUtils';
 import { packr } from './msgpackr';
 import { dialog, window as platformWindow, WebviewOptions, webviewWindow, WindowOptions } from './platform';
 
@@ -16,6 +16,11 @@ export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'heig
 export type WindowKind = 'start' | 'editor' | 'settings' | 'about';
 
 export async function openWindow(kind: Exclude<WindowKind, 'editor'>): Promise<void> {
+  if (!(await isTauri())) {
+    window.location.assign(`/${kind}`);
+    return;
+  }
+
   const parent = kind === 'settings' || kind === 'about' ? platformWindow.getCurrentWindow().label : undefined;
   return safeInvoke('open_window', {
     kind,
@@ -40,6 +45,11 @@ export async function openEditorWindow(options: {
   openPath?: string;
   initializationScript?: string;
 }): Promise<void> {
+  if (!(await isTauri())) {
+    window.location.assign('/editor');
+    return;
+  }
+
   let base64MsgpackrReq: string | undefined;
   if (options.loadRequest) {
     base64MsgpackrReq = getBase64MsgpackrRequest(options.loadRequest);
@@ -55,8 +65,11 @@ export async function openEditorWindow(options: {
   });
 }
 
-export function openDevTools(windowLabel: string): Promise<void> {
-  return safeInvoke('open_devtools_window', { windowLabel });
+export async function openDevTools(windowLabel: string): Promise<void> {
+  if (!windowLabel) return;
+  if (!import.meta.env.DEV) return;
+  if (!(await isTauri())) return;
+  await safeInvoke('open_devtools_window', { windowLabel });
 }
 
 export async function closeWindowsByLabel(label: string) {
@@ -142,6 +155,8 @@ export async function reportCriticalError(e: any) {
 }
 
 export async function showMainWindow() {
+  if (!(await isTauri())) return;
+
   const windowLabel = platformWindow.getCurrentWindow().label;
   await safeInvoke('show_main_window', { windowLabel });
   logSystemInfo('🌐 [PERF] Window transition completed', { label: 'WindowUtils', debugOnly: true });

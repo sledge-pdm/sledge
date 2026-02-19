@@ -1,8 +1,21 @@
 import { render } from 'solid-js/web';
-import App from './app';
 import { setPlatform } from './utils/platform';
+import { createBrowserPlatform } from './utils/platform/BrowserPlatform';
 import { createTauriPlatform } from './utils/platform/TauriPlatform';
 
-setPlatform(createTauriPlatform());
+const isTauriRuntime = () => {
+  const tauriWindow = window as Window & {
+    __TAURI__?: unknown;
+    __TAURI_INTERNALS__?: unknown;
+  };
+  return Boolean(tauriWindow.__TAURI_INTERNALS__ || tauriWindow.__TAURI__);
+};
 
-render(() => <App />, document.getElementById('root')!);
+setPlatform(isTauriRuntime() ? createTauriPlatform() : createBrowserPlatform());
+
+const mount = async () => {
+  const { default: App } = await import('./app');
+  render(() => <App />, document.getElementById('root')!);
+};
+
+void mount();

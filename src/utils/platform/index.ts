@@ -16,8 +16,8 @@ export type { WebviewOptions, WebviewPlatform } from './plugins/webview';
 export type { WebviewWindowPlatform } from './plugins/webviewWindow';
 export type { AppWindow, CloseRequestedEvent, FocusChangedEvent, ScaleChangedEvent, WindowOptions, WindowPlatform } from './plugins/window';
 export type { Platform } from './types';
-import type { Platform } from './types';
 import { createTestMockPlatform } from './TestMockPlatform';
+import type { Platform } from './types';
 
 export let platform: Platform = createTestMockPlatform();
 

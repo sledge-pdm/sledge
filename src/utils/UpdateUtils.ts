@@ -1,7 +1,7 @@
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { ioStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { dialog, process, updater, Update } from './platform';
+import { dialog, process, Update, updater } from './platform';
 
 const getUpdaterCheckOptions = () => ({
   channel: globalConfig.debug.updateChannel ?? 'stable',

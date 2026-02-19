@@ -18,8 +18,8 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0
       '@sledge-pdm/core':
-        specifier: ^1.2.4
-        version: 1.2.4
+        specifier: ^1.2.5
+        version: 1.2.5
       '@sledge-pdm/frasco':
         specifier: ^0.2.4
         version: 0.2.4
@@ -842,8 +842,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@sledge-pdm/core@1.2.4':
-    resolution: {integrity: sha512-gOUlSs+OXVr5/dTKA8U8G0oaP2V0/jvrzvXOH0ZYL6iuyZR/lv+RmqdDNM9dh9bqbDVPHafLr3SGwky2mNPzzA==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.2.4/b87ad9553f896b5a197c1df756bda970f19babc2}
+  '@sledge-pdm/core@1.2.5':
+    resolution: {integrity: sha512-lyA66OOWFrTKHb6TKN93ykwFOK5QWrXNhrF2NvnKeTGSFp/the1p9qzhblj0uzOaB1XiJEnIIX6qETb9m+8VUQ==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.2.5/aa6bdc72fa79644b4528c45442613c42fc3b88c2}
 
   '@sledge-pdm/frasco@0.2.4':
     resolution: {integrity: sha512-JccUOS/9q5g0K6SDlm/foLLPcDU6hGV2Y+TlTIet5HsBLDn4URvP52fvqf9zUC5cqBaw9PlhH88RN4KwFmMGvA==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.2.4/5544e132c00af790620269a1b6b722ca64f905b6}
@@ -2622,7 +2622,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.56.0':
     optional: true
 
-  '@sledge-pdm/core@1.2.4':
+  '@sledge-pdm/core@1.2.5':
     dependencies:
       '@types/pako': 2.0.4
       msgpackr: 1.11.8
@@ -2630,11 +2630,11 @@ snapshots:
 
   '@sledge-pdm/frasco@0.2.4':
     dependencies:
-      '@sledge-pdm/core': 1.2.4
+      '@sledge-pdm/core': 1.2.5
 
   '@sledge-pdm/ui@1.2.7':
     dependencies:
-      '@sledge-pdm/core': 1.2.4
+      '@sledge-pdm/core': 1.2.5
       solid-js: 1.9.11
 
   '@solid-primitives/deep@0.3.3(solid-js@1.9.11)':

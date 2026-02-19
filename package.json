@@ -20,7 +20,7 @@
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",
     "@jaames/iro": "^5.5.2",
     "@jsquash/webp": "^1.5.0",
-    "@sledge-pdm/core": "^1.2.4",
+    "@sledge-pdm/core": "^1.2.5",
     "@sledge-pdm/frasco": "^0.2.4",
     "@sledge-pdm/ui": "^1.2.7",
     "@solid-primitives/deep": "^0.3.3",

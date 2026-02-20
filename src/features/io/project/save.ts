@@ -13,7 +13,7 @@ import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFile
 import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { packr } from '~/utils/msgpackr';
-import { dialog, fs, path } from '~/utils/platform';
+import { core, dialog, fs, path } from '~/utils/platform';
 
 async function folderSelection(nameWOExtension: string) {
   const defaultPath = normalizeJoin(await projectSaveDir(), `${nameWOExtension}.sledge`);
@@ -45,6 +45,45 @@ export async function getPackedCurrentProject(): Promise<Uint8Array> {
 
 export async function saveProject(name?: string, existingPath?: string): Promise<boolean> {
   const LOG_LABEL = 'ProjectSave';
+  if (!core.isTauri()) {
+    try {
+      setIOStore('loadProjectVersion', {
+        sledge: await getCurrentVersion(),
+        project: CURRENT_PROJECT_VERSION,
+      });
+
+      const fileNameWOExtension = getFileNameWithoutExtension(name ?? ioStore.savedLocation.name ?? 'new project');
+      const fileName = `${fileNameWOExtension}.sledge`;
+      const bytes = await getPackedCurrentProject();
+      const blob = new Blob([bytes.slice()], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setIOStore('openAs', 'project');
+      setIOStore('savedLocation', {
+        path: undefined,
+        name: fileName,
+      });
+      setProjectStore('project', 'lastSavedAt', new Date());
+      makeSnapshotsAllRuntime();
+
+      setIOStore('isProjectChangedAfterSave', false);
+      logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
+      return true;
+    } catch (error) {
+      logSystemError('Error saving project.', { label: LOG_LABEL, details: [error] });
+      logUserError('project save failed.', { label: LOG_LABEL, details: [error], persistent: true });
+      eventBus.emit('project:saveFailed', { error: error });
+      return false;
+    }
+  }
+
   let selectedPath: string | null;
 
   let fileNameWOExtension = name ? getFileNameWithoutExtension(name) : 'new project';

@@ -8,6 +8,7 @@ import { sectionContent } from '~/components/section/SectionStyles';
 import { addImagesFromLocal, getEntry, removeEntry } from '~/features/image_pool';
 import { openImageImportDialog } from '~/features/io/image_pool/import';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
+import { core } from '~/utils/platform';
 
 const imagesSectionsContent = css`
   margin-top: 8px;
@@ -41,6 +42,10 @@ const Images: Component = () => {
         {
           src: '/assets/icons/misc/add.png',
           onClick: async () => {
+            if (!core.isTauri()) {
+              alert('adding image is not supported in browser');
+              return;
+            }
             const path = await openImageImportDialog();
             if (path !== undefined) {
               addImagesFromLocal(path);

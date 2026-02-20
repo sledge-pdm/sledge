@@ -1,12 +1,19 @@
-import { ProjectBase, RawPixelData } from '@sledge-pdm/core';
+import { FileLocation, ProjectBase, RawPixelData } from '@sledge-pdm/core';
 import { changeCanvasSize } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { historyManager } from '~/features/history';
+import { clearImagePoolBlobUrls } from '~/features/image_pool/blobManager';
+import { setImagePoolImages } from '~/features/image_pool/imageStore';
 import { addLayer } from '~/features/layer';
+import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
-import { setIOStore } from '~/stores/EditorStores';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { selectionManager } from '~/features/selection/SelectionManager';
+import { defaultInteractStore } from '~/stores/editor/InteractStore';
+import { setIOStore, setInteractStore } from '~/stores/EditorStores';
 import { initRuntimeProject } from '~/stores/RuntimeProject';
+import { resetRuntimeProjectStore } from '~/stores/RuntimeProjectStore';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
 import { pathToFileLocation } from '~/utils/FileUtils';
 import { unpackFromPath } from '~/utils/msgpackr';
@@ -31,6 +38,7 @@ interface PathLoadOption extends LoadOption {
 
 interface ProjectObjLoadOption extends LoadOption {
   project: ProjectBase;
+  locationOverride?: FileLocation;
 }
 
 interface ImageLoadOptions extends LoadOption {
@@ -68,7 +76,7 @@ interface InternalLoadResult {
 export type InitialLoadRequest =
   | { type: 'new'; option: { width: number; height: number } }
   | { type: 'path'; option: { path: string } }
-  | { type: 'projectObj'; option: { project: ProjectBase } }
+  | { type: 'projectObj'; option: ProjectObjLoadOption }
   | { type: 'image'; option: ImageLoadOptions }
   | { type: 'clipboard'; option: ClipboardLoadOptions };
 
@@ -127,24 +135,42 @@ export class ProjectLoader<T extends LoadOption> {
     let result: InternalLoadResult;
     switch (this.type) {
       case 'new':
+        initBeforeLoad();
         result = await loadNewProject(this.options as unknown as NewProjectLoadOption);
         break;
       case 'path':
         result = await loadFromPath(this.options as unknown as PathLoadOption);
         break;
       case 'projectObj':
+        initBeforeLoad();
         result = await loadFromProjectObj(this.options as unknown as ProjectObjLoadOption);
         break;
       case 'image':
+        initBeforeLoad();
         result = await loadFromImage(this.options as unknown as ImageLoadOptions);
         break;
       case 'clipboard':
+        initBeforeLoad();
         result = await loadFromClipboard(this.options as unknown as ClipboardLoadOptions);
         break;
     }
 
     return { ...result, type: this.type };
   }
+}
+
+function initBeforeLoad() {
+  floatingMoveManager.cancel();
+  selectionManager.clearAll();
+  historyManager.clearHistory();
+  layerManager.disposeAll();
+  clearImagePoolBlobUrls();
+  setImagePoolImages(new Map());
+  resetRuntimeProjectStore();
+  setInteractStore(structuredClone(defaultInteractStore));
+  setIOStore('savedLocation', { name: undefined, path: undefined });
+  setIOStore('loadProjectVersion', undefined);
+  setIOStore('isProjectChangedAfterSave', false);
 }
 
 async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLoadResult> {
@@ -195,6 +221,7 @@ async function loadFromPath(options: PathLoadOption): Promise<InternalLoadResult
   }
 
   if (fileExists) {
+    initBeforeLoad();
     const result = ProjectLoader.isProjectPath(path) ? await loadFromPathProject(path) : await loadFromPathImage(path);
     if (result.ok) {
       addRecentFile(pathToFileLocation(path));
@@ -273,6 +300,7 @@ async function loadFromProjectObj(options: ProjectObjLoadOption): Promise<Intern
     setIOStore('openAs', 'project');
     const project = options.project;
     await initRuntimeProject(project);
+    if (options.locationOverride) setIOStore('savedLocation', options.locationOverride);
     setIOStore('isProjectChangedAfterSave', false);
     return {
       ok: true,

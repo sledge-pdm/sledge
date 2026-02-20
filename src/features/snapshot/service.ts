@@ -146,7 +146,7 @@ This will NOT backup your current state (unless you did manually backup.)`,
     return;
   }
   // load snapshot
-  await ProjectLoader.fromProjectObj({ project: fullSnapshot.project }).load();
+  await ProjectLoader.fromProjectObj({ project: fullSnapshot.project, locationOverride: { ...ioStore.savedLocation } }).load();
 
   setIOStore('isProjectChangedAfterSave', false);
 

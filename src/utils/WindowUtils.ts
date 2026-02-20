@@ -2,9 +2,9 @@
 import { InitialLoadRequest } from '~/features/io/project/ProjectLoader';
 import { logSystemError, logSystemInfo, logSystemWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
-import { isTauri, safeInvoke } from './TauriUtils';
+import { safeInvoke } from './TauriUtils';
 import { packr } from './msgpackr';
-import { dialog, window as platformWindow, WebviewOptions, webviewWindow, WindowOptions } from './platform';
+import { core, dialog, window as platformWindow, WebviewOptions, webviewWindow, WindowOptions } from './platform';
 
 export function zoomForIntegerize(dpr: number) {
   const n = Math.round(dpr - 0.01);
@@ -16,7 +16,7 @@ export type WindowOptionsProp = Omit<WebviewOptions, 'x' | 'y' | 'width' | 'heig
 export type WindowKind = 'start' | 'editor' | 'settings' | 'about';
 
 export async function openWindow(kind: Exclude<WindowKind, 'editor'>): Promise<void> {
-  if (!(await isTauri())) {
+  if (!core.isTauri()) {
     window.location.assign(`/${kind}`);
     return;
   }
@@ -45,8 +45,7 @@ export async function openEditorWindow(options: {
   openPath?: string;
   initializationScript?: string;
 }): Promise<void> {
-  if (!(await isTauri())) {
-    window.location.assign('/editor');
+  if (!core.isTauri()) {
     return;
   }
 
@@ -68,7 +67,7 @@ export async function openEditorWindow(options: {
 export async function openDevTools(windowLabel: string): Promise<void> {
   if (!windowLabel) return;
   if (!import.meta.env.DEV) return;
-  if (!(await isTauri())) return;
+  if (!core.isTauri()) return;
   await safeInvoke('open_devtools_window', { windowLabel });
 }
 
@@ -155,7 +154,7 @@ export async function reportCriticalError(e: any) {
 }
 
 export async function showMainWindow() {
-  if (!(await isTauri())) return;
+  if (!core.isTauri()) return;
 
   const windowLabel = platformWindow.getCurrentWindow().label;
   await safeInvoke('show_main_window', { windowLabel });

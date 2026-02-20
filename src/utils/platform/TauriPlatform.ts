@@ -1,5 +1,5 @@
 import { getTauriVersion, getVersion } from '@tauri-apps/api/app';
-import { convertFileSrc, invoke, transformCallback } from '@tauri-apps/api/core';
+import { convertFileSrc, invoke, isTauri, transformCallback } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { Image } from '@tauri-apps/api/image';
 import { BaseDirectory as PathBaseDirectory, appConfigDir, appDataDir, homeDir, pictureDir } from '@tauri-apps/api/path';
@@ -61,6 +61,7 @@ export const createTauriPlatform = (): Platform => ({
     invoke,
     transformCallback,
     convertFileSrc,
+    isTauri,
   },
   event: {
     listen: (event, handler) => listen(event as any, handler as any),

@@ -43,6 +43,7 @@ export const createBrowserPlatform = (): Platform => ({
     invoke: async <T = unknown>() => undefined as T,
     transformCallback: <T = unknown>(_callback?: ((response: T) => void) | undefined, _once?: boolean | undefined) => 0,
     convertFileSrc: (path: string) => path,
+    isTauri: () => false,
   },
   event: {
     listen: async () => () => {},

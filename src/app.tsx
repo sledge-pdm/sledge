@@ -1,6 +1,6 @@
 // @refresh reload
 import { MetaProvider } from '@solidjs/meta';
-import { Route, Router } from '@solidjs/router';
+import { Navigate, Route, Router } from '@solidjs/router';
 import TitleBar from './components/global/title_bar/TitleBar';
 import About from './routes/about/index';
 import Editor from './routes/editor/index';
@@ -110,6 +110,7 @@ export default function App() {
       )}
     >
       <Route path='/start' component={Home} />
+      <Route path='/' component={() => <Navigate href='/editor' />} />
       <Route path='/editor' component={Editor} />
       <Route path='/settings' component={Settings} />
       <Route path='/about' component={About} />

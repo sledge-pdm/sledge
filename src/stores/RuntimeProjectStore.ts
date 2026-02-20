@@ -21,7 +21,7 @@ export type RuntimeProject = {
   snapshots: (ProjectSnapshot | RuntimeProjectSnapshot)[];
 };
 
-const runtimeProjectBeforeInit: RuntimeProject = {
+const createRuntimeProjectInitialState = (): RuntimeProject => ({
   canvas: {
     size: {
       width: 1024,
@@ -56,6 +56,10 @@ const runtimeProjectBeforeInit: RuntimeProject = {
       preserveAspectRatio: true,
     },
   },
-};
+});
 
-export const [projectStore, setProjectStore] = createStore<RuntimeProject>(runtimeProjectBeforeInit);
+export const [projectStore, setProjectStore] = createStore<RuntimeProject>(createRuntimeProjectInitialState());
+
+export const resetRuntimeProjectStore = () => {
+  setProjectStore(createRuntimeProjectInitialState());
+};

@@ -1,11 +1,18 @@
 import type { Platform } from './types';
 
-export class TestMockPlatform implements Platform {
-  os = {
-    platform: () => this.platformSpec,
-  };
+const detectPlatformSpec = (): string => {
+  const ua = navigator.userAgent.toLowerCase();
+  if (ua.includes('win')) return 'windows';
+  if (ua.includes('mac')) return 'macos';
+  if (ua.includes('linux')) return 'linux';
+  return 'unknown';
+};
 
-  fs = {
+export const createBrowserPlatform = (): Platform => ({
+  os: {
+    platform: () => detectPlatformSpec(),
+  },
+  fs: {
     BaseDirectory: {},
     exists: async () => false,
     mkdir: async () => {},
@@ -16,65 +23,62 @@ export class TestMockPlatform implements Platform {
     readDir: async () => [],
     remove: async () => {},
     stat: async () => ({ size: 0, isFile: true, isDirectory: false }),
-  };
-
-  dialog = {
-    confirm: async () => true,
-    message: async () => {},
+  },
+  dialog: {
+    confirm: async (message: string) => window.confirm(message),
+    message: async (message: string) => {
+      window.alert(message);
+    },
     open: async () => null,
     save: async () => null,
-  };
-
-  path = {
+  },
+  path: {
     BaseDirectory: {},
-    homeDir: async () => 'C:/',
-    pictureDir: async () => 'C:/Pictures',
-    appConfigDir: async () => 'C:/AppConfig',
-    appDataDir: async () => 'C:/AppData',
-  };
-
-  core = {
+    homeDir: async () => '/',
+    pictureDir: async () => '/Pictures',
+    appConfigDir: async () => '/AppConfig',
+    appDataDir: async () => '/AppData',
+  },
+  core: {
     invoke: async <T = unknown>() => undefined as T,
     transformCallback: <T = unknown>(_callback?: ((response: T) => void) | undefined, _once?: boolean | undefined) => 0,
     convertFileSrc: (path: string) => path,
     isTauri: () => false,
-  };
-
-  event = {
+  },
+  event: {
     listen: async () => () => {},
-  };
-
-  log = {
+  },
+  log: {
     info: async () => {},
     warn: async () => {},
     error: async () => {},
-  };
-
-  app = {
-    getTauriVersion: async () => '0.0.0-test',
-    getVersion: async () => '0.0.0-test',
-  };
-
-  opener = {
+  },
+  app: {
+    getTauriVersion: async () => {
+      throw new Error('Tauri runtime is not available in browser platform.');
+    },
+    getVersion: async () => '0.0.0-browser',
+  },
+  opener: {
     revealItemInDir: async () => {},
-  };
-
-  process = {
-    exit: async (code?: number) => {},
+  },
+  process: {
+    exit: async () => {},
     relaunch: async () => {},
-  };
-
-  window = {
+  },
+  window: {
     getCurrentWindow: () => ({
-      label: 'test-window',
-      scaleFactor: async () => 1,
+      label: 'browser-window',
+      scaleFactor: async () => window.devicePixelRatio || 1,
       isMaximized: async () => false,
       isDecorated: async () => true,
-      isMaximizable: async () => true,
-      isMinimizable: async () => true,
-      isClosable: async () => true,
-      title: async () => 'test',
-      setTitle: async () => {},
+      isMaximizable: async () => false,
+      isMinimizable: async () => false,
+      isClosable: async () => false,
+      title: async () => document.title,
+      setTitle: async (title: string) => {
+        document.title = title;
+      },
       show: async () => {},
       close: async () => {},
       destroy: async () => {},
@@ -85,29 +89,26 @@ export class TestMockPlatform implements Platform {
       onCloseRequested: async () => () => {},
       onFocusChanged: async () => () => {},
     }),
-  };
-
-  webview = {
+  },
+  webview: {
     getCurrentWebview: () => ({
-      label: 'test-webview',
+      label: 'browser-webview',
       setZoom: async () => {},
       clearAllBrowsingData: async () => {},
     }),
-  };
-
-  webviewWindow = {
+  },
+  webviewWindow: {
     getAllWebviewWindows: async () => [],
-  };
-
-  updater = {
+  },
+  updater: {
     check: async () => null,
-  };
-
-  shell = {
-    open: async () => {},
-  };
-
-  clipboard = {
+  },
+  shell: {
+    open: async (target: string) => {
+      window.open(target, '_blank', 'noopener,noreferrer');
+    },
+  },
+  clipboard: {
     readImage: async () => ({
       rgba: async () => new Uint8Array(),
       size: async () => ({ width: 0, height: 0 }),
@@ -116,17 +117,12 @@ export class TestMockPlatform implements Platform {
     readText: async () => '',
     writeImage: async () => {},
     writeText: async () => {},
-  };
-
-  image = {
+  },
+  image: {
     create: async () => ({
       rgba: async () => new Uint8Array(),
       size: async () => ({ width: 0, height: 0 }),
       close: () => {},
     }),
-  };
-
-  platformSpec = 'windows';
-}
-
-export const createTestMockPlatform = (): Platform => new TestMockPlatform();
+  },
+});

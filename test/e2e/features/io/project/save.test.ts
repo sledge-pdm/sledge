@@ -13,6 +13,7 @@ describe('io/project/save (e2e)', () => {
   beforeEach(() => {
     platform = new TestMockPlatform();
     setPlatform(platform);
+    platform.core.isTauri = vi.fn(() => true) as any;
 
     setIOStore('openAs', 'new_project');
     setIOStore('savedLocation', { path: 'C:/work', name: 'demo.sledge' });

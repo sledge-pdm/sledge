@@ -1,38 +1,22 @@
-import { Update as PluginUpdate } from '@tauri-apps/plugin-updater';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { ioStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
-import { dialog, process, Update } from './platform';
-import { safeInvoke } from './TauriUtils';
+import { dialog, process, Update, updater } from './platform';
 
-type UpdaterMetadata = {
-  rid: number;
-  currentVersion: string;
-  version: string;
-  date?: string;
-  body?: string;
-  rawJson: Record<string, unknown>;
-};
-
-function toUpdate(metadata: UpdaterMetadata): Update {
-  return new PluginUpdate(metadata) as unknown as Update;
-}
+const getUpdaterCheckOptions = () => ({
+  channel: globalConfig.debug.updateChannel ?? 'stable',
+  headers: [
+    ['Cache-Control', 'no-cache'],
+    ['Pragma', 'no-cache'],
+  ],
+  timeout: 5000,
+});
 
 export async function getUpdate(): Promise<Update | undefined> {
   logSystemInfo('checking for updates...', { label: 'UpdateUtils', debugOnly: true });
   try {
-    const metadata = await safeInvoke<UpdaterMetadata | null>('check_update_with_channel', {
-      channel: globalConfig.debug.updateChannel ?? 'stable',
-      headers: [
-        ['Cache-Control', 'no-cache'],
-        ['Pragma', 'no-cache'],
-      ],
-      timeout: 5000,
-    });
-    if (metadata) {
-      const update = toUpdate(metadata);
-      return update;
-    }
+    const update = await updater.check(getUpdaterCheckOptions());
+    if (update) return update;
   } catch (e) {
     logSystemError('failed to update.', { label: 'UpdateUtils', details: [e] });
   }
@@ -44,16 +28,8 @@ export async function askAndInstallUpdate() {
   logSystemInfo('checking for updates...', { label: 'UpdateUtils', debugOnly: true });
 
   try {
-    const metadata = await safeInvoke<UpdaterMetadata | null>('check_update_with_channel', {
-      channel: globalConfig.debug.updateChannel ?? 'stable',
-      headers: [
-        ['Cache-Control', 'no-cache'],
-        ['Pragma', 'no-cache'],
-      ],
-      timeout: 5000,
-    });
-    if (metadata) {
-      const update = toUpdate(metadata);
+    const update = await updater.check(getUpdaterCheckOptions());
+    if (update) {
       logSystemInfo(`found update ${update.version} from ${update.date}`, {
         label: 'UpdateUtils',
         debugOnly: true,

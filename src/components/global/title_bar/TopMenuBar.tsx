@@ -2,7 +2,6 @@ import { css } from '@acab/ecsstatic';
 import { color, fonts, MenuListOption } from '@sledge-pdm/ui';
 import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
-import SaveSection from '~/components/global/title_bar/SaveSection';
 import { TopMenuBarItem, TopMenuBarItemProps } from '~/components/global/title_bar/TopMenuBarItem';
 import { SECTION_TAB_CONTROLS } from '~/config/SectionTabConfig';
 import { adjustZoomToFit } from '~/features/canvas';
@@ -21,6 +20,7 @@ import { globalConfig } from '~/stores/GlobalStores';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog, window as platformWindow } from '~/utils/platform';
 import { openWindow } from '~/utils/WindowUtils';
+import SaveSection from './SaveSection';
 import { UpdateSection } from './UpdateSection';
 
 const topMenuBarRoot = css`
@@ -48,7 +48,6 @@ const menuListCanvasControls = css`
   flex-direction: row;
   height: 100%;
   align-items: center;
-  margin-right: 8px;
 `;
 
 const menuListRight = css`
@@ -60,6 +59,10 @@ const saveSectionContainer = css`
   display: flex;
   flex-direction: row;
   align-self: center;
+`;
+
+const itemsContainer = css`
+  margin-left: 8px;
 `;
 
 const TopMenuBar: Component = () => {
@@ -330,7 +333,9 @@ Unsaved changes will be discarded!`);
       <UpdateSection />
 
       <div class={menuListRight}>
-        <TopMenuBarItem {...settingMenuItem} />
+        <div class={itemsContainer}>
+          <TopMenuBarItem {...settingMenuItem} />
+        </div>
       </div>
     </div>
   );

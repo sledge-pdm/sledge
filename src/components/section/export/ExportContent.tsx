@@ -228,6 +228,7 @@ const ExportContent: Component = () => {
       });
       return;
     }
+
     if (settings.folderPath) {
       let location: FileLocation | undefined;
       try {

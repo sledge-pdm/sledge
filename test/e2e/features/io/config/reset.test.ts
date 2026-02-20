@@ -15,6 +15,7 @@ describe('io/config/reset (e2e)', () => {
   beforeEach(() => {
     platform = new TestMockPlatform();
     setPlatform(platform);
+    platform.core.isTauri = vi.fn(() => true) as any;
     textFs = setupInMemoryTextFs(platform);
 
     setGlobalConfig(makeDefaultGlobalConfig());

@@ -9,7 +9,7 @@ import { EXPORT_TYPES, ExportableTypes } from '~/features/io/export/types';
 import { allLayers } from '~/features/layer';
 import { logSystemError, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
 import { normalizeJoin } from '~/utils/FileUtils';
-import { dialog, fs } from '~/utils/platform';
+import { core, dialog, fs } from '~/utils/platform';
 
 export interface CanvasExportOptions {
   perLayer: boolean;
@@ -28,15 +28,18 @@ const exporters = new Map<ExportableTypes, Exporter>([
   ['svg', new SVGExporter()],
 ]);
 
-export async function exportImage(folderPath: string, fileName: string, options: CanvasExportOptions): Promise<FileLocation | undefined> {
+export async function exportImage(folderPath: string | undefined, fileName: string, options: CanvasExportOptions): Promise<FileLocation | undefined> {
   try {
     const exporter = exporters.get(options.format);
     if (!exporter) throw new Error('Export Error: Exporter not defined');
     const ext = EXPORT_TYPES[options.format].fileExtension;
+    const isTauri = core.isTauri();
     if (!options.perLayer) {
       // whole canvas export
       const canvasBlob: Blob = await exporter.canvasToBlob(options.quality, options.scale);
-      const location = await saveBlobViaTauri(canvasBlob, folderPath, `${fileName}.${ext}`);
+      const location = isTauri
+        ? await saveBlobViaTauri(canvasBlob, folderPath, `${fileName}.${ext}`)
+        : await saveBlobViaBrowser(canvasBlob, `${fileName}.${ext}`);
       if (location) {
         logUserSuccess(`exported ${location.name}`, { label: LOG_LABEL, duration: 4000 });
         return location;
@@ -46,19 +49,25 @@ export async function exportImage(folderPath: string, fileName: string, options:
       const layerLocations = await Promise.all(
         allLayers().map(async (layer) => {
           const layerBlob = await exporter.layerToBlob(layer, options.quality, options.scale);
-          const loc = await saveBlobViaTauri(layerBlob, normalizeJoin(folderPath, fileName), `${fileName}_${layer.name}.${ext}`);
-          return loc;
+          if (isTauri) {
+            return await saveBlobViaTauri(
+              layerBlob,
+              folderPath ? normalizeJoin(folderPath, fileName) : undefined,
+              `${fileName}_${layer.name}.${ext}`
+            );
+          }
+          return await saveBlobViaBrowser(layerBlob, `${fileName}_${layer.name}.${ext}`);
         })
       );
       const exportedCount = layerLocations.filter(Boolean).length;
       if (exportedCount) {
-        logUserSuccess(`exported ${exportedCount} layer(s) to ${folderPath}`, {
+        logUserSuccess(isTauri ? `exported ${exportedCount} layer(s) to ${folderPath}` : `exported ${exportedCount} layer(s).`, {
           label: LOG_LABEL,
           duration: 4000,
         });
       }
       return {
-        path: folderPath,
+        path: isTauri ? folderPath : undefined,
         name: fileName,
       };
     }
@@ -69,7 +78,8 @@ export async function exportImage(folderPath: string, fileName: string, options:
   }
 }
 
-export async function saveBlobViaTauri(blob: Blob, folderPath: string, fileName = 'export.png'): Promise<FileLocation | undefined> {
+export async function saveBlobViaTauri(blob: Blob, folderPath: string | undefined, fileName = 'export.png'): Promise<FileLocation | undefined> {
+  if (!folderPath) throw new Error('Export Error: output folder is required in Tauri runtime.');
   if (!(await fs.exists(folderPath))) {
     await fs.mkdir(folderPath, { recursive: true });
   }
@@ -91,6 +101,21 @@ export async function saveBlobViaTauri(blob: Blob, folderPath: string, fileName 
   await fs.writeFile(normalizeJoin(folderPath, fileName), buf, {});
   return {
     path: folderPath,
+    name: fileName,
+  };
+}
+
+export async function saveBlobViaBrowser(blob: Blob, fileName = 'export.png'): Promise<FileLocation> {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  return {
+    path: undefined,
     name: fileName,
   };
 }

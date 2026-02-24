@@ -1,5 +1,5 @@
 import { doCommands } from '~/features/history';
-import { ApplySelectionFrontToBackCommand } from '~/features/history/command/selection/SelectionChangeCommand';
+import { ApplySelectionFrontToBackCommand } from '~/features/history/commands';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';

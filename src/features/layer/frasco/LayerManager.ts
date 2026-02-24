@@ -1,7 +1,7 @@
 import type { RawPixelData, RGBA } from '@sledge-pdm/core';
 import { HistoryRawSnapshot, Layer, SurfaceBounds, TextureHistoryBackend } from '@sledge-pdm/frasco';
 import { historyManager } from '~/features/history';
-import { FrascoLayerCommand } from '~/features/history/command/frasco/FrascoLayerCommand';
+import { FrascoLayerCommand } from '~/features/history/commands';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { flip_pixels_vertically } from '~/utils/wasm';
 

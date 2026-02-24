@@ -3,9 +3,16 @@ import { clsx, ImagePoolEntry } from '@sledge-pdm/core';
 import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
-import { hideEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer, updateEntryPartial } from '~/features/image_pool';
-import { registerEntryUpdate } from '~/features/image_pool/actions';
-import { cloneEntry } from '~/features/image_pool/service';
+import {
+  cloneEntry,
+  hideEntry,
+  registerEntryUpdate,
+  removeEntry,
+  selectEntry,
+  showEntry,
+  transferToCurrentLayer,
+  updateEntryPartial,
+} from '~/features/image_pool';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';

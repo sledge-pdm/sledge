@@ -1,5 +1,5 @@
 import { HistoryContext, ImagePoolEntry } from '@sledge-pdm/core';
-import { cloneEntry } from '~/features/image_pool/service';
+import { cloneEntry } from '~/features/image_pool';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { HistoryCommand } from '../HistoryCommand';
 import { registerHistoryCommand } from '../registry';

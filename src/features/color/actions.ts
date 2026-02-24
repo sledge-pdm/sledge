@@ -1,6 +1,6 @@
 import { RGBA } from '@sledge-pdm/core';
 import { historyManager } from '~/features/history';
-import { ColorChangeCommand } from '~/features/history/command/color/ColorChangeCommand';
+import { ColorChangeCommand } from '~/features/history/commands';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { colorStore } from '~/stores/EditorStores';
 import { addColorHistory } from './service';

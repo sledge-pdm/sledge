@@ -3,7 +3,7 @@ import { Dropdown, Slider } from '@sledge-pdm/ui';
 import { debounce } from '@solid-primitives/scheduled';
 import { Component } from 'solid-js';
 import { historyManager } from '~/features/history';
-import { LayerPropsCommand } from '~/features/history/command/layer/LayerPropsCommand';
+import { LayerPropsCommand } from '~/features/history/commands';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { activeLayer, blendModeOptions, findLayerById, setLayerProp } from '~/features/layer';
 import { flexRow } from '~/styles/styles';

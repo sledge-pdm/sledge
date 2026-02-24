@@ -1,6 +1,6 @@
 import { HistoryContext, Size2D, Vec2 } from '@sledge-pdm/core';
 import { historyManager } from '~/features/history';
-import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeCommand';
+import { CanvasSizeCommand } from '~/features/history/commands';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';

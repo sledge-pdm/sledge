@@ -4,8 +4,7 @@ import { BaseLayerColorMode, HistoryContext, Layer, LayerType } from '@sledge-pd
 import { BlendMode, FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
 import { adjustZoomToFit } from '~/features/canvas';
 import { historyManager } from '~/features/history';
-import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeCommand';
-import { layerMergeSnippet } from '~/features/history/command/snippet/LayerMergeCommands';
+import { CanvasSizeCommand, layerMergeSnippet } from '~/features/history/commands';
 import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { doCommands } from '~/features/history/service';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';

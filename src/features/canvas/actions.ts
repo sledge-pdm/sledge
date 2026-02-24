@@ -1,7 +1,6 @@
 import { HistoryContext, Size2D, Vec2 } from '@sledge-pdm/core';
-import { historyManager } from '~/features/history';
+import { registerCommandsHistory } from '~/features/history';
 import { CanvasSizeCommand } from '~/features/history/commands';
-import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { setInteractStore } from '~/stores/EditorStores';
@@ -71,7 +70,7 @@ export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptio
           : '/assets/icons/actions/canvas_size_smaller.png',
       description: `${oldSize.width}x${oldSize.height} -> ${newSize.width}x${newSize.height}`,
     };
-    historyManager.addEntry(new CommandsHistoryEntry(command, context));
+    registerCommandsHistory(command, { context });
   }
 
   return true;

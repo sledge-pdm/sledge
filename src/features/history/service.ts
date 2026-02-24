@@ -4,13 +4,13 @@ import { HistoryCommand } from './command/HistoryCommand';
 import { CommandLine, CommandsHistoryEntry } from './entry/CommandsHistoryEntry';
 import { historyManager } from './HistoryManager';
 
-type CommandInput = HistoryCommand | HistoryCommand[] | CommandLine | CommandLine[];
+export type HistoryCommandsInput = HistoryCommand | HistoryCommand[] | CommandLine | CommandLine[];
 
 const isCommandLine = (value: HistoryCommand | CommandLine): value is CommandLine => {
   return (value as CommandLine).command !== undefined;
 };
 
-const executeCommands = (input: CommandInput) => {
+export const executeCommands = (input: HistoryCommandsInput) => {
   const list = Array.isArray(input) ? input : [input];
   for (const item of list) {
     const command = isCommandLine(item) ? item.command : item;
@@ -18,15 +18,23 @@ const executeCommands = (input: CommandInput) => {
   }
 };
 
-interface DoCommandsOption {
+export interface RegisterCommandsOption {
+  context?: HistoryContext;
+}
+
+export function registerCommandsHistory(commands: HistoryCommandsInput, options?: RegisterCommandsOption) {
+  historyManager.addEntry(new CommandsHistoryEntry(commands, options?.context));
+}
+
+export interface DoCommandsOption {
   register?: boolean;
   context?: HistoryContext;
 }
 
-export function doCommands(commands: CommandInput, options?: DoCommandsOption) {
+export function doCommands(commands: HistoryCommandsInput, options?: DoCommandsOption) {
   const { register = true, context = undefined } = options ?? {};
   executeCommands(commands);
-  if (register) historyManager.addEntry(new CommandsHistoryEntry(commands, context));
+  if (register) registerCommandsHistory(commands, { context });
 }
 
 export function tryUndo() {

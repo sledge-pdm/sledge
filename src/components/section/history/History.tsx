@@ -5,8 +5,7 @@ import { createStore } from 'solid-js/store';
 import HistoryItemRow from '~/components/section/history/ProjectHistoryItem';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent, sectionSubCaption, sectionSubContent } from '~/components/section/SectionStyles';
-import { historyManager } from '~/features/history';
-import { HistoryEntry } from '~/features/history/entry/HistoryEntry';
+import { historyManager, type HistoryEntry } from '~/features/history';
 
 const historyContentStyle = css`
   margin-top: 8px;

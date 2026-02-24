@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   applyProjectLocation,
   applyProjectLocationFromPath,
+  applyProjectLocationFromPathOrEmpty,
   getActiveProjectLocation,
   hasActiveProjectLocation,
 } from '~/features/io/project/ProjectLocationManager';
@@ -50,5 +51,15 @@ describe('ProjectLocationManager', () => {
   it('applyProjectLocationFromPath returns undefined for invalid path', () => {
     const parsed = applyProjectLocationFromPath('invalid', 'project');
     expect(parsed).toBeUndefined();
+  });
+
+  it('applyProjectLocationFromPathOrEmpty clears location when path is invalid', () => {
+    setIOStore('savedLocation', { path: 'C:/work', name: 'sample.sledge' });
+
+    const parsed = applyProjectLocationFromPathOrEmpty('invalid', 'image');
+
+    expect(parsed).toBeUndefined();
+    expect(ioStore.savedLocation).toEqual({ path: undefined, name: undefined });
+    expect(ioStore.openAs).toBe('image');
   });
 });

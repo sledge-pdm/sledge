@@ -41,3 +41,9 @@ export function applyProjectLocationFromPath(path: string, openAs: ProjectOpenMo
   applyProjectLocation(parsed, openAs);
   return parsed;
 }
+
+export function applyProjectLocationFromPathOrEmpty(path: string, openAs: ProjectOpenMode = 'project'): FileLocation | undefined {
+  const parsed = applyProjectLocationFromPath(path, openAs);
+  if (!parsed) applyProjectLocation(undefined, openAs);
+  return parsed;
+}

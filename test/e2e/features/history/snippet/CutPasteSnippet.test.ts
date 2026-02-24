@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { CommandsHistoryEntry } from '~/features/history';
 import { cutPasteSnippet } from '~/features/history/command/snippet/CutPasteCommands';
-import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { createWebGLCanvas } from '../../../../support/e2e';

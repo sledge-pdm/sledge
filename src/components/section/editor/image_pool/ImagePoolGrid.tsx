@@ -1,11 +1,11 @@
 import { ImagePoolEntry } from '@sledge-pdm/core';
-import { color, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
+import { color, showContextMenu } from '@sledge-pdm/ui';
 import { Component, For } from 'solid-js';
-import { hideEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer } from '~/features/image_pool';
+import { selectEntry } from '~/features/image_pool';
+import { buildImagePoolEntryContextMenu } from '~/features/image_pool/contextMenu';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, flexRow } from '~/styles/styles';
-import { ContextMenuItems } from '~/utils/ContextMenuItems';
 
 const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
   const imageSrc = useImageBlobUrl(() => props.entry.id);
@@ -25,43 +25,7 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        const entry = props.entry;
-        if (!entry) return;
-        const showHideItem: MenuListOption = props.entry.visible
-          ? {
-              ...ContextMenuItems.BaseImageHide,
-              onSelect: () => {
-                hideEntry(entry.id);
-              },
-            }
-          : {
-              ...ContextMenuItems.BaseImageShow,
-              onSelect: () => {
-                showEntry(entry.id);
-              },
-            };
-        let label = entry.descriptionName ?? '[ unknown ]';
-        if (!props.entry.visible) label += ' (hidden)';
-        showContextMenu(
-          [
-            { type: 'label', label },
-            showHideItem,
-            {
-              ...ContextMenuItems.BaseTransfer,
-              onSelect: () => transferToCurrentLayer(entry.id, false),
-            },
-            {
-              ...ContextMenuItems.BaseTransferRemove,
-              onSelect: () => transferToCurrentLayer(entry.id, true),
-            },
-            {
-              ...ContextMenuItems.BaseRemove,
-              label: 'Remove from pool',
-              onSelect: () => removeEntry(entry.id),
-            },
-          ],
-          e
-        );
+        showContextMenu(buildImagePoolEntryContextMenu(props.entry), e);
       }}
     >
       <div

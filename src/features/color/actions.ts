@@ -1,7 +1,6 @@
 import { RGBA } from '@sledge-pdm/core';
-import { historyManager } from '~/features/history';
+import { registerCommandsHistory } from '~/features/history';
 import { ColorChangeCommand } from '~/features/history/commands';
-import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { colorStore } from '~/stores/EditorStores';
 import { addColorHistory } from './service';
 
@@ -17,7 +16,7 @@ export function registerColorChange(oldColor: RGBA, newColor: RGBA, options?: Re
     oldColor,
     newColor,
   });
-  historyManager.addEntry(new CommandsHistoryEntry(command));
+  registerCommandsHistory(command);
 
   // add color history
   addColorHistory(newColor, options);

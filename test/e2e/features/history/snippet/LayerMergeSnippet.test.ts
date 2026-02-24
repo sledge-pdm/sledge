@@ -1,7 +1,7 @@
 import { BlendMode } from '@sledge-pdm/frasco';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { CommandsHistoryEntry } from '~/features/history';
 import { layerMergeSnippet } from '~/features/history/command/snippet/LayerMergeCommands';
-import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { findLayerById, getLayerIndex } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { projectStore } from '~/stores/RuntimeProjectStore';

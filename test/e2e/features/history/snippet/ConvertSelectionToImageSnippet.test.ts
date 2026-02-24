@@ -1,8 +1,8 @@
 import { ImagePoolEntry, ImagePoolImage } from '@sledge-pdm/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { CommandsHistoryEntry } from '~/features/history';
 import { FrascoLayerCommand } from '~/features/history/command/frasco/FrascoLayerCommand';
 import { convertSelectionToImageSnippet } from '~/features/history/command/snippet/ConvertSelectionToImageCommands';
-import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { imagePoolImages, setImagePoolImages } from '~/features/image_pool/imageStore';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { selectionManager } from '~/features/selection/SelectionManager';

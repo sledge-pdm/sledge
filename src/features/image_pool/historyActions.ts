@@ -1,7 +1,6 @@
 import { HistoryContext, ImagePoolEntry, ImagePoolImage } from '@sledge-pdm/core';
-import { historyManager } from '~/features/history';
+import { registerCommandsHistory } from '~/features/history';
 import { FrascoLayerCommand, ImagePoolAddCommand, ImagePoolPropsCommand, ImagePoolRemoveCommand } from '~/features/history/commands';
-import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 import { cloneEntry } from './service';
 
 const isSameEntryProps = (a: ImagePoolEntry, b: ImagePoolEntry): boolean => {
@@ -25,51 +24,43 @@ const isSameEntryProps = (a: ImagePoolEntry, b: ImagePoolEntry): boolean => {
 };
 
 export function registerImagePoolAddHistory(entry: ImagePoolEntry, image: ImagePoolImage, index: number) {
-  historyManager.addEntry(
-    new CommandsHistoryEntry(
-      new ImagePoolAddCommand({
-        entry: cloneEntry(entry),
-        image,
-        index,
-      })
-    )
+  registerCommandsHistory(
+    new ImagePoolAddCommand({
+      entry: cloneEntry(entry),
+      image,
+      index,
+    })
   );
 }
 
 export function registerImagePoolRemoveHistory(entry: ImagePoolEntry, image: ImagePoolImage | undefined, index: number) {
-  historyManager.addEntry(
-    new CommandsHistoryEntry(
-      new ImagePoolRemoveCommand({
-        entry: cloneEntry(entry),
-        image,
-        index,
-      })
-    )
+  registerCommandsHistory(
+    new ImagePoolRemoveCommand({
+      entry: cloneEntry(entry),
+      image,
+      index,
+    })
   );
 }
 
 export function registerEntryUpdate(id: string, before: ImagePoolEntry, after: ImagePoolEntry, options?: { context?: HistoryContext }) {
   if (isSameEntryProps(before, after)) return;
 
-  historyManager.addEntry(
-    new CommandsHistoryEntry(
-      new ImagePoolPropsCommand({
-        entryId: id,
-        before,
-        after,
-      }),
-      options?.context
-    )
+  registerCommandsHistory(
+    new ImagePoolPropsCommand({
+      entryId: id,
+      before,
+      after,
+    }),
+    { context: options?.context }
   );
 }
 
 export function registerTransferHistory(layerId: string) {
-  historyManager.addEntry(
-    new CommandsHistoryEntry(
-      new FrascoLayerCommand({
-        layerId,
-        context: { tool: 'image' },
-      })
-    )
+  registerCommandsHistory(
+    new FrascoLayerCommand({
+      layerId,
+      context: { tool: 'image' },
+    })
   );
 }

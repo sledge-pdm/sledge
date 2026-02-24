@@ -2,12 +2,11 @@ import { Vec2 } from '@sledge-pdm/core';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserInfo } from '~/features/log/service';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
-import { extractMaskedPatch } from '~/features/selection/maskOps';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';
+import { extractSelectionBufferFromMask } from '~/features/selection/selectionBuffer';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { trim_mask_with_box } from '~/utils/wasm';
 
 export class MoveTool implements ToolBehavior {
   private startOffset: Vec2 = { x: 0, y: 0 };
@@ -93,22 +92,19 @@ export class MoveTool implements ToolBehavior {
 
   private buildFloatingBufferFromSelection(layerId: string, selection: SelectionMask): FloatingBuffer | undefined {
     const { width, height } = projectStore.canvas.size;
-    const bbox = selection.getBoundBox();
-    if (!bbox) return;
-
-    const selectionWidth = bbox.right - bbox.left + 1;
-    const selectionHeight = bbox.bottom - bbox.top + 1;
     const mask = selection.getMask();
-    const trimmedMask = trim_mask_with_box(mask, width, height, bbox.left, bbox.top, selectionWidth, selectionHeight);
     const layerBuffer = layerManager.exportRawCanvas(layerId);
-    const patch = extractMaskedPatch(layerBuffer, trimmedMask, width, height, bbox.left, bbox.top, selectionWidth, selectionHeight);
+    const extracted = extractSelectionBufferFromMask(layerBuffer, mask, width, height);
+    if (!extracted) return;
+
+    const { buffer, bbox } = extracted;
 
     return {
-      buffer: patch,
+      buffer,
       offset: { x: 0, y: 0 },
-      width: selectionWidth,
-      height: selectionHeight,
-      origin: { x: bbox.left, y: bbox.top },
+      width: bbox.width,
+      height: bbox.height,
+      origin: { x: bbox.x, y: bbox.y },
     };
   }
 }

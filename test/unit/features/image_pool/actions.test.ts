@@ -2,16 +2,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 
 const mocks = vi.hoisted(() => ({
-  historyAddEntry: vi.fn(),
+  registerCommandsHistory: vi.fn(),
   logUserInfo: vi.fn(),
   createEntryFromRawBuffer: vi.fn(),
   removeImagePoolBlobUrl: vi.fn(),
 }));
 
 vi.mock('~/features/history', () => ({
-  historyManager: {
-    addEntry: mocks.historyAddEntry,
-  },
+  registerCommandsHistory: mocks.registerCommandsHistory,
 }));
 
 vi.mock('~/features/log/service', () => ({
@@ -56,7 +54,7 @@ describe('image_pool actions', () => {
     setProjectStore('imagePool', 'state', 'selectedEntryId', undefined);
     setImagePoolImages(new Map());
 
-    mocks.historyAddEntry.mockReset();
+    mocks.registerCommandsHistory.mockReset();
     mocks.logUserInfo.mockReset();
     mocks.createEntryFromRawBuffer.mockReset();
     mocks.removeImagePoolBlobUrl.mockReset();
@@ -70,7 +68,7 @@ describe('image_pool actions', () => {
 
     expect(projectStore.imagePool.entries.map((e) => e.id)).toEqual(['e1']);
     expect(imagePoolImages().get('e1')).toEqual(image);
-    expect(mocks.historyAddEntry).toHaveBeenCalledTimes(1);
+    expect(mocks.registerCommandsHistory).toHaveBeenCalledTimes(1);
   });
 
   it('updateEntryPartial mutates entry and registers history when values changed', () => {
@@ -79,7 +77,7 @@ describe('image_pool actions', () => {
 
     updateEntryPartial('e1', { visible: false }, { register: true });
 
-    expect(mocks.historyAddEntry).toHaveBeenCalledTimes(1);
+    expect(mocks.registerCommandsHistory).toHaveBeenCalledTimes(1);
     expect(projectStore.imagePool.entries[0].visible).toBe(false);
   });
 
@@ -90,7 +88,7 @@ describe('image_pool actions', () => {
     updateEntryPartial('e1', { visible: false }, { register: false });
     updateEntryPartial('missing', { visible: false }, { register: true });
 
-    expect(mocks.historyAddEntry).not.toHaveBeenCalled();
+    expect(mocks.registerCommandsHistory).not.toHaveBeenCalled();
   });
 
   it('removeEntry updates selectedEntryId to previous entry and removes stored image', () => {
@@ -113,7 +111,7 @@ describe('image_pool actions', () => {
     expect(imagePoolImages().has('e1')).toBe(true);
     expect(projectStore.imagePool.state.selectedEntryId).toBe('e1');
     expect(mocks.removeImagePoolBlobUrl).toHaveBeenCalledWith('e2');
-    expect(mocks.historyAddEntry).toHaveBeenCalledTimes(1);
+    expect(mocks.registerCommandsHistory).toHaveBeenCalledTimes(1);
   });
 
   it('addImagesFromRawBuffer creates image entry and inserts into pool', async () => {

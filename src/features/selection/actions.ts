@@ -2,9 +2,8 @@ import { combine_masks_subtract, flip_pixels_vertically } from '@sledge/wasm';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { updateFrascoCanvas } from '~/webgl/service';
-import { historyManager } from '../history';
+import { registerCommandsHistory } from '../history';
 import { convertSelectionToImageSnippet } from '../history/command/snippet/ConvertSelectionToImageCommands';
-import { CommandsHistoryEntry } from '../history/entry/CommandsHistoryEntry';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '../image_pool';
 import { activeLayer } from '../layer';
 import { layerManager } from '../layer/frasco/LayerManager';
@@ -127,7 +126,7 @@ export async function convertSelectionToImage(deleteAfter?: boolean) {
     selectionBefore,
     deleteAfter,
   });
-  historyManager.addEntry(new CommandsHistoryEntry(commands, context));
+  registerCommandsHistory(commands, { context });
 
   if (deleteAfter) {
     updateFrascoCanvas('delete selected area');

@@ -1,14 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  addEntry: vi.fn(),
+  registerCommandsHistory: vi.fn(),
   saveEditorStateDebounced: vi.fn(),
 }));
 
 vi.mock('~/features/history', () => ({
-  historyManager: {
-    addEntry: mocks.addEntry,
-  },
+  registerCommandsHistory: mocks.registerCommandsHistory,
 }));
 
 vi.mock('~/features/io/editor/save', () => ({
@@ -31,7 +29,7 @@ function resetColorState() {
 describe('features/color/actions', () => {
   beforeEach(() => {
     resetColorState();
-    mocks.addEntry.mockReset();
+    mocks.registerCommandsHistory.mockReset();
     mocks.saveEditorStateDebounced.mockReset();
   });
 
@@ -40,7 +38,7 @@ describe('features/color/actions', () => {
 
     registerColorChange(color, color);
 
-    expect(mocks.addEntry).not.toHaveBeenCalled();
+    expect(mocks.registerCommandsHistory).not.toHaveBeenCalled();
     expect(colorStore.history).toEqual([]);
     expect(mocks.saveEditorStateDebounced).not.toHaveBeenCalled();
   });
@@ -52,11 +50,10 @@ describe('features/color/actions', () => {
 
     registerColorChange(oldColor, newColor, { replaceSameColor: false });
 
-    expect(mocks.addEntry).toHaveBeenCalledTimes(1);
-    const entry = mocks.addEntry.mock.calls[0][0];
-    const line = entry.getCommandLines()[0];
-    expect(line.command.type).toBe('color');
-    expect(line.command.serializeProps()).toEqual({
+    expect(mocks.registerCommandsHistory).toHaveBeenCalledTimes(1);
+    const command = mocks.registerCommandsHistory.mock.calls[0][0];
+    expect(command.type).toBe('color');
+    expect(command.serializeProps()).toEqual({
       palette: PaletteType.secondary,
       oldColor,
       newColor,

@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { Icon } from '@sledge-pdm/ui';
 import { Accessor, Component } from 'solid-js';
-import { HistoryEntry } from '~/features/history/entry/HistoryEntry';
+import { type HistoryEntry } from '~/features/history';
 
 const historyRowStyle = css`
   display: flex;

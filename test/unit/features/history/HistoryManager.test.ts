@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { HistoryEntry } from '~/features/history';
 import { HistoryManager } from '~/features/history/HistoryManager';
-import { HistoryEntry } from '~/features/history/entry/HistoryEntry';
 import { ioStore, setIOStore } from '~/stores/EditorStores';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 

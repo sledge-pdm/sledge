@@ -6,9 +6,8 @@ import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import { toolStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { trim_mask_with_box } from '~/utils/wasm';
 import { updateFrascoCanvas } from '~/webgl/service';
-import { extractMaskedPatch } from './maskOps';
+import { computeMaskBBox, extractSelectionBufferFromMask } from './selectionBuffer';
 
 // SelectionOperator is an integrated manager of selection area and floating move management.
 
@@ -86,31 +85,6 @@ export function cancelMove() {
     logUserInfo('Selection move cancelled.');
   }
 }
-// Compute tight bounding box of 1s in a canvas-sized selection mask
-export const computeMaskBBox = (
-  mask: Uint8Array,
-  width: number,
-  height: number
-): { x: number; y: number; width: number; height: number } | undefined => {
-  let minX = Number.POSITIVE_INFINITY;
-  let minY = Number.POSITIVE_INFINITY;
-  let maxX = -1;
-  let maxY = -1;
-  for (let y = 0; y < height; y++) {
-    const row = y * width;
-    for (let x = 0; x < width; x++) {
-      if (mask[row + x] === 1) {
-        if (x < minX) minX = x;
-        if (y < minY) minY = y;
-        if (x > maxX) maxX = x;
-        if (y > maxY) maxY = y;
-      }
-    }
-  }
-  if (maxX < 0 || maxY < 0) return undefined;
-  return { x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1 };
-};
-
 export function getCurrentSelectionBuffer():
   | {
       buffer: Uint8ClampedArray;
@@ -122,15 +96,10 @@ export function getCurrentSelectionBuffer():
   selectionManager.commitOffset();
   const mask = selectionManager.getSelection()?.getMask();
   if (!mask) return;
-  const bbox = computeMaskBBox(mask, width, height);
-  if (!bbox) return;
 
-  const trimmedMask = trim_mask_with_box(mask, width, height, bbox.x, bbox.y, bbox.width, bbox.height);
   const sourceBuffer = layerManager.exportRawCanvas(activeLayer().id);
-  const selectionBuffer = extractMaskedPatch(sourceBuffer, trimmedMask, width, height, bbox.x, bbox.y, bbox.width, bbox.height);
-
-  return {
-    buffer: selectionBuffer,
-    bbox,
-  };
+  return extractSelectionBufferFromMask(sourceBuffer, mask, width, height);
 }
+
+export { convertSelectionToImage, deleteSelectedArea, invertSelectionArea } from './actions';
+export { computeMaskBBox };

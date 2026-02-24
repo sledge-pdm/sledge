@@ -21,7 +21,7 @@ import { fs } from '~/utils/platform';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { tryGetImageFromClipboard } from '../clipboard/ClipboardUtils';
 import { CURRENT_PROJECT_VERSION } from './Project';
-import { applyProjectLocation, applyProjectLocationFromPath } from './ProjectLocationManager';
+import { applyProjectLocation, applyProjectLocationFromPathOrEmpty } from './ProjectLocationManager';
 
 type LoadType = 'new' | 'path' | 'projectObj' | 'image' | 'clipboard';
 
@@ -241,7 +241,7 @@ async function loadFromPath(options: PathLoadOption): Promise<InternalLoadResult
 async function loadFromPathProject(path: string): Promise<InternalLoadResult> {
   try {
     setIOStore('openAs', 'project');
-    if (!applyProjectLocationFromPath(path, 'project')) applyProjectLocation(undefined, 'project');
+    applyProjectLocationFromPathOrEmpty(path, 'project');
     const unpacked = await unpackFromPath(path);
     const result = await loadFromProjectObj({
       project: unpacked,
@@ -271,8 +271,7 @@ async function loadFromPathImage(path: string): Promise<InternalLoadResult> {
     setIOStore('openAs', 'image');
     const bitmap = await loadLocalImage(path);
     const imageData = await loadImageData(bitmap);
-    const loc = pathToFileLocation(path);
-    applyProjectLocation(loc, 'image');
+    const loc = applyProjectLocationFromPathOrEmpty(path, 'image');
     const result = await loadFromImage({
       name: loc?.name,
       buffer: new Uint8ClampedArray(imageData.data),
@@ -313,23 +312,26 @@ async function loadFromProjectObj(options: ProjectObjLoadOption): Promise<Intern
   }
 }
 
+function applyImageToProject(options: ImageLoadOptions): void {
+  setIOStore('openAs', 'image');
+  const size = { width: options.width, height: options.height };
+  changeCanvasSize(size, {
+    register: false,
+  });
+  addLayer(
+    { name: options.name },
+    {
+      register: false,
+      uniqueName: false,
+      initImage: options.buffer,
+    }
+  );
+}
+
 async function loadFromImage(options: ImageLoadOptions): Promise<InternalLoadResult> {
-  const { name, width, height, buffer } = options;
   try {
     historyManager.clearHistory();
-    setIOStore('openAs', 'image');
-    const size = { width, height };
-    changeCanvasSize(size, {
-      register: false,
-    });
-    addLayer(
-      { name },
-      {
-        register: false,
-        uniqueName: false,
-        initImage: buffer,
-      }
-    );
+    applyImageToProject(options);
     return {
       ok: true,
     };
@@ -350,20 +352,12 @@ async function loadFromClipboard(options: ClipboardLoadOptions): Promise<Interna
     }
 
     const { width, height, buffer } = imgData;
-
-    setIOStore('openAs', 'image');
-    const size = { width, height };
-    changeCanvasSize(size, {
-      register: false,
+    applyImageToProject({
+      name: options.name ?? 'clipboard image',
+      width,
+      height,
+      buffer,
     });
-    addLayer(
-      { name: options.name ?? 'clipboard image' },
-      {
-        register: false,
-        uniqueName: false,
-        initImage: buffer,
-      }
-    );
     setIOStore('isProjectChangedAfterSave', false);
     return {
       ok: true,

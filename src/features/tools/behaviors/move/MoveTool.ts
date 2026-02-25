@@ -4,9 +4,9 @@ import { logUserInfo } from '~/features/log/service';
 import { FloatingBuffer, floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';
+import { extractSelectionBufferFromMask } from '~/features/selection/selectionBuffer';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { trim_mask_with_box } from '~/utils/wasm';
 
 export class MoveTool implements ToolBehavior {
   private startOffset: Vec2 = { x: 0, y: 0 };
@@ -92,22 +92,19 @@ export class MoveTool implements ToolBehavior {
 
   private buildFloatingBufferFromSelection(layerId: string, selection: SelectionMask): FloatingBuffer | undefined {
     const { width, height } = projectStore.canvas.size;
-    const bbox = selection.getBoundBox();
-    if (!bbox) return;
-
-    const selectionWidth = bbox.right - bbox.left + 1;
-    const selectionHeight = bbox.bottom - bbox.top + 1;
     const mask = selection.getMask();
-    const trimmedMask = trim_mask_with_box(mask, width, height, bbox.left, bbox.top, selectionWidth, selectionHeight);
     const layerBuffer = layerManager.exportRawCanvas(layerId);
-    const patch = extractMaskedPatch(layerBuffer, trimmedMask, width, height, bbox.left, bbox.top, selectionWidth, selectionHeight);
+    const extracted = extractSelectionBufferFromMask(layerBuffer, mask, width, height);
+    if (!extracted) return;
+
+    const { buffer, bbox } = extracted;
 
     return {
-      buffer: patch,
+      buffer,
       offset: { x: 0, y: 0 },
-      width: selectionWidth,
-      height: selectionHeight,
-      origin: { x: bbox.left, y: bbox.top },
+      width: bbox.width,
+      height: bbox.height,
+      origin: { x: bbox.x, y: bbox.y },
     };
   }
 }
@@ -117,33 +114,3 @@ const cloneMask = (mask: SelectionMask): SelectionMask => {
   cloned.setMask(new Uint8Array(mask.getMask()));
   return cloned;
 };
-
-function extractMaskedPatch(
-  source: Uint8ClampedArray,
-  mask: Uint8Array,
-  sourceWidth: number,
-  sourceHeight: number,
-  left: number,
-  top: number,
-  width: number,
-  height: number
-): Uint8ClampedArray {
-  const out = new Uint8ClampedArray(width * height * 4);
-  for (let y = 0; y < height; y++) {
-    const srcY = top + y;
-    if (srcY < 0 || srcY >= sourceHeight) continue;
-    for (let x = 0; x < width; x++) {
-      const srcX = left + x;
-      if (srcX < 0 || srcX >= sourceWidth) continue;
-      const maskIdx = y * width + x;
-      if (mask[maskIdx] === 0) continue;
-      const srcIdx = (srcY * sourceWidth + srcX) * 4;
-      const dstIdx = (y * width + x) * 4;
-      out[dstIdx] = source[srcIdx];
-      out[dstIdx + 1] = source[srcIdx + 1];
-      out[dstIdx + 2] = source[srcIdx + 2];
-      out[dstIdx + 3] = source[srcIdx + 3];
-    }
-  }
-  return out;
-}

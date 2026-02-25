@@ -1,5 +1,5 @@
 import { doCommands } from '~/features/history';
-import { ApplySelectionFrontToBackCommand } from '~/features/history/command/selection/SelectionChangeCommand';
+import { ApplySelectionFrontToBackCommand } from '~/features/history/commands';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';

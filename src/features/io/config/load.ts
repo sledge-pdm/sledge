@@ -1,4 +1,5 @@
 import { Consts } from '~/Consts';
+import { loadJsonFileWithFallback } from '~/features/io/common/JsonFileLoader';
 import { saveGlobalSettings } from '~/features/io/config/save';
 import { getDefaultSettings, getFallbackedSettings } from '~/features/io/config/set';
 import { ErrorTypes, LoadError } from '~/features/io/project/ProjectLoader';
@@ -24,18 +25,27 @@ export async function loadGlobalConfig(): Promise<{
 }> {
   const baseDir = fs.BaseDirectory?.AppConfig;
   const defaultSettings = getDefaultSettings();
-  try {
-    let isConfigExists = false;
-    try {
-      isConfigExists = baseDir ? await fs.exists(Consts.globalConfigFileName, { baseDir }) : await fs.exists(Consts.globalConfigFileName);
-    } catch (_e) {
-      // Let pass through as not existing
-    }
 
-    if (!isConfigExists) {
+  const applyDefaultSettings = async () => {
+    loadConfigToGlobalStore(defaultSettings);
+    await saveGlobalSettings(false);
+    return defaultSettings;
+  };
+
+  return await loadJsonFileWithFallback<
+    {
+      store: Config;
+      error?: LoadError;
+    },
+    {
+      globalConfigStore?: any;
+      keyConfigStore?: any;
+      lastSettingsStore?: any;
+    }
+  >(Consts.globalConfigFileName, baseDir, {
+    onNotFound: async () => {
       logSystemWarn('No global settings found, create one with default values.', { label: LOG_LABEL });
-      loadConfigToGlobalStore(defaultSettings);
-      await saveGlobalSettings(false);
+      await applyDefaultSettings();
       return {
         store: defaultSettings,
         error: {
@@ -43,15 +53,10 @@ export async function loadGlobalConfig(): Promise<{
           detail: GLOBAL_CONFIG_ERROR_FILE_NOT_FOUND,
         },
       };
-    }
-
-    let configData: string | undefined;
-    try {
-      configData = await fs.readTextFile(Consts.globalConfigFileName, baseDir ? { baseDir } : undefined);
-    } catch (e) {
+    },
+    onReadError: async (e) => {
       logSystemError(GLOBAL_CONFIG_ERROR_FAILED_FILE_READ, { label: LOG_LABEL, details: [e] });
-      loadConfigToGlobalStore(defaultSettings);
-      await saveGlobalSettings(false);
+      await applyDefaultSettings();
       return {
         store: defaultSettings,
         error: {
@@ -60,23 +65,11 @@ export async function loadGlobalConfig(): Promise<{
           stacktrace: getErrorStacktrace(e),
         },
       };
-    }
-
-    try {
-      const configJson = JSON.parse(configData);
-      logSystemInfo('json data loaded from file.', { label: LOG_LABEL, debugOnly: true });
-      const fallbackedConfigJson = getFallbackedSettings(configJson);
-      loadConfigToGlobalStore(fallbackedConfigJson);
-      await saveGlobalSettings(false);
-      return {
-        store: fallbackedConfigJson,
-        error: undefined,
-      };
-    } catch (e) {
+    },
+    onParseError: async (e) => {
       logSystemError(GLOBAL_CONFIG_ERROR_FAILED_PARSE_JSON, { label: LOG_LABEL, details: [e] });
       logSystemWarn('create config with default values.', { label: LOG_LABEL });
-      loadConfigToGlobalStore(defaultSettings);
-      await saveGlobalSettings(false);
+      await applyDefaultSettings();
       return {
         store: defaultSettings,
         error: {
@@ -85,18 +78,27 @@ export async function loadGlobalConfig(): Promise<{
           stacktrace: getErrorStacktrace(e),
         },
       };
-    }
-  } catch (e) {
-    // fallback to default
-    loadConfigToGlobalStore(defaultSettings);
-    await saveGlobalSettings(false);
-    return {
-      store: defaultSettings,
-      error: {
-        type: ErrorTypes.INTERNAL_ERROR,
-        detail: GLOBAL_CONFIG_ERROR_INTERNAL,
-        stacktrace: getErrorStacktrace(e),
-      },
-    };
-  }
+    },
+    onSuccess: async (configJson) => {
+      logSystemInfo('json data loaded from file.', { label: LOG_LABEL, debugOnly: true });
+      const fallbackedConfigJson = getFallbackedSettings(configJson);
+      loadConfigToGlobalStore(fallbackedConfigJson);
+      await saveGlobalSettings(false);
+      return {
+        store: fallbackedConfigJson,
+        error: undefined,
+      };
+    },
+    onUnexpectedError: async (e) => {
+      await applyDefaultSettings();
+      return {
+        store: defaultSettings,
+        error: {
+          type: ErrorTypes.INTERNAL_ERROR,
+          detail: GLOBAL_CONFIG_ERROR_INTERNAL,
+          stacktrace: getErrorStacktrace(e),
+        },
+      };
+    },
+  });
 }

@@ -1,8 +1,7 @@
 import type { RawPixelData, RGBA } from '@sledge-pdm/core';
 import { HistoryRawSnapshot, Layer, SurfaceBounds, TextureHistoryBackend } from '@sledge-pdm/frasco';
-import { historyManager } from '~/features/history';
-import { FrascoLayerCommand } from '~/features/history/command/frasco/FrascoLayerCommand';
-import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
+import { registerCommandsHistory } from '~/features/history';
+import { FrascoLayerCommand } from '~/features/history/commands';
 import { flip_pixels_vertically } from '~/utils/wasm';
 
 type InputSpace = 'canvas' | 'layer';
@@ -205,13 +204,11 @@ export class LayerManager {
       layer.importHistoryRaw(historyRaw.undoStack, historyRaw.redoStack);
     }
     layer.addListener('historyRegistered', (e) => {
-      historyManager.addEntry(
-        new CommandsHistoryEntry(
-          new FrascoLayerCommand({
-            layerId: layerId,
-            context: e.context,
-          })
-        )
+      registerCommandsHistory(
+        new FrascoLayerCommand({
+          layerId: layerId,
+          context: e.context,
+        })
       );
     });
     return layer;

@@ -3,7 +3,7 @@ import { FrascoLayerCommand } from '~/features/history/command/frasco/FrascoLaye
 import { ImagePoolAddCommand } from '~/features/history/command/image_pool/ImagePoolAddCommand';
 import { ApplySelectionFrontToBackCommand } from '~/features/history/command/selection/SelectionChangeCommand';
 import { CommandLine } from '~/features/history/entry/CommandsHistoryEntry';
-import { cloneEntry } from '~/features/image_pool/service';
+import { cloneEntry } from '~/features/image_pool';
 import SelectionMask from '~/features/selection/SelectionMask';
 
 const cloneSelection = (selection?: SelectionMask): SelectionMask | undefined => {

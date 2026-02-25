@@ -1,6 +1,6 @@
 import { toUint8Array } from '@sledge-pdm/core';
 import { doCommands } from '~/features/history';
-import { cutPasteSnippet } from '~/features/history/command/snippet/CutPasteCommands';
+import { cutPasteSnippet } from '~/features/history/commands';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeIndex, addLayerTo, findLayerById, setLayerProp } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';

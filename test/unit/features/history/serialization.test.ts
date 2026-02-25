@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { CommandsHistoryEntry, HistoryEntry } from '~/features/history';
 import { HistoryCommand } from '~/features/history/command/HistoryCommand';
 import { SetActiveLayerCommand } from '~/features/history/command/layer_list/SetActiveLayerCommand';
-import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
-import { HistoryEntry } from '~/features/history/entry/HistoryEntry';
 import {
   deserializeHistoryEntry,
   deserializeHistoryStacks,

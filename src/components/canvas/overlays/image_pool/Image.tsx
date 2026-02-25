@@ -1,15 +1,13 @@
 import { css } from '@acab/ecsstatic';
 import { clsx, ImagePoolEntry } from '@sledge-pdm/core';
-import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
+import { color, Icon, showContextMenu } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
-import { hideEntry, removeEntry, selectEntry, showEntry, transferToCurrentLayer, updateEntryPartial } from '~/features/image_pool';
-import { registerEntryUpdate } from '~/features/image_pool/actions';
-import { cloneEntry } from '~/features/image_pool/service';
+import { cloneEntry, registerEntryUpdate, selectEntry, updateEntryPartial } from '~/features/image_pool';
+import { buildImagePoolEntryContextMenu } from '~/features/image_pool/contextMenu';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { ContextMenuItems } from '~/utils/ContextMenuItems';
 
 const imageRoot = css`
   position: absolute;
@@ -167,41 +165,11 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
     e.stopPropagation();
     e.stopImmediatePropagation();
     selectEntry(entry.id);
-    const showHideItem: MenuListOption = entry.visible
-      ? {
-          ...ContextMenuItems.BaseImageHide,
-          onSelect: () => {
-            hideEntry(entry.id);
-            selectEntry(undefined);
-          },
-        }
-      : {
-          ...ContextMenuItems.BaseImageShow,
-          onSelect: () => {
-            showEntry(entry.id);
-            selectEntry(entry.id);
-          },
-        };
-    let label = entry.descriptionName ?? '[ unknown ]';
-    if (!entry.visible) label += ' (hidden)';
     showContextMenu(
-      [
-        { type: 'label', label },
-        showHideItem,
-        {
-          ...ContextMenuItems.BaseTransfer,
-          onSelect: () => transferToCurrentLayer(entry.id, false),
-        },
-        {
-          ...ContextMenuItems.BaseTransferRemove,
-          onSelect: () => transferToCurrentLayer(entry.id, true),
-        },
-        {
-          ...ContextMenuItems.BaseRemove,
-          label: 'Remove from pool',
-          onSelect: () => removeEntry(entry.id),
-        },
-      ],
+      buildImagePoolEntryContextMenu(entry, {
+        onHide: () => selectEntry(undefined),
+        onShow: () => selectEntry(entry.id),
+      }),
       e
     );
   };

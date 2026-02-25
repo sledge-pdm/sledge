@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { type CommandLine, CommandsHistoryEntry } from '~/features/history';
 import { HistoryCommand } from '~/features/history/command/HistoryCommand';
-import { CommandLine, CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
 
 class FakeCommand extends HistoryCommand {
   constructor(

@@ -3,11 +3,8 @@
 import { BaseLayerColorMode, HistoryContext, Layer, LayerType } from '@sledge-pdm/core';
 import { BlendMode, FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
 import { adjustZoomToFit } from '~/features/canvas';
-import { historyManager } from '~/features/history';
-import { CanvasSizeCommand } from '~/features/history/command/canvas/CanvasSizeCommand';
-import { layerMergeSnippet } from '~/features/history/command/snippet/LayerMergeCommands';
-import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
-import { doCommands } from '~/features/history/service';
+import { doCommands, registerCommandsHistory } from '~/features/history';
+import { CanvasSizeCommand, layerMergeSnippet } from '~/features/history/commands';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
@@ -320,6 +317,6 @@ export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
     icon: layerDirection === 'cw' ? '/assets/icons/actions/canvas_rotate_counterclockwise.png' : '/assets/icons/actions/canvas_rotate_clockwise.png',
     description: 'rotate canvas',
   };
-  historyManager.addEntry(new CommandsHistoryEntry(command, context));
+  registerCommandsHistory(command, { context });
   updateFrascoCanvas();
 };

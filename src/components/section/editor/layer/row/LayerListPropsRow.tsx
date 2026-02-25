@@ -2,9 +2,8 @@ import { css } from '@acab/ecsstatic';
 import { Dropdown, Slider } from '@sledge-pdm/ui';
 import { debounce } from '@solid-primitives/scheduled';
 import { Component } from 'solid-js';
-import { historyManager } from '~/features/history';
-import { LayerPropsCommand } from '~/features/history/command/layer/LayerPropsCommand';
-import { CommandsHistoryEntry } from '~/features/history/entry/CommandsHistoryEntry';
+import { registerCommandsHistory } from '~/features/history';
+import { LayerPropsCommand } from '~/features/history/commands';
 import { activeLayer, blendModeOptions, findLayerById, setLayerProp } from '~/features/layer';
 import { flexRow } from '~/styles/styles';
 
@@ -28,7 +27,7 @@ const LayerListPropsRow: Component = () => {
     if (layer) {
       pendingAction.registerAfter(layer);
       if (pendingAction.hasDiff()) {
-        historyManager.addEntry(new CommandsHistoryEntry([pendingAction]));
+        registerCommandsHistory([pendingAction]);
       }
     }
 

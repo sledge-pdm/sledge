@@ -13,22 +13,14 @@ import { exportDir, getDefinedDriveLetters, normalizeJoin, normalizePath } from 
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { dialog, DirEntry, fs } from '~/utils/platform';
 import { openExportWithPath } from '../export/Export';
+import { useExplorerNavigation } from './utils/useExplorerNavigation';
 
-// Styles
 const explorerContainer = css`
   display: flex;
   flex-direction: column;
   width: 100%;
   padding-left: 8px;
   gap: 8px;
-`;
-
-const driveDropdownContainer = css`
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  align-items: center;
-  justify-content: end;
 `;
 
 const explorerInner = css`
@@ -49,6 +41,8 @@ const navigationRow = css`
   flex-direction: row;
   width: 100%;
   align-items: center;
+  background: var(--color-surface);
+  padding: 4px 8px;
 `;
 
 const menuButtonContainer = css`
@@ -66,6 +60,7 @@ const pathInput = css`
   font-family: PM10;
   font-size: 10px;
   letter-spacing: 1px;
+  padding: 0;
   flex-grow: 1;
 `;
 
@@ -98,22 +93,38 @@ const errorText = css`
   color: var(--color-error);
 `;
 
-const emptyText = css`
-  color: var(--color-muted);
-`;
-
 const Explorer: Component = () => {
   let inputRef: HTMLInputElement | undefined = undefined;
+
   const [configStore, setConfigStore] = createStore<FilesConfig>({
     showOnlySledgeOpenable: true,
     twoColumns: false,
     pathEditMode: false,
   });
-  const [currentPath, setCurrentPath] = createSignal<string>('');
-  createEffect(() => {
+  const { currentPath, setCurrentPath, push, back, forward } = useExplorerNavigation('');
+  createEffect(async () => {
     const newPath = currentPath();
-    if (newPath) setAppearanceStore('explorerPath', newPath);
+    if (newPath) {
+      // update store
+      setAppearanceStore('explorerPath', newPath);
+      // update explorer entries
+      const normalized = normalizePath(newPath);
+      try {
+        const dirEntries = await fs.readDir(normalized);
+        if (currentPath() !== newPath) return;
+        sortEntries(dirEntries);
+        setEntries(dirEntries);
+      } catch (e) {
+        // handle error
+        await dialog.message(`Couldn't open directory.\n${normalized}`, {
+          kind: 'warning',
+          title: 'Explorer',
+          okLabel: 'OK',
+        });
+      }
+    }
   });
+
   const [entries, setEntries] = createSignal<DirEntry[] | undefined>([]);
   const visibleEntries = createMemo<DirEntry[] | undefined>(() => {
     const currentEntries = entries();
@@ -125,15 +136,9 @@ const Explorer: Component = () => {
     });
   });
   const [pathDraft, setPathDraft] = createSignal<string>('');
-
   const [driveLetters, setDriveLetters] = createSignal<string[] | undefined>(undefined);
 
-  let defaultExplorerPath: string | undefined;
-  let lastValidPath: string | undefined;
-  let loadRequestToken = 0;
   let skipBlurApply = false;
-  let backPath: string | undefined;
-  let forwardPath: string | undefined;
 
   const driveRootFromLetter = (letter: string | undefined): string | undefined => {
     if (!letter) return undefined;
@@ -160,187 +165,40 @@ const Explorer: Component = () => {
     });
   };
 
-  const revertToPath = (path: string) => {
-    setCurrentPath(path);
-    if (!configStore.pathEditMode) setPathDraft(path);
-  };
-
-  const setPath = async (path: string, allowRetry = true): Promise<boolean> => {
-    const normalized = normalizeDirectoryPath(path);
-    if (!normalized) return false;
-
-    const previousValidPath = lastValidPath ?? currentPath();
-    if (normalized === previousValidPath) {
-      if (currentPath() !== previousValidPath) {
-        revertToPath(previousValidPath);
-      } else if (!configStore.pathEditMode) {
-        setPathDraft(previousValidPath);
-      }
-      return true;
-    }
-
-    const requestToken = ++loadRequestToken;
-    revertToPath(normalized);
-
-    try {
-      const dirEntries = await fs.readDir(normalized);
-      if (requestToken !== loadRequestToken) return true;
-      sortEntries(dirEntries);
-      setEntries(dirEntries);
-      lastValidPath = normalized;
-      if (!defaultExplorerPath) defaultExplorerPath = normalized;
-      return true;
-    } catch (error) {
-      if (requestToken !== loadRequestToken) return false;
-
-      const fallback =
-        allowRetry &&
-        ((lastValidPath && lastValidPath !== normalized && lastValidPath) ||
-          (defaultExplorerPath && defaultExplorerPath !== normalized && defaultExplorerPath));
-
-      await dialog.message(`Cannot open directory.\n${normalized}${fallback ? `\nReverting to ${fallback}.` : ''}`, {
-        kind: 'warning',
-        title: 'Explorer',
-        okLabel: 'OK',
-      });
-
-      if (fallback) {
-        return await setPath(fallback, false);
-      }
-
-      if (previousValidPath) {
-        revertToPath(previousValidPath);
-        return false;
-      }
-
-      setEntries(undefined);
-      setCurrentPath('');
-      if (!configStore.pathEditMode) setPathDraft('');
-      return false;
-    }
-  };
-
-  type HistoryMode = 'push' | 'back' | 'forward' | 'replace';
-
-  const navigatePath = async (path: string, options?: { mode?: HistoryMode; allowRetry?: boolean }) => {
-    const mode = options?.mode ?? 'push';
-    const allowRetry = options?.allowRetry ?? true;
-    const previous = currentPath();
-    const previousBack = backPath;
-    const previousForward = forwardPath;
-    let candidateBack = backPath;
-    let candidateForward = forwardPath;
-
-    if (mode !== 'replace') {
-      if (mode === 'push') {
-        candidateBack = previous ? previous : candidateBack;
-        candidateForward = undefined;
-      } else if (mode === 'back') {
-        candidateForward = previous ? previous : candidateForward;
-      } else if (mode === 'forward') {
-        candidateBack = previous ? previous : candidateBack;
-      }
-    }
-
-    const success = await setPath(path, allowRetry);
-    const changed = success && currentPath() !== previous;
-
-    if (!changed) {
-      backPath = previousBack;
-      forwardPath = previousForward;
-      return false;
-    }
-
-    if (mode === 'replace') {
-      return true;
-    }
-
-    backPath = candidateBack;
-    forwardPath = candidateForward;
-
-    if (mode === 'back') {
-      backPath = undefined;
-    } else if (mode === 'forward') {
-      forwardPath = undefined;
-    }
-
-    return true;
-  };
-
-  const handleBackNavigation = async () => {
-    if (backPath) {
-      const target = backPath;
-      await navigatePath(target, { mode: 'back' });
-      return;
-    }
-
-    const current = currentPath();
-    const parent = current ? getParentDirectory(current) : undefined;
-    if (!parent) return;
-    if (current) {
-      forwardPath = current;
-    }
-    await navigatePath(parent, { mode: 'replace' });
-  };
-
-  const handleForwardNavigation = async () => {
-    if (!forwardPath) return;
-    const target = forwardPath;
-    await navigatePath(target, { mode: 'forward' });
-  };
-
   const applyPathDraft = async () => {
     const rawDraft = pathDraft();
-    if (!rawDraft.trim()) {
-      setPathDraft(currentPath());
-      setConfigStore('pathEditMode', false);
-      return;
+    if (rawDraft.trim()) {
+      const normalizedDraft = normalizeDirectoryPath(rawDraft);
+      if (normalizedDraft && normalizedDraft !== currentPath()) {
+        // prevent pushing same path
+        push(normalizedDraft);
+      }
     }
-
-    const normalizedDraft = normalizeDirectoryPath(rawDraft);
-    if (!normalizedDraft) {
-      setPathDraft(currentPath());
-      setConfigStore('pathEditMode', false);
-      return;
-    }
-
-    if (normalizedDraft === currentPath()) {
-      setPathDraft(currentPath());
-      setConfigStore('pathEditMode', false);
-      return;
-    }
-
-    await navigatePath(rawDraft);
     setPathDraft(currentPath());
     setConfigStore('pathEditMode', false);
   };
 
   const handleMouseDown = (e: MouseEvent) => {
     // prevent if canvas area focused
-    if ((e.target as HTMLElement).closest('#canvas-area')) {
-      return;
-    }
+    if ((e.target as HTMLElement).closest('#canvas-area')) return;
 
     if (e.button === 3) {
       e.preventDefault();
-      handleBackNavigation();
-      return;
+      back();
     } else if (e.button === 4) {
       e.preventDefault();
-      handleForwardNavigation();
-      return;
+      forward();
     }
   };
 
   onMount(async () => {
     const openPath = ioStore.savedLocation.path ? normalizePath(ioStore.savedLocation.path) : undefined;
     const fallbackPath = await exportDir();
-    defaultExplorerPath = fallbackPath;
     const editorSavedPath = appearanceStore.explorerPath ?? undefined;
     const defaultPath = editorSavedPath ?? openPath ?? fallbackPath;
     if (defaultPath) {
       setPathDraft(defaultPath);
-      await navigatePath(defaultPath, { mode: 'replace' });
+      setCurrentPath(defaultPath);
     }
 
     setDriveLetters(await getDefinedDriveLetters());
@@ -352,14 +210,24 @@ const Explorer: Component = () => {
     window.removeEventListener('mousedown', handleMouseDown);
   });
 
+  const enterEditMode = () => {
+    setPathDraft(currentPath());
+    setConfigStore('pathEditMode', true);
+    skipBlurApply = false;
+    setTimeout(() => {
+      inputRef?.focus();
+      inputRef?.select();
+    }, 0);
+  };
+
   const [isMenuOpened, setMenuOpened] = createSignal<boolean>(false);
 
   return (
     <div class={explorerContainer}>
       <Show when={driveLetters()}>
-        <div class={driveDropdownContainer}>
+        <div class={controlsRow}>
           <Dropdown
-            align='right'
+            align='left'
             wheelSpin={false}
             options={driveLetters()!
               .map((letter) => driveRootFromLetter(letter))
@@ -371,29 +239,90 @@ const Explorer: Component = () => {
             value={driveRootFromPath(currentPath()) ?? ''}
             onChange={async (v) => {
               setPathDraft(v);
-              await navigatePath(v, { mode: 'replace' });
+              push(v);
             }}
           />
+          <div class={controlButtonsRow}>
+            <div class={iconButton} onClick={() => enterEditMode()}>
+              <Icon src={'/assets/icons/files/edit.png'} base={8} hoverColor={color.accent} />
+            </div>
+            <div
+              class={iconButton}
+              onClick={() => {
+                const parent = getParentDirectory(currentPath());
+                if (parent) push(parent);
+              }}
+            >
+              <Icon src={'/assets/icons/files/folder_up.png'} base={8} hoverColor={color.accent} />
+            </div>
+            <div class={iconButton} onClick={() => setConfigStore('twoColumns', (v) => !v)}>
+              <Icon
+                src={configStore.twoColumns ? '/assets/icons/files/two_column.png' : '/assets/icons/files/one_column.png'}
+                base={8}
+                hoverColor={color.accent}
+              />
+            </div>
+            <div class={iconButton} title='show only files that sledge can open.' onClick={() => setConfigStore('showOnlySledgeOpenable', (v) => !v)}>
+              <Icon src={'/assets/icons/files/file_sledge.png'} base={8} color={configStore.showOnlySledgeOpenable ? color.enabled : color.muted} />
+            </div>
+            <div class={menuButtonContainer}>
+              <div
+                class={iconButton}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setMenuOpened(!isMenuOpened());
+                }}
+              >
+                <Icon src={'/assets/icons/misc/vert_dots.png'} base={8} hoverColor={color.accent} />
+              </div>
+              <Show when={isMenuOpened()}>
+                <MenuList
+                  align='right'
+                  onClose={() => setMenuOpened(false)}
+                  closeByOutsideClick
+                  style={{ 'margin-top': '4px', 'margin-left': '-8px' }}
+                  options={[
+                    {
+                      type: 'item',
+                      label: 'open in explorer',
+                      onSelect: async () => {
+                        await revealInFileBrowser(currentPath());
+                      },
+                    },
+                    {
+                      type: 'item',
+                      label: 'back to saved folder',
+                      disabled: !ioStore.savedLocation.path || !ioStore.savedLocation.name,
+                      onSelect: () => {
+                        if (ioStore.savedLocation.path) push(ioStore.savedLocation.path);
+                      },
+                    },
+                    {
+                      type: 'item',
+                      label: 'Export to this folder',
+                      onSelect: () => {
+                        showTabContent('export', 'rightSide');
+                        openExportWithPath(currentPath());
+                      },
+                    },
+                  ]}
+                />
+              </Show>
+            </div>
+          </div>
         </div>
       </Show>
       <div class={explorerInner}>
         <div class={navigationPanel}>
-          <div class={navigationRow}>
-            <Show
-              when={configStore.pathEditMode}
-              fallback={
-                <>
-                  <Breadcrumbs
-                    path={currentPath()}
-                    onNavigate={(value) => {
-                      void navigatePath(value);
-                    }}
-                  />
-                </>
-              }
-            >
+          <div class={navigationRow} onDblClick={() => enterEditMode()}>
+            <Show when={configStore.pathEditMode} fallback={<Breadcrumbs path={currentPath()} onNavigate={(value) => push(value)} />}>
               <input
                 ref={(ref) => (inputRef = ref)}
+                class={pathInput}
+                style={{
+                  opacity: configStore.pathEditMode ? 1 : 0.4,
+                }}
                 value={pathDraft()}
                 onInput={(e) => {
                   setPathDraft(e.currentTarget.value);
@@ -419,113 +348,8 @@ const Explorer: Component = () => {
                   if (!configStore.pathEditMode) return;
                   await applyPathDraft();
                 }}
-                class={pathInput}
-                style={{
-                  opacity: configStore.pathEditMode ? 1 : 0.4,
-                }}
               />
             </Show>
-          </div>
-
-          <div class={controlsRow}>
-            <div class={controlButtonsRow}>
-              <div
-                class={iconButton}
-                onClick={() => {
-                  setPathDraft(currentPath());
-                  setConfigStore('pathEditMode', true);
-                  skipBlurApply = false;
-                  setTimeout(() => {
-                    inputRef?.focus();
-                    inputRef?.select();
-                  }, 0);
-                }}
-              >
-                <Icon src={'/assets/icons/files/edit.png'} base={8} hoverColor={color.accent} />
-              </div>
-              <div
-                class={iconButton}
-                onClick={() => {
-                  const parent = getParentDirectory(currentPath());
-                  if (parent) {
-                    void navigatePath(parent);
-                  }
-                }}
-              >
-                <Icon src={'/assets/icons/files/folder_up.png'} base={8} hoverColor={color.accent} />
-              </div>
-              <div
-                class={iconButton}
-                onClick={() => {
-                  setConfigStore('twoColumns', (v) => !v);
-                }}
-              >
-                <Icon
-                  src={configStore.twoColumns ? '/assets/icons/files/two_column.png' : '/assets/icons/files/one_column.png'}
-                  base={8}
-                  hoverColor={color.accent}
-                />
-              </div>
-              <div
-                class={iconButton}
-                title='show only files that sledge can open.'
-                onClick={() => {
-                  setConfigStore('showOnlySledgeOpenable', (v) => !v);
-                }}
-              >
-                <Icon
-                  src={'/assets/icons/files/file_sledge.png'}
-                  base={8}
-                  color={configStore.showOnlySledgeOpenable ? color.enabled : color.muted}
-                  hoverColor={color.enabled}
-                />
-              </div>
-              <div class={menuButtonContainer}>
-                <div
-                  class={iconButton}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setMenuOpened(!isMenuOpened());
-                  }}
-                >
-                  <Icon src={'/assets/icons/misc/vert_dots.png'} base={8} hoverColor={color.accent} />
-                </div>
-                <Show when={isMenuOpened()}>
-                  <MenuList
-                    align='right'
-                    onClose={() => setMenuOpened(false)}
-                    closeByOutsideClick
-                    style={{ 'margin-top': '4px', 'margin-left': '-8px' }}
-                    options={[
-                      {
-                        type: 'item',
-                        label: 'open in explorer',
-                        onSelect: async () => {
-                          await revealInFileBrowser(currentPath());
-                        },
-                      },
-                      {
-                        type: 'item',
-                        label: 'back to saved folder',
-                        disabled: !ioStore.savedLocation.path || !ioStore.savedLocation.name,
-                        onSelect: () => {
-                          if (ioStore.savedLocation.path) void navigatePath(ioStore.savedLocation.path);
-                        },
-                      },
-                      {
-                        type: 'item',
-                        label: 'Export to this folder',
-                        onSelect: () => {
-                          showTabContent('export', 'rightSide');
-                          openExportWithPath(currentPath());
-                        },
-                      },
-                    ]}
-                  />
-                </Show>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -554,9 +378,9 @@ const Explorer: Component = () => {
                       entry={entry}
                       isMe={!!isMe}
                       isPartOfMe={!!isPartOfMe}
-                      onClick={(e) => {
+                      onClick={() => {
                         if (entry.isDirectory) {
-                          void navigatePath(path);
+                          push(path);
                           return true;
                         }
                         return false;

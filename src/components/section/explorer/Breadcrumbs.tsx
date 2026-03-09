@@ -10,8 +10,6 @@ const breadcrumbsContainer = css`
   width: 100%;
   flex-wrap: wrap;
   margin-right: auto;
-  padding: 4px 8px;
-  background: var(--color-surface);
 `;
 
 const breadcrumbItem = css`

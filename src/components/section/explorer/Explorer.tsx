@@ -263,12 +263,7 @@ const Explorer: Component = () => {
               />
             </div>
             <div class={iconButton} title='show only files that sledge can open.' onClick={() => setConfigStore('showOnlySledgeOpenable', (v) => !v)}>
-              <Icon
-                src={'/assets/icons/files/file_sledge.png'}
-                base={8}
-                color={configStore.showOnlySledgeOpenable ? color.enabled : color.muted}
-                hoverColor={color.enabled}
-              />
+              <Icon src={'/assets/icons/files/file_sledge.png'} base={8} color={configStore.showOnlySledgeOpenable ? color.enabled : color.muted} />
             </div>
             <div class={menuButtonContainer}>
               <div

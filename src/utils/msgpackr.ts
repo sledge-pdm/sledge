@@ -1,7 +1,8 @@
 import { Packr } from 'msgpackr';
 import { fs } from './platform';
 
-export const packr = new Packr({ useRecords: true, mapsAsObjects: false });
+// Preserve Set/Map types in serialized project data.
+export const packr = new Packr({ useRecords: true, mapsAsObjects: false, moreTypes: true });
 
 export async function unpackFromPath(path: string): Promise<any | null> {
   try {

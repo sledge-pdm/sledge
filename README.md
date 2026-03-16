@@ -2,10 +2,6 @@
 
 [![release](https://github.com/sledge-pdm/sledge/actions/workflows/release.yml/badge.svg)](https://github.com/sledge-pdm/sledge/actions/workflows/release.yml)
 &nbsp;
-[![development_release](https://github.com/sledge-pdm/sledge/actions/workflows/development_release.yml/badge.svg)](https://github.com/sledge-pdm/sledge/actions/workflows/development_release.yml)
-&nbsp;
-[![development_build](https://github.com/sledge-pdm/sledge/actions/workflows/development_build.yml/badge.svg)](https://github.com/sledge-pdm/sledge/actions/workflows/development_build.yml)
-&nbsp;
 ![Vercel Deploy](https://deploy-badge.vercel.app/vercel/sledge-gold)
 &nbsp;
 ![GitHub Release](https://img.shields.io/github/v/release/sledge-pdm/sledge)

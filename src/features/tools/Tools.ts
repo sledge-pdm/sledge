@@ -48,13 +48,13 @@ export type PresetConfig = {
 export type PenPresetConfig = PresetConfig & {
   shape?: 'circle' | 'square';
   sizeHistory?: number[];
-  // opacity?: number;
+  opacity?: number; // 1-100 (%)
 };
 
 export type EraserPresetConfig = PresetConfig & {
   shape?: 'circle' | 'square';
   sizeHistory?: number[];
-  // hardness?: number;
+  opacity?: number; // 1-100 (%)
 };
 
 export type FillPresetConfig = PresetConfig & {
@@ -84,7 +84,7 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1, shape: 'circle' } as PenPresetConfig,
+        [DEFAULT_PRESET]: { size: 1, shape: 'circle', opacity: 100 } as PenPresetConfig,
       },
     },
   } as ToolCategory<PenPresetConfig>,
@@ -96,7 +96,7 @@ export const toolCategories = {
     presets: {
       selected: DEFAULT_PRESET,
       options: {
-        [DEFAULT_PRESET]: { size: 1, shape: 'circle' } as EraserPresetConfig,
+        [DEFAULT_PRESET]: { size: 1, shape: 'circle', opacity: 100 } as EraserPresetConfig,
       },
     },
   } as ToolCategory<EraserPresetConfig>,

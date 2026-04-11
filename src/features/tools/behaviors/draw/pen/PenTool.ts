@@ -173,6 +173,7 @@ export class PenTool implements ToolBehavior {
     const presetName = args.presetName ?? DEFAULT_PRESET;
     const preset = getPresetOf(this.categoryId, presetName) as PenPresetConfig | undefined;
     const size = preset?.size ?? 1;
+    const opacity = (preset?.opacity ?? 100) / 100;
     const finalColor = this.isEraserMode() ? transparent : color;
 
     return {
@@ -181,7 +182,7 @@ export class PenTool implements ToolBehavior {
       style: {
         color: finalColor,
         size,
-        opacity: 1,
+        opacity,
       },
     };
   }

@@ -5,6 +5,8 @@ import { tryRedo, tryUndo } from '~/features/history';
 import { saveProject } from '~/features/io/project/save';
 import { toggleLayerVisibility } from '~/features/layer';
 import { clearLayersFromUser, duplicateLayers, removeLayersFromUser } from '~/features/layer/service';
+import { deleteSelectedArea } from '~/features/selection/actions';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import {
   getActiveToolCategoryId,
   getCurrentPresetConfig,
@@ -93,7 +95,11 @@ const KeyListener: Component = () => {
 
     if (!inputFocused && isKeyMatchesToEntry(e, keyConfigStore()['layer_delete'])) {
       e.preventDefault();
-      await removeLayersFromUser();
+      if (selectionManager.hasSelection()) {
+        deleteSelectedArea();
+      } else {
+        await removeLayersFromUser();
+      }
     }
 
     if (!inputFocused && isKeyMatchesToEntry(e, keyConfigStore()['layer_clear'])) {

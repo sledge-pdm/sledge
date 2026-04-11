@@ -27,6 +27,22 @@ export const eraserPresetFields: PresetFieldMeta<EraserPresetConfig>[] = [
     },
   },
   {
+    key: 'opacity',
+    label: 'Opacity',
+    component: 'Slider',
+    props: {
+      labelWidth: 40,
+      min: 1,
+      max: 100,
+      step: 1,
+      allowFloat: false,
+    },
+    tips: 'Eraser brush opacity',
+    customFormat: (v: number) => {
+      return `${v} %`;
+    },
+  },
+  {
     key: 'shape',
     label: 'Shape',
     component: 'Dropdown',

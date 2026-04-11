@@ -1,6 +1,7 @@
 import { Layer, LayerType, RawPixelData } from '@sledge-pdm/core';
 import { BlendMode } from '@sledge-pdm/frasco';
-import { logUserInfo } from '~/features/log/service';
+import { Consts } from '~/Consts';
+import { logUserInfo, logUserWarn } from '~/features/log/service';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { LayerAddCommand } from '../history/command/layer/LayerAddCommand';
 import { LayerPropsCommand } from '../history/command/layer/LayerPropsCommand';
@@ -26,7 +27,7 @@ export function addLayer(
     mode?: BlendMode;
   },
   options?: AddLayerOptions
-) {
+): boolean {
   return addLayerTo(0, layer, options);
 }
 
@@ -41,8 +42,13 @@ export function addLayerTo(
     cutFreeze?: boolean;
   },
   options?: AddLayerOptions
-) {
+): boolean {
   const { register = true } = options ?? {};
+
+  if (projectStore.layers.layers.length >= Consts.maxLayerSize) {
+    logUserWarn(`Cannot add more layers. Maximum layer count (${Consts.maxLayerSize}) reached.`);
+    return false;
+  }
   const uniqueName = options?.uniqueName === undefined ? true : options.uniqueName;
 
   const command = new LayerAddCommand({
@@ -52,6 +58,7 @@ export function addLayerTo(
     uniqueName,
   });
   doCommands(command, { register });
+  return true;
 }
 
 export interface RemoveLayerOptions {

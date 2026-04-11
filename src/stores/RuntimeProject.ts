@@ -15,6 +15,18 @@ import { getCurrentVersion } from '~/utils/VersionUtils';
 import { setIOStore } from './EditorStores';
 import { CurrentProject, projectStore, RuntimeProject, setProjectStore } from './RuntimeProjectStore';
 
+export const normalizeLayerSelection = (selected: unknown): Set<string> => {
+  if (selected instanceof Set) {
+    return new Set(Array.from(selected).filter((id): id is string => typeof id === 'string'));
+  }
+
+  if (Array.isArray(selected)) {
+    return new Set(selected.filter((id): id is string => typeof id === 'string'));
+  }
+
+  return new Set<string>();
+};
+
 export async function initRuntimeProject(project: ProjectBase) {
   // things which is not included in RuntimeProject
   const adapter = getProjectAdapter(project);
@@ -72,6 +84,7 @@ export async function initRuntimeProject(project: ProjectBase) {
     const { project, ...runtime } = fullSnapshot;
     return runtime as RuntimeProjectSnapshot;
   });
+  const layerListState = adapter.getLayerListState();
 
   // set runtime project
   const runtime: RuntimeProject = {
@@ -82,7 +95,10 @@ export async function initRuntimeProject(project: ProjectBase) {
     },
     layers: {
       layers: adapter.getLayers() ?? [],
-      state: adapter.getLayerListState(),
+      state: {
+        ...layerListState,
+        selected: normalizeLayerSelection(layerListState.selected),
+      },
     },
     project: adapter.getProjectInfo(),
     snapshots: runtimeSnapshots ?? [],

@@ -18,11 +18,13 @@ import { ErrorTypes, ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { logUserWarn } from '~/features/log/service';
 import { handleCloseRequest } from '~/routes/editor/close';
 import { getInitialLoader, InitialLoadTypes } from '~/routes/editor/load';
-import { reportInitialLoadError } from '~/routes/editor/loadError';
+import { reportInitialLoadError, reportLoadTimeout } from '~/routes/editor/loadError';
 import { appearanceStore, EditorStateStore, ioStore, setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { flexCol, pageRoot } from '~/styles/styles';
+import { pathToFileLocation } from '~/utils/FileUtils';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';
+import { safeInvoke } from '~/utils/TauriUtils';
 import { isFirstStartup, showMainWindow } from '~/utils/WindowUtils';
 import { disposeFrascoRenderer } from '~/webgl/FrascoRenderer';
 
@@ -65,9 +67,32 @@ export default function Editor() {
   // Not throwable / return if loading itself was OK or not
   const loadProject = async (editorState: EditorStateStore): Promise<boolean> => {
     const { initialLoadType, loader, fatalError, targetPath } = await getInitialLoader(editorState);
+
+    if (targetPath) setIOStore('loadingTargetPath', pathToFileLocation(targetPath));
+
     if (!loader) {
       await reportInitialLoadError(initialLoadType, fatalError, undefined, targetPath);
     } else {
+      // For path-based loads, pre-check accessibility with a 5s timeout before
+      // attempting any blocking file I/O. This prevents the window from freezing
+      // when the target file is on an unavailable network drive.
+      if (targetPath) {
+        const accessible = await safeInvoke<boolean>('check_file_accessible', {
+          path: targetPath,
+          timeoutMs: 5000,
+        }).catch(() => true); // command error → assume accessible, let normal load handle it
+
+        if (accessible === false) {
+          if (initialLoadType === InitialLoadTypes.PATH_PROJECT_LAST || initialLoadType === InitialLoadTypes.PATH_IMAGE_PROJECT_LAST) {
+            setIOStore('savedLocation', { path: undefined, name: undefined });
+            await saveEditorStateImmediate(['lastPath']);
+          }
+          await reportLoadTimeout(targetPath);
+          const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();
+          return fallbackResult.ok;
+        }
+      }
+
       const result = await loader.load();
       if (result.ok) {
         return true;
@@ -130,6 +155,7 @@ export default function Editor() {
       return;
     } finally {
       setIOStore('isInInitialLoading', false);
+      setIOStore('loadingTargetPath', undefined);
     }
   });
 

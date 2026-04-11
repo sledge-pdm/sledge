@@ -3,6 +3,9 @@ import { InitialLoadTypes } from '~/routes/editor/load';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { dialog, window as platformWindow } from '~/utils/platform';
 
+export const ERROR_LOAD_TIMED_OUT =
+  'Loading timed out.\n{path}\n\nPossible causes:\n- The file is on a network drive that is not yet connected\n- The project is extremely large\n\nOpening new project.';
+
 export const ERROR_NEW_PROJECT = 'Failed to load new project.';
 export const ERROR_NEW_PROJECT_FALLBACK_BUT_ITS_NOT = 'Failed to load new project.';
 export const ERROR_LAST_PROJECT_NOT_FOUND_OPENED_NEW = 'Last project file({path}) not found.\nOpening new project.';
@@ -68,6 +71,13 @@ const errorFallback: LoadError = {
   type: ErrorTypes.UNKNOWN_ERROR,
   detail: 'Unknown error',
 };
+
+export async function reportLoadTimeout(path: string): Promise<void> {
+  await showDialog(ErrorTypes.INTERNAL_ERROR, ERROR_LOAD_TIMED_OUT, {
+    closeWindowWithOK: false,
+    path,
+  });
+}
 
 export async function reportInitialLoadError(type: InitialLoadTypes, error?: LoadError, fallbackBeforeType?: InitialLoadTypes, targetPath?: string) {
   const fallbackedError: LoadError = Object.assign(errorFallback, error);

@@ -3,17 +3,15 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import glsl from 'vite-plugin-glsl';
 import solidPlugin from 'vite-plugin-solid';
-import topLevelAwait from 'vite-plugin-top-level-await';
 import wasmPlugin from 'vite-plugin-wasm';
 
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [wasmPlugin(), ecsstatic(), solidPlugin(), glsl(), topLevelAwait()],
+  plugins: [wasmPlugin(), ecsstatic(), solidPlugin(), glsl()],
   build: {
     outDir: 'dist',
-    // Tauri uses Chromium on Windows and WebKit on macOS and Linux
-    target: process.env.TAURI_ENV_PLATFORM == 'windows' ? 'chrome105' : 'safari13',
+    target: 'esnext',
     // don't minify for debug builds
     minify: !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false,
     // produce sourcemaps for debug builds

@@ -1,6 +1,8 @@
-import SizeHistoryRow from '~/components/section/editor/tool/SizeHistoryRow';
+import { lazy } from 'solid-js';
 import { EraserPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
+
+const SizeHistoryRow = lazy(() => import('~/components/section/editor/tool/SizeHistoryRow'));
 
 export const eraserPresetFields: PresetFieldMeta<EraserPresetConfig>[] = [
   {
@@ -24,6 +26,22 @@ export const eraserPresetFields: PresetFieldMeta<EraserPresetConfig>[] = [
     label: undefined,
     component: () => {
       return <SizeHistoryRow categoryId={TOOL_CATEGORIES.ERASER} />;
+    },
+  },
+  {
+    key: 'opacity',
+    label: 'Opacity',
+    component: 'Slider',
+    props: {
+      labelWidth: 40,
+      min: 1,
+      max: 100,
+      step: 1,
+      allowFloat: false,
+    },
+    tips: 'Eraser brush opacity',
+    customFormat: (v: number) => {
+      return `${v} %`;
     },
   },
   {

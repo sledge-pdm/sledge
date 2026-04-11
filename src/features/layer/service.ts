@@ -33,7 +33,7 @@ export function duplicateLayer(layerId: string) {
   const layer = findLayerById(layerId);
   if (!layer) return;
   const buffer = layerManager.exportRawCanvas(layerId);
-  addLayer(
+  const added = addLayer(
     {
       name: layer.name,
       type: layer.type,
@@ -43,6 +43,7 @@ export function duplicateLayer(layerId: string) {
     },
     { initImage: buffer }
   );
+  if (!added) return;
   updateFrascoCanvas(`Layer(${layerId}) duplicated`);
   logUserInfo(`Layer "${layer.name}" duplicated.`, { label: LOG_LABEL });
 }

@@ -1,13 +1,13 @@
 import { Layer, RGBA, transparent } from '@sledge-pdm/core';
 import type { CompositeLayer } from '@sledge-pdm/frasco';
 import { Frasco, BlendMode as FrascoBlendMode } from '@sledge-pdm/frasco';
+import { normalizeMaxLayerCount } from '~/config/GlobalConfig';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { getBaseLayerColor } from '~/features/layer/model';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flip_pixels_vertically } from '~/utils/wasm';
-
-const MAX_LAYERS = 16;
 
 export let frascoRenderer: FrascoRenderer | undefined;
 
@@ -43,6 +43,9 @@ export class FrascoRenderer {
   private overlayVbo: WebGLBuffer;
   private overlayTexture: WebGLTexture;
   private overlayVersion = -1;
+  private overlayPosLoc = -1;
+  private overlayUvLoc = -1;
+  private overlayTexLoc: WebGLUniformLocation | null = null;
   private previewTexture?: WebGLTexture;
   private previewVersion = -1;
 
@@ -84,6 +87,10 @@ export class FrascoRenderer {
     if (!overlayTexture) throw new Error('FrascoRenderer: failed to create overlay texture');
     this.overlayTexture = overlayTexture;
     this.initOverlayResources();
+
+    this.overlayPosLoc = gl.getAttribLocation(this.overlayProgram, 'a_pos');
+    this.overlayUvLoc = gl.getAttribLocation(this.overlayProgram, 'a_uv');
+    this.overlayTexLoc = gl.getUniformLocation(this.overlayProgram, 'u_overlayTex');
   }
 
   public setLayers(layers: Layer[]) {
@@ -103,7 +110,7 @@ export class FrascoRenderer {
   }
 
   public getCompositeLayers(): CompositeLayer[] {
-    const layers = this.layers.toReversed().slice(0, MAX_LAYERS);
+    const layers = this.layers.toReversed().slice(0, this.getMaxLayerCount());
     return this.buildCompositeLayers(layers);
   }
 
@@ -134,7 +141,7 @@ export class FrascoRenderer {
     if (this.width === 0 || this.height === 0) return;
 
     const baseColor: RGBA = this.includeBaseLayer ? getBaseLayerColor(projectStore.layers.state.baseLayer) : [0, 0, 0, 0];
-    const layers = this.layers.toReversed().slice(0, MAX_LAYERS);
+    const layers = this.layers.toReversed().slice(0, this.getMaxLayerCount());
     const composite = this.buildCompositeLayers(layers);
 
     this.frasco.compose(composite, { size: { width: this.width, height: this.height }, baseColor });
@@ -147,7 +154,7 @@ export class FrascoRenderer {
       return new Uint8ClampedArray(0);
     }
 
-    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, MAX_LAYERS));
+    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, this.getMaxLayerCount()));
     this.frasco.compose(composite, { size: { width: this.width, height: this.height }, baseColor: baseColor ?? transparent });
     return this.readPixelsRaw();
   }
@@ -156,7 +163,7 @@ export class FrascoRenderer {
     this.checkDisposed();
     if (this.width === 0 || this.height === 0) return;
 
-    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, MAX_LAYERS));
+    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, this.getMaxLayerCount()));
     this.frasco.compose(composite, {
       size: { width: this.width, height: this.height },
       baseColor: baseColor ?? transparent,
@@ -169,7 +176,7 @@ export class FrascoRenderer {
     if (this.width === 0 || this.height === 0) return;
     if (!targetLayer) return;
 
-    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, MAX_LAYERS));
+    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, this.getMaxLayerCount()));
     this.frasco.composeToLayer(composite, targetLayer, {
       size: { width: this.width, height: this.height },
       baseColor: baseColor ?? transparent,
@@ -265,6 +272,10 @@ export class FrascoRenderer {
     return composite;
   }
 
+  private getMaxLayerCount(): number {
+    return normalizeMaxLayerCount(Number(globalConfig.editor.maxLayerCount));
+  }
+
   private checkDisposed(): void {
     if (this.disposed) {
       throw new Error('FrascoRenderer has been disposed');
@@ -305,22 +316,19 @@ export class FrascoRenderer {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.overlayVbo);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.DYNAMIC_DRAW);
 
-    const posLoc = gl.getAttribLocation(this.overlayProgram, 'a_pos');
-    const uvLoc = gl.getAttribLocation(this.overlayProgram, 'a_uv');
-    if (posLoc >= 0) {
-      gl.enableVertexAttribArray(posLoc);
-      gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 16, 0);
+    if (this.overlayPosLoc >= 0) {
+      gl.enableVertexAttribArray(this.overlayPosLoc);
+      gl.vertexAttribPointer(this.overlayPosLoc, 2, gl.FLOAT, false, 16, 0);
     }
-    if (uvLoc >= 0) {
-      gl.enableVertexAttribArray(uvLoc);
-      gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 16, 8);
+    if (this.overlayUvLoc >= 0) {
+      gl.enableVertexAttribArray(this.overlayUvLoc);
+      gl.vertexAttribPointer(this.overlayUvLoc, 2, gl.FLOAT, false, 16, 8);
     }
 
     gl.useProgram(this.overlayProgram);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.overlayTexture);
-    const texLoc = gl.getUniformLocation(this.overlayProgram, 'u_overlayTex');
-    if (texLoc) gl.uniform1i(texLoc, 0);
+    if (this.overlayTexLoc) gl.uniform1i(this.overlayTexLoc, 0);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);

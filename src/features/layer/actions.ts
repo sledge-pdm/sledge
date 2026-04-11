@@ -1,6 +1,8 @@
 import { Layer, LayerType, RawPixelData } from '@sledge-pdm/core';
 import { BlendMode } from '@sledge-pdm/frasco';
-import { logUserInfo } from '~/features/log/service';
+import { normalizeMaxLayerCount } from '~/config/GlobalConfig';
+import { logUserInfo, logUserWarn } from '~/features/log/service';
+import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { LayerAddCommand } from '../history/command/layer/LayerAddCommand';
 import { LayerPropsCommand } from '../history/command/layer/LayerPropsCommand';
@@ -10,6 +12,10 @@ import { doCommands } from '../history/service';
 import { findLayerById, getOperationTargetLayerIds, resetSelectionState } from './service';
 
 const LOG_LABEL = 'LayerActions';
+
+function getMaxLayerCount() {
+  return normalizeMaxLayerCount(Number(globalConfig.editor.maxLayerCount));
+}
 
 export interface AddLayerOptions {
   initImage?: RawPixelData;
@@ -26,7 +32,7 @@ export function addLayer(
     mode?: BlendMode;
   },
   options?: AddLayerOptions
-) {
+): boolean {
   return addLayerTo(0, layer, options);
 }
 
@@ -41,8 +47,14 @@ export function addLayerTo(
     cutFreeze?: boolean;
   },
   options?: AddLayerOptions
-) {
+): boolean {
   const { register = true } = options ?? {};
+  const maxLayerCount = getMaxLayerCount();
+
+  if (projectStore.layers.layers.length >= maxLayerCount) {
+    logUserWarn(`Cannot add more layers. Maximum layer count (${maxLayerCount}) reached.`);
+    return false;
+  }
   const uniqueName = options?.uniqueName === undefined ? true : options.uniqueName;
 
   const command = new LayerAddCommand({
@@ -52,6 +64,7 @@ export function addLayerTo(
     uniqueName,
   });
   doCommands(command, { register });
+  return true;
 }
 
 export interface RemoveLayerOptions {

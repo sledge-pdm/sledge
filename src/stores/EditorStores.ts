@@ -107,7 +107,14 @@ export const loadEditorStateStore = (state: EditorStateStore): EditorStateStore 
 
   setIOStore('recentFiles', state.recentFiles ?? []);
   state.presets?.forEach((record) => {
-    setToolStore('tools', record.toolId, 'presets', record.presets);
+    const defaultOption = defaultToolStore.tools[record.toolId]?.presets?.options?.['default'];
+    const migratedPresets = defaultOption
+      ? {
+          ...record.presets,
+          options: Object.fromEntries(Object.entries(record.presets.options).map(([key, option]) => [key, { ...defaultOption, ...option }])),
+        }
+      : record.presets;
+    setToolStore('tools', record.toolId, 'presets', migratedPresets);
     eventBus.emit('tools:presetLoaded', { toolId: record.toolId });
   });
 

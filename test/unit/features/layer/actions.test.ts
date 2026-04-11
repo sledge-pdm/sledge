@@ -1,11 +1,13 @@
 import { LayerType } from '@sledge-pdm/core';
 import { BlendMode } from '@sledge-pdm/frasco';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { setGlobalConfig } from '~/stores/GlobalStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 
 const mocks = vi.hoisted(() => ({
   doCommands: vi.fn(),
   logUserInfo: vi.fn(),
+  logUserWarn: vi.fn(),
 }));
 
 vi.mock('~/features/history/service', () => ({
@@ -14,6 +16,7 @@ vi.mock('~/features/history/service', () => ({
 
 vi.mock('~/features/log/service', () => ({
   logUserInfo: mocks.logUserInfo,
+  logUserWarn: mocks.logUserWarn,
 }));
 
 import { addLayer, addLayerTo, removeLayer, reorderLayer, setLayerProp, toggleLayerVisibility } from '~/features/layer/actions';
@@ -35,9 +38,11 @@ describe('features/layer/actions', () => {
     setProjectStore('layers', 'state', 'selectionEnabled', true);
     setProjectStore('layers', 'state', 'selected', new Set(['l1', 'l2']));
     setProjectStore('layers', 'state', 'baseLayer', { colorMode: 'transparent' });
+    setGlobalConfig('editor', 'maxLayerCount', 64);
 
     mocks.doCommands.mockReset();
     mocks.logUserInfo.mockReset();
+    mocks.logUserWarn.mockReset();
   });
 
   it('addLayer creates layer_add command at index 0', () => {
@@ -66,6 +71,16 @@ describe('features/layer/actions', () => {
         uniqueName: false,
       })
     );
+  });
+
+  it('addLayer blocks when configured max layer count is reached', () => {
+    setGlobalConfig('editor', 'maxLayerCount', 3);
+
+    const result = addLayer({ name: 'overflow' }, { register: false });
+
+    expect(result).toBe(false);
+    expect(mocks.doCommands).not.toHaveBeenCalled();
+    expect(mocks.logUserWarn).toHaveBeenCalledWith('Cannot add more layers. Maximum layer count (3) reached.');
   });
 
   it('removeLayer is no-op for undefined or unknown id', () => {

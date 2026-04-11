@@ -16,11 +16,13 @@ describe('io/config/set', () => {
       globalConfigStore: {
         editor: {
           maxHistoryItemsCount: 999,
+          maxLayerCount: 12,
         },
       },
     });
 
     expect(fallbacked.globalConfigStore.editor.maxHistoryItemsCount).toBe(999);
+    expect(fallbacked.globalConfigStore.editor.maxLayerCount).toBe(12);
     expect(fallbacked.globalConfigStore.default.canvasSize.width).toBeDefined();
   });
 

@@ -1,6 +1,7 @@
 import { playwright } from '@vitest/browser-playwright';
 import dotenv from 'dotenv';
 import path from 'path';
+import solidPlugin from 'vite-plugin-solid';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import wasmPlugin from 'vite-plugin-wasm';
 import { defineConfig } from 'vitest/config';
@@ -8,7 +9,7 @@ import { defineConfig } from 'vitest/config';
 const projectRoot = path.resolve(__dirname);
 
 export default defineConfig({
-  plugins: [wasmPlugin(), topLevelAwait()],
+  plugins: [wasmPlugin(), solidPlugin(), topLevelAwait()],
   resolve: {
     alias: {
       '~': path.resolve(projectRoot, 'src'),

@@ -1,4 +1,6 @@
+import ConfigNumberInput from '~/components/config/ConfigNumberInput';
 import { ConfigSections, FieldMeta } from '~/config/ConfigMeta';
+import { maxLayerCountConfig } from '~/config/GlobalConfig';
 
 export const canvasMetas: FieldMeta[] = [
   {
@@ -92,6 +94,26 @@ export const canvasMetas: FieldMeta[] = [
       ],
     },
     tips: `centering canvas when window maximized.`,
+  },
+  {
+    section: ConfigSections.Canvas,
+    kind: 'header',
+    header: 'layers',
+  },
+  {
+    section: ConfigSections.Canvas,
+    path: 'editor/maxLayerCount',
+    label: 'max layer count',
+    component: ({ value, onChange }) => (
+      <ConfigNumberInput
+        value={value() ?? maxLayerCountConfig.defaultValue}
+        min={maxLayerCountConfig.min}
+        max={maxLayerCountConfig.max}
+        applyLabel='apply'
+        onApply={onChange}
+      />
+    ),
+    tips: `maximum number of layers that can exist in a project.`,
   },
   { section: ConfigSections.Canvas, kind: 'header', header: 'misc' },
   {

@@ -6,7 +6,7 @@ import SelectionMask from '~/features/selection/SelectionMask';
 import { SelectionBase } from '~/features/tools/behaviors/selection/SelectionBase';
 import { ToolArgs } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
-import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { LassoSelectionPresetConfig, TOOL_CATEGORIES } from '~/features/tools/ToolTypes';
 import { SelectionEditMode } from '~/stores/editor/InteractStore';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';

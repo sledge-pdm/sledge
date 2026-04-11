@@ -5,7 +5,7 @@ import { logUserInfo } from '~/features/log';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf } from '~/features/tools/ToolController';
-import { FillPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
+import { FillPresetConfig, TOOL_CATEGORIES } from '~/features/tools/ToolTypes';
 import { interactStore } from '~/stores/EditorStores';
 import { fill_mask_area, scanline_flood_fill, scanline_flood_fill_with_mask } from '~/utils/wasm';
 

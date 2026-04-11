@@ -10,10 +10,9 @@
     "jsx": "preserve",
     "esModuleInterop": true,
     "jsxImportSource": "solid-js",
-    "baseUrl": ".",
     "paths": {
-      "~/*": ["src/*"],
-      "@sledge/wasm": ["wasm/pkg/sledge_wasm.js"],
+      "~/*": ["./src/*"],
+      "@sledge/wasm": ["./wasm/pkg/sledge_wasm.js"],
       "@assets/*": ["./public/assets/*"]
     },
     "types": ["vite/client"],

@@ -1,7 +1,8 @@
 // Controller to manage tab content (not controls).
 
 import { JSX } from 'solid-js';
-import { SECTION_TABS, SectionSide, SectionTab } from '~/config/SectionTabConfig';
+import { SECTION_TABS } from '~/config/SectionTabContents';
+import { SectionSide, SectionTab } from '~/config/SectionTabConfig';
 import { appearanceStore, setAppearanceStore } from '~/stores/EditorStores';
 
 export const showTabContent = (tab: SectionTab, appearSide: SectionSide) => {

@@ -1,6 +1,8 @@
-import SizeHistoryRow from '~/components/section/editor/tool/SizeHistoryRow';
+import { lazy } from 'solid-js';
 import { EraserPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
+
+const SizeHistoryRow = lazy(() => import('~/components/section/editor/tool/SizeHistoryRow'));
 
 export const eraserPresetFields: PresetFieldMeta<EraserPresetConfig>[] = [
   {

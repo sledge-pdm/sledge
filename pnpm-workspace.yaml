@@ -2,3 +2,4 @@ onlyBuiltDependencies:
   - '@swc/core'
   - esbuild
   - msgpackr-extract
+  - simple-git-hooks

@@ -5,6 +5,17 @@ import { FPS } from '~/config/types/FPS';
 import { CanvasRenderingMode } from '~/features/canvas';
 import { CanvasCenteringMode } from '~/features/canvas/model';
 
+export const maxLayerCountConfig = {
+  min: 1,
+  max: 128,
+  defaultValue: 64,
+} as const;
+
+export const normalizeMaxLayerCount = (value: number) => {
+  if (!Number.isFinite(value)) return maxLayerCountConfig.defaultValue;
+  return Math.min(maxLayerCountConfig.max, Math.max(maxLayerCountConfig.min, Math.trunc(value)));
+};
+
 export type GlobalConfig = {
   general: {
     theme: Theme;
@@ -23,6 +34,7 @@ export type GlobalConfig = {
     requireConfirmBeforeLayerRemove: boolean;
     requireConfirmBeforeLayerClear: boolean;
     maxHistoryItemsCount: number;
+    maxLayerCount: number;
     touchRotationZeroSnapThreshold: number;
     rulerMarkDirection: 'outward' | 'inward';
     useRawMove: boolean;
@@ -57,6 +69,7 @@ export const makeDefaultGlobalConfig = (): GlobalConfig => ({
     requireConfirmBeforeLayerClear: true,
     showPointedPixel: true,
     maxHistoryItemsCount: 50,
+    maxLayerCount: maxLayerCountConfig.defaultValue,
     touchRotationZeroSnapThreshold: 5,
     rulerMarkDirection: 'inward',
     useRawMove: false,

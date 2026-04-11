@@ -7,8 +7,6 @@ export const Consts = {
 
   webGLTextureSizeLimitMargin: 100,
 
-  maxLayerSize: 64,
-
   projectThumbnailSize: 500,
 
   globalConfigFileName: 'global.json',

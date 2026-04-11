@@ -1,10 +1,11 @@
 import { Layer, RGBA, transparent } from '@sledge-pdm/core';
 import type { CompositeLayer } from '@sledge-pdm/frasco';
 import { Frasco, BlendMode as FrascoBlendMode } from '@sledge-pdm/frasco';
-import { Consts } from '~/Consts';
+import { normalizeMaxLayerCount } from '~/config/GlobalConfig';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { getBaseLayerColor } from '~/features/layer/model';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flip_pixels_vertically } from '~/utils/wasm';
 
@@ -109,7 +110,7 @@ export class FrascoRenderer {
   }
 
   public getCompositeLayers(): CompositeLayer[] {
-    const layers = this.layers.toReversed().slice(0, Consts.maxLayerSize);
+    const layers = this.layers.toReversed().slice(0, this.getMaxLayerCount());
     return this.buildCompositeLayers(layers);
   }
 
@@ -140,7 +141,7 @@ export class FrascoRenderer {
     if (this.width === 0 || this.height === 0) return;
 
     const baseColor: RGBA = this.includeBaseLayer ? getBaseLayerColor(projectStore.layers.state.baseLayer) : [0, 0, 0, 0];
-    const layers = this.layers.toReversed().slice(0, Consts.maxLayerSize);
+    const layers = this.layers.toReversed().slice(0, this.getMaxLayerCount());
     const composite = this.buildCompositeLayers(layers);
 
     this.frasco.compose(composite, { size: { width: this.width, height: this.height }, baseColor });
@@ -153,7 +154,7 @@ export class FrascoRenderer {
       return new Uint8ClampedArray(0);
     }
 
-    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, Consts.maxLayerSize));
+    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, this.getMaxLayerCount()));
     this.frasco.compose(composite, { size: { width: this.width, height: this.height }, baseColor: baseColor ?? transparent });
     return this.readPixelsRaw();
   }
@@ -162,7 +163,7 @@ export class FrascoRenderer {
     this.checkDisposed();
     if (this.width === 0 || this.height === 0) return;
 
-    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, Consts.maxLayerSize));
+    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, this.getMaxLayerCount()));
     this.frasco.compose(composite, {
       size: { width: this.width, height: this.height },
       baseColor: baseColor ?? transparent,
@@ -175,7 +176,7 @@ export class FrascoRenderer {
     if (this.width === 0 || this.height === 0) return;
     if (!targetLayer) return;
 
-    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, Consts.maxLayerSize));
+    const composite = this.buildCompositeLayers(layers.toReversed().slice(0, this.getMaxLayerCount()));
     this.frasco.composeToLayer(composite, targetLayer, {
       size: { width: this.width, height: this.height },
       baseColor: baseColor ?? transparent,
@@ -269,6 +270,10 @@ export class FrascoRenderer {
       });
     }
     return composite;
+  }
+
+  private getMaxLayerCount(): number {
+    return normalizeMaxLayerCount(Number(globalConfig.editor.maxLayerCount));
   }
 
   private checkDisposed(): void {

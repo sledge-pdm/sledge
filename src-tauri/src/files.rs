@@ -323,6 +323,29 @@ impl Drop for OwnedItemIdList {
     }
 }
 
+/// Checks whether a file path is accessible within the given timeout.
+///
+/// Spawns a real OS thread (not tokio's thread pool) for the blocking `exists()` call,
+/// then waits on it from a `spawn_blocking` context. This isolates the potentially
+/// indefinite network-drive hang from both the async executor and WebView2's message loop.
+///
+/// Returns `false` on timeout, which the caller should treat as "inaccessible".
+#[tauri::command(async)]
+pub async fn check_file_accessible(path: String, timeout_ms: u64) -> bool {
+    let (tx, rx) = std::sync::mpsc::channel::<bool>();
+    let path_clone = path.clone();
+
+    std::thread::spawn(move || {
+        let accessible = std::path::Path::new(&path_clone).exists();
+        let _ = tx.send(accessible);
+    });
+
+    let timeout = std::time::Duration::from_millis(timeout_ms);
+    tauri::async_runtime::spawn_blocking(move || rx.recv_timeout(timeout).unwrap_or_default())
+        .await
+        .unwrap_or(false)
+}
+
 #[cfg(target_os = "windows")]
 #[tauri::command(async)]
 pub async fn get_available_drive_letters() -> Result<Vec<char>, String> {

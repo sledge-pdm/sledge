@@ -202,38 +202,48 @@ export default function TitleBar() {
             }}
           >
             <div class={titleBarTitleContainer}>
-              <Show when={!ioStore.isInInitialLoading && shouldShowTitle()}>
-                <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowState.title}</p>}>
-                  {/* title */}
-                  <div class={flexRow}>
-                    <p class={titleBarTitle}>
-                      <span class={titleBarTitle} style={{ opacity: 0.5 }}>
-                        {ioStore.savedLocation.path ? `${ioStore.savedLocation.path}/` : ''}
-                      </span>
-                      {ioStore.savedLocation.name ?? '[new project]'}
-                    </p>
-                    <Show when={ioStore.openAs === 'image'}>
-                      <div style={{ 'margin-left': '8px' }}>
-                        <Icon src='/assets/icons/title_bar/image.png' base={8} />
-                      </div>
-                    </Show>
-                    <p class={titleBarTitleSub}>{ioStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
-                  </div>
-                  {/* project version (shown when older version, or DEV environment) */}
-                  <Show
-                    when={
-                      ioStore.openAs === 'project' &&
-                      (import.meta.env.DEV || (ioStore.loadProjectVersion && ioStore.loadProjectVersion?.project !== CURRENT_PROJECT_VERSION))
-                    }
-                  >
-                    <div class={titleDivider} />
-                    <p class={titleBarProjectVersion}>V{ioStore.loadProjectVersion?.project}</p>
-                  </Show>
-                  {/* canvas size */}
-                  <div class={titleDivider} />
-                  <p class={titleBarSize}>
-                    {projectStore.canvas.size.width} x {projectStore.canvas.size.height}
+              <Show when={shouldShowTitle()}>
+                <Show when={ioStore.isInInitialLoading && ioStore.loadingTargetPath}>
+                  <p class={titleBarTitle}>
+                    <span class={titleBarTitle} style={{ opacity: 0.5 }}>
+                      {ioStore.loadingTargetPath?.path ? `${ioStore.loadingTargetPath.path}/` : ''}
+                    </span>
+                    {ioStore.loadingTargetPath?.name}
                   </p>
+                </Show>
+                <Show when={!ioStore.isInInitialLoading}>
+                  <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowState.title}</p>}>
+                    {/* title */}
+                    <div class={flexRow}>
+                      <p class={titleBarTitle}>
+                        <span class={titleBarTitle} style={{ opacity: 0.5 }}>
+                          {ioStore.savedLocation.path ? `${ioStore.savedLocation.path}/` : ''}
+                        </span>
+                        {ioStore.savedLocation.name ?? '[new project]'}
+                      </p>
+                      <Show when={ioStore.openAs === 'image'}>
+                        <div style={{ 'margin-left': '8px' }}>
+                          <Icon src='/assets/icons/title_bar/image.png' base={8} />
+                        </div>
+                      </Show>
+                      <p class={titleBarTitleSub}>{ioStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
+                    </div>
+                    {/* project version (shown when older version, or DEV environment) */}
+                    <Show
+                      when={
+                        ioStore.openAs === 'project' &&
+                        (import.meta.env.DEV || (ioStore.loadProjectVersion && ioStore.loadProjectVersion?.project !== CURRENT_PROJECT_VERSION))
+                      }
+                    >
+                      <div class={titleDivider} />
+                      <p class={titleBarProjectVersion}>V{ioStore.loadProjectVersion?.project}</p>
+                    </Show>
+                    {/* canvas size */}
+                    <div class={titleDivider} />
+                    <p class={titleBarSize}>
+                      {projectStore.canvas.size.width} x {projectStore.canvas.size.height}
+                    </p>
+                  </Show>
                 </Show>
               </Show>
             </div>

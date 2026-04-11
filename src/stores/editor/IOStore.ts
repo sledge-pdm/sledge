@@ -2,6 +2,8 @@ import { FileLocation } from '@sledge-pdm/core';
 
 export type IOStore = {
   isInInitialLoading: boolean;
+  /** File location being loaded during initial startup, shown in titlebar while loading. Cleared after load. */
+  loadingTargetPath?: FileLocation;
   openAs: 'project' | 'new_project' | 'image';
   savedLocation: FileLocation;
   recentFiles: FileLocation[];

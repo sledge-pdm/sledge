@@ -79,6 +79,7 @@ pub fn run() {
             global_event::emit_global_event,
             updater::check_update_with_channel,
             files::reveal_native_path,
+            files::check_file_accessible,
             #[cfg(target_os = "windows")]
             files::get_available_drive_letters,
             #[cfg(target_os = "windows")]

@@ -1,4 +1,4 @@
-import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
+import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/ToolTypes';
 import { PenTool } from '../pen/PenTool';
 
 export class EraserTool extends PenTool {

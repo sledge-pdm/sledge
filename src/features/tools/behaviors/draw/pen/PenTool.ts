@@ -13,7 +13,7 @@ import { Consts } from '~/Consts';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
 import { ToolArgs, ToolBehavior, ToolResult } from '~/features/tools/behaviors/ToolBehavior';
 import { getPresetOf, updateToolPresetConfig } from '~/features/tools/ToolController';
-import { DEFAULT_PRESET, PenPresetConfig, TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
+import { DEFAULT_PRESET, PenPresetConfig, TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/ToolTypes';
 import { globalConfig } from '~/stores/GlobalStores';
 
 export class PenTool implements ToolBehavior {

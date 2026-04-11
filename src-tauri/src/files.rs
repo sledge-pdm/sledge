@@ -341,12 +341,9 @@ pub async fn check_file_accessible(path: String, timeout_ms: u64) -> bool {
     });
 
     let timeout = std::time::Duration::from_millis(timeout_ms);
-    tauri::async_runtime::spawn_blocking(move || match rx.recv_timeout(timeout) {
-        Ok(accessible) => accessible,
-        Err(_) => false,
-    })
-    .await
-    .unwrap_or(false)
+    tauri::async_runtime::spawn_blocking(move || rx.recv_timeout(timeout).unwrap_or_default())
+        .await
+        .unwrap_or(false)
 }
 
 #[cfg(target_os = "windows")]

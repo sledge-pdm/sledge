@@ -111,12 +111,7 @@ export const loadEditorStateStore = (state: EditorStateStore): EditorStateStore 
     const migratedPresets = defaultOption
       ? {
           ...record.presets,
-          options: Object.fromEntries(
-            Object.entries(record.presets.options).map(([key, option]) => [
-              key,
-              { ...defaultOption, ...option },
-            ])
-          ),
+          options: Object.fromEntries(Object.entries(record.presets.options).map(([key, option]) => [key, { ...defaultOption, ...option }])),
         }
       : record.presets;
     setToolStore('tools', record.toolId, 'presets', migratedPresets);

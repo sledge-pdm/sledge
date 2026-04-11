@@ -1,6 +1,6 @@
-import { combine_masks_subtract, flip_pixels_vertically } from '~/utils/wasm';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
+import { combine_masks_subtract, flip_pixels_vertically } from '~/utils/wasm';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { registerCommandsHistory } from '../history';
 import { convertSelectionToImageSnippet } from '../history/command/snippet/ConvertSelectionToImageCommands';

@@ -60,8 +60,7 @@ fn handle_file_associations(app: AppHandle, files: Vec<PathBuf>) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[allow(unused_mut)]
-    let mut builder = tauri::Builder::default()
-        .plugin(tauri_plugin_clipboard_manager::init());
+    let mut builder = tauri::Builder::default().plugin(tauri_plugin_clipboard_manager::init());
 
     #[cfg(debug_assertions)]
     {

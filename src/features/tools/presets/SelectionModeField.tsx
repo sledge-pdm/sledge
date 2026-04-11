@@ -36,7 +36,11 @@ const SelectionModeField = () => {
         <Show when={interactStore.selectionEditMode === 'replace'}>
           <p class={label}>replace.</p>
         </Show>
-        <Icon src='/assets/icons/selection/mode_replace.png' base={8} color={interactStore.selectionEditMode === 'replace' ? 'var(--color-active)' : 'var(--color-muted)'} />
+        <Icon
+          src='/assets/icons/selection/mode_replace.png'
+          base={8}
+          color={interactStore.selectionEditMode === 'replace' ? 'var(--color-active)' : 'var(--color-muted)'}
+        />
       </div>
       <div
         class={item}
@@ -47,7 +51,11 @@ const SelectionModeField = () => {
         <Show when={interactStore.selectionEditMode === 'add'}>
           <p class={label}>add.</p>
         </Show>
-        <Icon src='/assets/icons/selection/mode_add.png' base={8} color={interactStore.selectionEditMode === 'add' ? 'var(--color-active)' : 'var(--color-muted)'} />
+        <Icon
+          src='/assets/icons/selection/mode_add.png'
+          base={8}
+          color={interactStore.selectionEditMode === 'add' ? 'var(--color-active)' : 'var(--color-muted)'}
+        />
       </div>
       <div
         class={item}
@@ -58,7 +66,11 @@ const SelectionModeField = () => {
         <Show when={interactStore.selectionEditMode === 'subtract'}>
           <p class={label}>subtract.</p>
         </Show>
-        <Icon src='/assets/icons/selection/mode_subtract.png' base={8} color={interactStore.selectionEditMode === 'subtract' ? 'var(--color-active)' : 'var(--color-muted)'} />
+        <Icon
+          src='/assets/icons/selection/mode_subtract.png'
+          base={8}
+          color={interactStore.selectionEditMode === 'subtract' ? 'var(--color-active)' : 'var(--color-muted)'}
+        />
       </div>
       <div
         class={item}
@@ -69,7 +81,11 @@ const SelectionModeField = () => {
         <Show when={interactStore.selectionEditMode === 'move'}>
           <p class={label}>move.</p>
         </Show>
-        <Icon src='/assets/icons/selection/mode_move.png' base={8} color={interactStore.selectionEditMode === 'move' ? 'var(--color-active)' : 'var(--color-muted)'} />
+        <Icon
+          src='/assets/icons/selection/mode_move.png'
+          base={8}
+          color={interactStore.selectionEditMode === 'move' ? 'var(--color-active)' : 'var(--color-muted)'}
+        />
       </div>
     </div>
   );

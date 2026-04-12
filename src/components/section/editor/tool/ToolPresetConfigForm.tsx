@@ -54,8 +54,10 @@ const ToolPresetConfigForm: Component<Props> = (props) => {
             if (!condition) return null;
           }
 
-          const optionsValue = options();
-          const value = () => optionsValue?.[fieldMeta.key as keyof typeof optionsValue];
+          const value = () => {
+            const opts = options();
+            return opts?.[fieldMeta.key as keyof typeof opts];
+          };
           const onChange = (newValue: any) => {
             props.onConfigChange(fieldMeta.key as string, newValue);
           };

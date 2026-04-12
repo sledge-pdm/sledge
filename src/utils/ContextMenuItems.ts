@@ -23,7 +23,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   },
   Undo: {
     type: 'item',
-    label: 'Undo',
+    label: 'Undo.',
     icon: '/assets/icons/context_menu/undo.png',
     onSelect: () => {
       tryUndo();
@@ -31,7 +31,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   },
   Redo: {
     type: 'item',
-    label: 'Redo',
+    label: 'Redo.',
     icon: '/assets/icons/context_menu/redo.png',
     onSelect: () => {
       tryRedo();
@@ -39,7 +39,7 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   },
   Save: {
     type: 'item',
-    label: 'Save Project',
+    label: 'Save Project.',
     icon: '/assets/icons/context_menu/save.png',
     onSelect: async () => {
       await saveProject();
@@ -49,67 +49,77 @@ export const ContextMenuItems: { [key: string]: MenuListOption } = {
   // Registration for label+icon combinations only.
   BaseCopy: {
     type: 'item',
-    label: 'Copy',
+    label: 'Copy.',
     icon: '/assets/icons/context_menu/copy.png',
   },
   BaseCut: {
     type: 'item',
-    label: 'Cut',
+    label: 'Cut.',
     icon: '/assets/icons/context_menu/cut.png',
+  },
+  BasePaste: {
+    type: 'item',
+    label: 'Paste.',
+    icon: '/assets/icons/context_menu/paste.png',
   },
   BaseRemove: {
     type: 'item',
-    label: 'Remove',
+    label: 'Remove.',
     icon: '/assets/icons/context_menu/remove.png',
   },
   BaseDuplicate: {
     type: 'item',
-    label: 'Duplicate',
+    label: 'Duplicate.',
     icon: '/assets/icons/context_menu/duplicate.png',
   },
   BaseClear: {
     type: 'item',
-    label: 'Clear',
+    label: 'Clear.',
     icon: '/assets/icons/context_menu/clear.png',
   },
   BaseMergeDown: {
     type: 'item',
-    label: 'Merge Down',
+    label: 'Merge Down.',
     icon: '/assets/icons/context_menu/merge_down.png',
   },
   BaseImageShow: {
     type: 'item',
-    label: 'Show',
+    label: 'Show.',
     icon: '/assets/icons/context_menu/show_image.png',
   },
   BaseImageHide: {
     type: 'item',
-    label: 'Hide',
+    label: 'Hide.',
     icon: '/assets/icons/context_menu/hide_image.png',
   },
   BaseTransfer: {
     type: 'item',
-    label: 'Transfer to layer',
+    label: 'Transfer to layer.',
     icon: '/assets/icons/context_menu/transfer.png',
   },
   BaseTransferRemove: {
     type: 'item',
-    label: 'Transfer and Remove',
+    label: 'Transfer and Remove.',
     icon: '/assets/icons/context_menu/transfer_and_remove.png',
   },
   BaseSelectionConvertToImage: {
     type: 'item',
-    label: 'Convert to image',
+    label: 'Convert to image.',
     icon: '/assets/icons/context_menu/convert_to_image.png',
   },
   BaseSelectionCopyAsImage: {
     type: 'item',
-    label: 'Copy as image',
+    label: 'Copy as image.',
     icon: '/assets/icons/context_menu/copy_as_image.png',
   },
   BaseInvertSelection: {
     type: 'item',
-    label: 'Invert Selection',
+    label: 'Invert Selection.',
     icon: '/assets/icons/context_menu/invert.png',
+  },
+  BaseColorSelection: {
+    type: 'item',
+    label: 'Color Selection.',
+    icon: '/assets/icons/context_menu/color_selection.png',
   },
 } as const;

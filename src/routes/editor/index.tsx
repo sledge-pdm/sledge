@@ -4,6 +4,7 @@ import { onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import BottomBar from '~/components/global/BottomBar';
 import Loading from '~/components/global/common/Loading';
+import ColorSelectionDialogHost from '~/components/global/dialog/color_selection/ColorSelectionDialogHost';
 import OnscreenControl from '~/components/global/onscreen_control/OnscreenControl';
 import SideSectionControls from '~/components/section/SideSectionControls';
 import { adjustZoomToFit } from '~/features/canvas';
@@ -228,6 +229,7 @@ export default function Editor() {
 
         <KeyListener />
         <ClipboardListener />
+        <ColorSelectionDialogHost />
       </div>
     </Show>
   );

@@ -13,10 +13,12 @@ import { ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { openExistingProject, openNewEditorWindow, openNewProjectWithClipboard, openProjectWithExplorer } from '~/features/io/window';
 import { activeLayer } from '~/features/layer';
 import { flipAllLayer, rotateAllLayer } from '~/features/layer/service';
+import { openColorSelectionDialog } from '~/features/selection/color_selection';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import { createDefaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
 import { appearanceStore, ioStore, setAppearanceStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
+import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { dialog, window as platformWindow } from '~/utils/platform';
 import { openWindow } from '~/utils/WindowUtils';
@@ -245,25 +247,23 @@ Unsaved changes will be discarded!`);
       action: () => {},
       menu: () => [
         {
+          ...ContextMenuItems.BaseColorSelection,
+          onSelect: () => openColorSelectionDialog(),
+        },
+        {
           type: 'label',
           label: getCurrentEditTarget(),
         },
         {
-          type: 'item',
-          label: 'Copy.',
-          icon: '/assets/icons/context_menu/copy.png',
+          ...ContextMenuItems.BaseCopy,
           onSelect: async () => await clipboardCopy(),
         },
         {
-          type: 'item',
-          label: 'Cut.',
-          icon: '/assets/icons/context_menu/cut.png',
+          ...ContextMenuItems.BaseCut,
           onSelect: async () => await clipboardCut(),
         },
         {
-          type: 'item',
-          label: 'Paste.',
-          icon: '/assets/icons/context_menu/paste.png',
+          ...ContextMenuItems.BasePaste,
           onSelect: async () => await clipboardPaste(),
         },
         { type: 'divider', label: 'canvas' },

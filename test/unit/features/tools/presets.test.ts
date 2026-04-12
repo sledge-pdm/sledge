@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   hasSelection: vi.fn(),
 }));
-
+vi.mock('~/components/section/editor/tool/SizeHistoryRow', () => ({ default: () => null }));
+vi.mock('~/features/tools/presets/SelectionModeField', () => ({ default: () => null }));
 vi.mock('~/features/selection/SelectionManager', () => ({
   selectionManager: {
     hasSelection: mocks.hasSelection,

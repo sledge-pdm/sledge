@@ -31,6 +31,8 @@ describe('io/project/save (e2e)', () => {
     platform.fs.writeFile = vi.fn(async () => undefined) as any;
     platform.fs.exists = vi.fn(async () => false) as any;
     platform.fs.mkdir = vi.fn(async () => undefined) as any;
+    platform.fs.rename = vi.fn(async () => undefined) as any;
+    platform.fs.remove = vi.fn(async () => undefined) as any;
     platform.path.appDataDir = vi.fn(async () => 'C:/AppData') as any;
     platform.app.getVersion = vi.fn(async () => '1.2.3') as any;
   });
@@ -67,9 +69,13 @@ describe('io/project/save (e2e)', () => {
     const result = await saveProject('demo.sledge', 'C:/work');
 
     expect(result).toBe(true);
+    // the project is written to a temp file and renamed into place, so an interrupted save cannot
+    // leave a half-written .sledge behind
     expect(platform.fs.writeFile).toHaveBeenCalledTimes(1);
-    expect((platform.fs.writeFile as any).mock.calls[0][0]).toBe('C:/work/demo.sledge');
+    expect((platform.fs.writeFile as any).mock.calls[0][0]).toBe('C:/work/demo.sledge.saving');
     expect((platform.fs.writeFile as any).mock.calls[0][1]).toBeInstanceOf(Uint8Array);
+    expect(platform.fs.rename).toHaveBeenCalledWith('C:/work/demo.sledge.saving', 'C:/work/demo.sledge');
+    expect(platform.fs.remove).not.toHaveBeenCalled();
     expect(ioStore.openAs).toBe('project');
     expect(ioStore.savedLocation).toEqual({ path: 'C:/work', name: 'demo.sledge' });
     expect(ioStore.isProjectChangedAfterSave).toBe(false);
@@ -91,6 +97,22 @@ describe('io/project/save (e2e)', () => {
     const result = await saveProject('demo.sledge', 'C:/work');
 
     expect(result).toBe(false);
+    expect(emit).toHaveBeenCalledWith('project:saveFailed', {
+      error: expect.any(Error),
+    });
+  });
+
+  it('cleans up the temp file and fails when the rename does not go through', async () => {
+    const emit = vi.spyOn(eventBus, 'emit');
+    platform.fs.rename = vi.fn(async () => {
+      throw new Error('rename failed');
+    }) as any;
+
+    const result = await saveProject('demo.sledge', 'C:/work');
+
+    expect(result).toBe(false);
+    // the existing .sledge is still whatever it was, so the half-written temp file must not be left around
+    expect(platform.fs.remove).toHaveBeenCalledWith('C:/work/demo.sledge.saving');
     expect(emit).toHaveBeenCalledWith('project:saveFailed', {
       error: expect.any(Error),
     });

@@ -1,5 +1,5 @@
-import { getProjectAdapter, gzipInflate, ImagePoolImage, ProjectBase } from '@sledge-pdm/core';
-import type { HistoryRawSnapshot } from '@sledge-pdm/frasco';
+import { getProjectAdapter, ImagePoolImage, ProjectBase } from '@sledge-pdm/core';
+import type { HistoryPackedSnapshot } from '@sledge-pdm/frasco';
 import { unwrap } from 'solid-js/store';
 import { historyManager } from '~/features/history';
 import { inflateHistoryStacks, serializeHistoryStacks } from '~/features/history/serialization';
@@ -67,7 +67,8 @@ export async function initRuntimeProject(project: ProjectBase) {
   }
   if (history?.layerHistories) {
     for (const [layerId, stacks] of Object.entries(history.layerHistories)) {
-      layerManager.importHistoryRaw(layerId, inflateLayerHistory(stacks.undoStack ?? []), inflateLayerHistory(stacks.redoStack ?? []));
+      // hand the stored bytes over as they are - frasco keeps them, so the next save skips these snapshots.
+      layerManager.importHistoryPacked(layerId, stacks.undoStack ?? [], stacks.redoStack ?? []);
     }
   }
 
@@ -120,44 +121,63 @@ export interface GetProjectFromRuntimeOptions {
  *  @description Get project data for files with current runtime state
  */
 export async function getProjectFromRuntime(options?: GetProjectFromRuntimeOptions): Promise<CurrentProject> {
+  const size = projectStore.canvas.size;
+  const layers = allLayers();
+  const bufferCache = layerManager.bufferCache;
+
+  // layers that have not been touched since the last save keep the bytes produced back then. take those
+  // bytes now rather than after the compressions below: an edit landing mid-save drops the cache entry,
+  // and re-reading it then would leave the layer out of the file entirely.
+  const deflatedByLayer = new Map<string, Uint8Array>();
+  const staleLayerIds: string[] = [];
+  for (const l of layers) {
+    const cached = bufferCache.get(l.id);
+    if (cached) deflatedByLayer.set(l.id, cached);
+    else staleLayerIds.push(l.id);
+  }
+
+  // read back on demand: deflateAllAsync only asks for a layer when it is about to compress it.
+  const captureTokens = new Array<number>(staleLayerIds.length);
+  const deflatedStale = await deflateAllAsync(
+    staleLayerIds.map((layerId, i) => () => {
+      // token taken right before the read, so an edit arriving during the compression voids this result.
+      captureTokens[i] = bufferCache.beginCapture(layerId);
+      try {
+        return layerManager.exportRawCanvas(layerId);
+      } catch {
+        return new Uint8ClampedArray(size.width * size.height * 4);
+      }
+    })
+  );
+  staleLayerIds.forEach((layerId, i) => {
+    bufferCache.commit(layerId, captureTokens[i], deflatedStale[i]);
+    deflatedByLayer.set(layerId, deflatedStale[i]);
+  });
+
   const buffers = new Map<
     string, // layer id
     {
       deflatedBuffer: Uint8Array; // deflate compressed buffer
     }
   >();
-  const size = projectStore.canvas.size;
-  const layers = allLayers();
-  // read back on demand: deflateAllAsync only asks for a layer when it is about to compress it.
-  const deflatedBuffers = await deflateAllAsync(
-    layers.map((l) => () => {
-      try {
-        return layerManager.exportRawCanvas(l.id);
-      } catch {
-        return new Uint8ClampedArray(size.width * size.height * 4);
-      }
-    })
-  );
-  layers.forEach((l, i) => {
-    buffers.set(l.id, {
-      deflatedBuffer: deflatedBuffers[i],
-    });
-  });
+  for (const l of layers) {
+    const deflatedBuffer = deflatedByLayer.get(l.id);
+    if (deflatedBuffer) buffers.set(l.id, { deflatedBuffer });
+  }
 
   const selectionMask = selectionManager.getBack();
 
   const serializedHistory = serializeHistoryStacks(historyManager.getUndoStack(), historyManager.getRedoStack());
-  const layerHistories: Record<string, { undoStack: PackedHistorySnapshot[]; redoStack: PackedHistorySnapshot[] }> = {};
+  const layerHistories: Record<string, { undoStack: HistoryPackedSnapshot[]; redoStack: HistoryPackedSnapshot[] }> = {};
   for (const l of layers) {
     const layer = layerManager.getLayerOptional(l.id);
     if (!layer) continue;
-    const raw = layer.exportHistoryRaw();
-    if (!raw) continue;
+    // frasco hands back the deflate it already holds for each snapshot and only reads one off the GPU when
+    // it has none, so snapshots that survived the previous save cost nothing here.
+    const packed = await layer.exportHistoryPacked();
+    if (!packed) continue;
 
-    layerHistories[l.id] = {
-      undoStack: await deflateLayerHistory(raw.undoStack),
-      redoStack: await deflateLayerHistory(raw.redoStack),
-    };
+    layerHistories[l.id] = packed;
   }
 
   const runtimeSnapshots = options?.includeSnapshots === false ? [] : await getAllFullSnapshots();
@@ -184,30 +204,4 @@ export async function getProjectFromRuntime(options?: GetProjectFromRuntimeOptio
   };
 
   return project;
-}
-
-type PackedHistorySnapshot = {
-  bounds: { x: number; y: number; width: number; height: number };
-  size: { width: number; height: number };
-  deflated: Uint8Array;
-  fullLayer?: boolean;
-};
-
-async function deflateLayerHistory(stacks: HistoryRawSnapshot[]): Promise<PackedHistorySnapshot[]> {
-  const deflated = await deflateAllAsync(stacks.map((snapshot) => () => snapshot.buffer));
-  return stacks.map((snapshot, i) => ({
-    bounds: snapshot.bounds,
-    size: snapshot.size,
-    deflated: deflated[i],
-    fullLayer: snapshot.fullLayer,
-  }));
-}
-
-function inflateLayerHistory(stacks: PackedHistorySnapshot[]): HistoryRawSnapshot[] {
-  return stacks.map((snapshot) => ({
-    bounds: snapshot.bounds,
-    size: snapshot.size,
-    buffer: gzipInflate(snapshot.deflated),
-    fullLayer: snapshot.fullLayer,
-  }));
 }

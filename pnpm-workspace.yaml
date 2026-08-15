@@ -1,3 +1,9 @@
+allowBuilds:
+  esbuild: true
+  msgpackr-extract: true
+  simple-git-hooks: true
+minimumReleaseAgeExclude:
+  - '@sledge-pdm/core@1.2.7'
 onlyBuiltDependencies:
   - '@swc/core'
   - esbuild

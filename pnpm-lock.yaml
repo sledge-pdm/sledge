@@ -18,8 +18,8 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0
       '@sledge-pdm/core':
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.7
+        version: 1.2.7
       '@sledge-pdm/frasco':
         specifier: ^0.2.4
         version: 0.2.4
@@ -162,8 +162,8 @@ packages:
   '@acab/ecsstatic@0.9.0':
     resolution: {integrity: sha512-7L+xveTes981hSQcj+CIzhzVWxCc+PY+bou+aE0ZNK/QYFlygJi+5j6r3B7BXvJC76A3SPKSAb5/YeB9kUmuzQ==}
 
-  '@adobe/css-tools@4.4.4':
-    resolution: {integrity: sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==}
+  '@adobe/css-tools@4.5.0':
+    resolution: {integrity: sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q==}
 
   '@atlaskit/pragmatic-drag-and-drop@1.7.10':
     resolution: {integrity: sha512-2oHJbThv26CVxM+N8w1X9iyvnts9f8n5+XdCHyG2DtLtqk97rsvbykUyRV2m2llpH06ZdBycycz/+H7eBgRN4A==}
@@ -947,6 +947,9 @@ packages:
   '@sledge-pdm/core@1.2.5':
     resolution: {integrity: sha512-lyA66OOWFrTKHb6TKN93ykwFOK5QWrXNhrF2NvnKeTGSFp/the1p9qzhblj0uzOaB1XiJEnIIX6qETb9m+8VUQ==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.2.5/aa6bdc72fa79644b4528c45442613c42fc3b88c2}
 
+  '@sledge-pdm/core@1.2.7':
+    resolution: {integrity: sha512-Qg1mCRjePelKfjGS8C1FHoQGU5eQ7R85rLSOYpL7tEwdbmlq9J0KKxryxxYE25ODkjbFsBl2e2Cx0KrIuCA5zw==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/core/1.2.7/da745296b1d9a406b28b91c8d4f59e94643abfd8}
+
   '@sledge-pdm/frasco@0.2.4':
     resolution: {integrity: sha512-JccUOS/9q5g0K6SDlm/foLLPcDU6hGV2Y+TlTIet5HsBLDn4URvP52fvqf9zUC5cqBaw9PlhH88RN4KwFmMGvA==, tarball: https://npm.pkg.github.com/download/@sledge-pdm/frasco/0.2.4/5544e132c00af790620269a1b6b722ca64f905b6}
 
@@ -1163,6 +1166,9 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
+  '@types/estree@1.0.9':
+    resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
+
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
@@ -1320,8 +1326,9 @@ packages:
     resolution: {integrity: sha512-I3yl4r9QB5ZRY3XuJVEPfc2XhZO6YweFPI+UovAzn+8/hb3oJ6lnysaFcjVpkCPfVWFUDvoZ8kmVDP7WyRtYtQ==}
     engines: {node: '>= 0.6.0'}
 
-  baseline-browser-mapping@2.9.18:
-    resolution: {integrity: sha512-e23vBV1ZLfjb9apvfPk4rHVu2ry6RIr2Wfs+O324okSidrX7pTAnEJPCh/O5BtRlr7QtZI7ktOP3vsqr7Z5XoA==}
+  baseline-browser-mapping@2.11.14:
+    resolution: {integrity: sha512-JyJ954WzuIR8/FFzX0o5krdSTrBAkcCSRfWSleRsIHSWV+cZe2FI1PKggVkFke1hBldRs+LRxUczzE9iPmgZww==}
+    engines: {node: '>=6.0.0'}
     hasBin: true
 
   bind-event-listener@3.0.0:
@@ -1344,8 +1351,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
-  caniuse-lite@1.0.30001766:
-    resolution: {integrity: sha512-4C0lfJ0/YPjJQHagaE9x2Elb69CIqEPZeG0anQt9SIvIoOH4a4uaRl73IavyO+0qZh6MDLH//DrXThEYKHkmYA==}
+  caniuse-lite@1.0.30001809:
+    resolution: {integrity: sha512-xxWVywk6a6Arlk+hymeycyn/VgqEfLDxupvhH/xiY5SJ/18kmi9o6MiO320DCUzypORHLtvh0I4i04tUhCNHNQ==}
 
   chai@6.2.2:
     resolution: {integrity: sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg==}
@@ -1883,6 +1890,10 @@ packages:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
 
+  picomatch@4.0.5:
+    resolution: {integrity: sha512-RvwwcruNjI1ncT5xRakeyS9Lf8lcItv34KD+aif+VH9kduAyfYBipGh12274xtenIPZ119/R9BdTBa8gAwSh0A==}
+    engines: {node: '>=12'}
+
   pidtree@0.6.0:
     resolution: {integrity: sha512-eG2dWTVw5bzqGRztnHExczNxt5VGsE6OwTeCG3fdUf9KBsZzO3R5OIIIzWR+iZA0NtZ+RDVdaoE2dK1cn6jH4g==}
     engines: {node: '>=0.10'}
@@ -2312,7 +2323,7 @@ snapshots:
       postcss-nesting: 13.0.2(postcss@8.5.6)
       postcss-scss: 4.0.9(postcss@8.5.6)
 
-  '@adobe/css-tools@4.4.4':
+  '@adobe/css-tools@4.5.0':
     optional: true
 
   '@atlaskit/pragmatic-drag-and-drop@1.7.10':
@@ -2768,9 +2779,9 @@ snapshots:
 
   '@rollup/pluginutils@5.3.0(rollup@4.56.0)':
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       estree-walker: 2.0.2
-      picomatch: 4.0.4
+      picomatch: 4.0.5
     optionalDependencies:
       rollup: 4.56.0
     optional: true
@@ -2851,6 +2862,12 @@ snapshots:
     optional: true
 
   '@sledge-pdm/core@1.2.5':
+    dependencies:
+      '@types/pako': 2.0.4
+      msgpackr: 1.11.9
+      pako: 2.1.0
+
+  '@sledge-pdm/core@1.2.7':
     dependencies:
       '@types/pako': 2.0.4
       msgpackr: 1.11.9
@@ -3022,7 +3039,7 @@ snapshots:
 
   '@testing-library/jest-dom@6.9.1':
     dependencies:
-      '@adobe/css-tools': 4.4.4
+      '@adobe/css-tools': 4.5.0
       aria-query: 5.3.2
       css.escape: 1.5.1
       dom-accessibility-api: 0.6.3
@@ -3066,6 +3083,9 @@ snapshots:
   '@types/esrecurse@4.3.1': {}
 
   '@types/estree@1.0.8': {}
+
+  '@types/estree@1.0.9':
+    optional: true
 
   '@types/json-schema@7.0.15': {}
 
@@ -3233,7 +3253,7 @@ snapshots:
   autoprefixer@10.4.23(postcss@8.5.6):
     dependencies:
       browserslist: 4.28.1
-      caniuse-lite: 1.0.30001766
+      caniuse-lite: 1.0.30001809
       fraction.js: 5.3.4
       picocolors: 1.1.1
       postcss: 8.5.6
@@ -3259,7 +3279,7 @@ snapshots:
 
   base64-arraybuffer@1.0.2: {}
 
-  baseline-browser-mapping@2.9.18: {}
+  baseline-browser-mapping@2.11.14: {}
 
   bind-event-listener@3.0.0: {}
 
@@ -3277,13 +3297,13 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.9.18
-      caniuse-lite: 1.0.30001766
+      baseline-browser-mapping: 2.11.14
+      caniuse-lite: 1.0.30001809
       electron-to-chromium: 1.5.278
       node-releases: 2.0.27
       update-browserslist-db: 1.2.3(browserslist@4.28.1)
 
-  caniuse-lite@1.0.30001766: {}
+  caniuse-lite@1.0.30001809: {}
 
   chai@6.2.2: {}
 
@@ -3801,6 +3821,9 @@ snapshots:
   picomatch@4.0.3: {}
 
   picomatch@4.0.4: {}
+
+  picomatch@4.0.5:
+    optional: true
 
   pidtree@0.6.0: {}
 

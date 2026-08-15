@@ -1,4 +1,4 @@
-import { getProjectAdapter, gzipDeflate, gzipInflate, ImagePoolImage, ProjectBase } from '@sledge-pdm/core';
+import { getProjectAdapter, gzipInflate, ImagePoolImage, ProjectBase } from '@sledge-pdm/core';
 import type { HistoryRawSnapshot } from '@sledge-pdm/frasco';
 import { unwrap } from 'solid-js/store';
 import { historyManager } from '~/features/history';
@@ -11,6 +11,7 @@ import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { getAllFullSnapshots, RuntimeProjectSnapshot } from '~/features/snapshot';
+import { deflateAllAsync } from '~/utils/Compression';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { setIOStore } from './EditorStores';
 import { CurrentProject, projectStore, RuntimeProject, setProjectStore } from './RuntimeProjectStore';
@@ -107,10 +108,18 @@ export async function initRuntimeProject(project: ProjectBase) {
   setProjectStore(runtime);
 }
 
+export interface GetProjectFromRuntimeOptions {
+  /**
+   * @description restore snapshot bodies from the saved file (default: true).
+   *   pass false when the caller discards snapshots anyway - restoring them reads and unpacks the whole project file.
+   */
+  includeSnapshots?: boolean;
+}
+
 /**
  *  @description Get project data for files with current runtime state
  */
-export async function getProjectFromRuntime(): Promise<CurrentProject> {
+export async function getProjectFromRuntime(options?: GetProjectFromRuntimeOptions): Promise<CurrentProject> {
   const buffers = new Map<
     string, // layer id
     {
@@ -118,16 +127,20 @@ export async function getProjectFromRuntime(): Promise<CurrentProject> {
     }
   >();
   const size = projectStore.canvas.size;
-  allLayers().forEach((l) => {
-    let buffer: Uint8ClampedArray;
-    try {
-      buffer = layerManager.exportRawCanvas(l.id);
-    } catch {
-      buffer = new Uint8ClampedArray(size.width * size.height * 4);
-    }
-    const deflated = gzipDeflate(buffer);
+  const layers = allLayers();
+  // read back on demand: deflateAllAsync only asks for a layer when it is about to compress it.
+  const deflatedBuffers = await deflateAllAsync(
+    layers.map((l) => () => {
+      try {
+        return layerManager.exportRawCanvas(l.id);
+      } catch {
+        return new Uint8ClampedArray(size.width * size.height * 4);
+      }
+    })
+  );
+  layers.forEach((l, i) => {
     buffers.set(l.id, {
-      deflatedBuffer: deflated,
+      deflatedBuffer: deflatedBuffers[i],
     });
   });
 
@@ -135,21 +148,23 @@ export async function getProjectFromRuntime(): Promise<CurrentProject> {
 
   const serializedHistory = serializeHistoryStacks(historyManager.getUndoStack(), historyManager.getRedoStack());
   const layerHistories: Record<string, { undoStack: PackedHistorySnapshot[]; redoStack: PackedHistorySnapshot[] }> = {};
-  allLayers().forEach((l) => {
+  for (const l of layers) {
     const layer = layerManager.getLayerOptional(l.id);
-    if (!layer) return;
+    if (!layer) continue;
     const raw = layer.exportHistoryRaw();
-    if (!raw) return;
+    if (!raw) continue;
 
     layerHistories[l.id] = {
-      undoStack: deflateLayerHistory(raw.undoStack),
-      redoStack: deflateLayerHistory(raw.redoStack),
+      undoStack: await deflateLayerHistory(raw.undoStack),
+      redoStack: await deflateLayerHistory(raw.redoStack),
     };
-  });
+  }
 
-  const runtimeSnapshots = await getAllFullSnapshots();
+  const runtimeSnapshots = options?.includeSnapshots === false ? [] : await getAllFullSnapshots();
 
-  const clonedProjectStore = structuredClone(unwrap(projectStore));
+  // snapshots are replaced below, and cloning them would duplicate every buffer they hold. clone the rest.
+  const { snapshots: _snapshots, ...storeWithoutSnapshots } = unwrap(projectStore);
+  const clonedProjectStore = structuredClone(storeWithoutSnapshots);
   const project: CurrentProject = {
     version: await getCurrentVersion(),
     projectVersion: CURRENT_PROJECT_VERSION,
@@ -178,11 +193,12 @@ type PackedHistorySnapshot = {
   fullLayer?: boolean;
 };
 
-function deflateLayerHistory(stacks: HistoryRawSnapshot[]): PackedHistorySnapshot[] {
-  return stacks.map((snapshot) => ({
+async function deflateLayerHistory(stacks: HistoryRawSnapshot[]): Promise<PackedHistorySnapshot[]> {
+  const deflated = await deflateAllAsync(stacks.map((snapshot) => () => snapshot.buffer));
+  return stacks.map((snapshot, i) => ({
     bounds: snapshot.bounds,
     size: snapshot.size,
-    deflated: gzipDeflate(snapshot.buffer),
+    deflated: deflated[i],
     fullLayer: snapshot.fullLayer,
   }));
 }

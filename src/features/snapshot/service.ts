@@ -1,7 +1,7 @@
-import { getProjectAdapter, gzipDeflate, ProjectSnapshot, Size2D } from '@sledge-pdm/core';
+import { getProjectAdapter, gzipDeflate, ProjectBase, ProjectSnapshot, Size2D } from '@sledge-pdm/core';
 import { batch, createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
-import { logSystemError, logUserError } from '~/features/log/service';
+import { logSystemError, logSystemWarn, logUserError } from '~/features/log/service';
 import { ioStore, setIOStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
@@ -13,9 +13,60 @@ import { updateFrascoCanvas } from '~/webgl/service';
 import { ProjectLoader } from '../io/project/ProjectLoader';
 import { RuntimeProjectSnapshot } from './types';
 
+const SNAPSHOT_LOG_LABEL = 'Snapshot';
+
+/**
+ * @description read + unpack the saved project file and collect snapshot bodies as id -> project.
+ *   both are heavy operations against the whole project, so callers must share a single result
+ *   instead of doing this per snapshot.
+ */
+async function loadStoredSnapshotProjects(): Promise<Map<string, ProjectBase> | undefined> {
+  const projectLoc = ioStore.savedLocation;
+  if (!projectLoc || !projectLoc.path || !projectLoc.name) return undefined;
+
+  try {
+    const rootProject = await unpackFromPath(normalizeJoin(projectLoc.path, projectLoc.name));
+    if (!rootProject) return undefined;
+    const adapter = getProjectAdapter(rootProject);
+    if (!adapter) return undefined;
+    const snapshots = await adapter.getSnapshots();
+    const stored = new Map<string, ProjectBase>();
+    snapshots?.forEach((s) => {
+      if (s.project) stored.set(s.id, s.project);
+    });
+    return stored;
+  } catch (error) {
+    logSystemError('Failed to read snapshots from saved project.', { label: SNAPSHOT_LOG_LABEL, details: [error] });
+    return undefined;
+  }
+}
+
 export async function getAllFullSnapshots(): Promise<ProjectSnapshot[]> {
-  const fullSnapshots = await Promise.all(projectStore.snapshots.map(async (s) => await loadFullSnapshot(s)));
-  return fullSnapshots.filter((item): item is Exclude<typeof item, undefined> => item !== undefined);
+  const snapshots = projectStore.snapshots;
+  if (snapshots.length === 0) return [];
+
+  // snapshots without a body have to be restored from the saved file. read it once, not once per snapshot.
+  const stored = snapshots.some((s) => !s.project) ? await loadStoredSnapshotProjects() : undefined;
+
+  const fullSnapshots: ProjectSnapshot[] = [];
+  for (const snapshot of snapshots) {
+    if (snapshot.project) {
+      fullSnapshots.push(snapshot as ProjectSnapshot);
+      continue;
+    }
+    const project = stored?.get(snapshot.id);
+    // a single unrestorable snapshot must not fail the whole save.
+    if (!project) {
+      logSystemWarn(`Snapshot "${snapshot.name}" could not be restored and is excluded from this save.`, {
+        label: SNAPSHOT_LOG_LABEL,
+        details: [snapshot.id],
+      });
+      continue;
+    }
+    fullSnapshots.push({ ...snapshot, project });
+  }
+
+  return fullSnapshots;
 }
 
 export function makeSnapshotsAllRuntime() {
@@ -29,19 +80,13 @@ export function makeSnapshotsAllRuntime() {
 export async function loadFullSnapshot(snapshot: ProjectSnapshot | RuntimeProjectSnapshot): Promise<ProjectSnapshot | undefined> {
   if (snapshot.project) return snapshot;
 
-  const projectLoc = ioStore.savedLocation;
-  if (!projectLoc || !projectLoc.path || !projectLoc.name) return undefined;
-  const rootProject = await unpackFromPath(normalizeJoin(projectLoc.path, projectLoc.name));
-  if (!rootProject) return undefined;
-  const adapter = getProjectAdapter(rootProject);
-  if (!adapter) return undefined;
-  const snapshots = await adapter.getSnapshots();
-  const matched: ProjectSnapshot | undefined = snapshots?.find((s) => s.id === snapshot.id);
-  if (!matched) return undefined;
+  const stored = await loadStoredSnapshotProjects();
+  const project = stored?.get(snapshot.id);
+  if (!project) return undefined;
 
   return {
     ...snapshot,
-    project: matched.project,
+    project,
   };
 }
 
@@ -52,7 +97,8 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
     const thumbnailImageData = canvasThumbnailGenerator.generateCanvasThumbnail(thumbSize.width, thumbSize.height);
 
     const now = new Date();
-    const currentProject = await getProjectFromRuntime();
+    // snapshots are dropped right below, so don't pay for restoring them in the first place.
+    const currentProject = await getProjectFromRuntime({ includeSnapshots: false });
     currentProject.snapshots = []; // for memory optimization
     const snapshot: ProjectSnapshot = {
       createdAt: Date.now(),

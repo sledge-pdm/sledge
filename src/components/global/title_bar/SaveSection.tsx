@@ -62,6 +62,10 @@ const saveButtonMainButton = css`
   &:hover {
     background-color: var(--color-button-hover);
   }
+  &:disabled {
+    cursor: default;
+    background-color: transparent;
+  }
 `;
 
 const saveButtonSide = css`
@@ -91,9 +95,13 @@ const SaveSection: Component = () => {
 
   const [saveLoading, setSaveLoading] = createSignal<boolean>(false);
   const save = async () => {
+    if (saveLoading()) return;
     setSaveLoading(true);
-    await saveProject(ioStore.savedLocation.name, ioStore.savedLocation.path);
-    setSaveLoading(false);
+    try {
+      await saveProject(ioStore.savedLocation.name, ioStore.savedLocation.path);
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(projectStore.project.lastSavedAt?.getTime());
@@ -158,10 +166,15 @@ const SaveSection: Component = () => {
       type: 'item',
       label: 'Save As...',
       onSelect: async () => {
+        if (saveLoading()) return;
         setSaveLoading(true);
-        await saveProject(ioStore.savedLocation.name);
-        setSaveLoading(false);
+        try {
+          await saveProject(ioStore.savedLocation.name);
+        } finally {
+          setSaveLoading(false);
+        }
       },
+      disabled: saveLoading(),
       color: color.onBackground,
     },
     {
@@ -185,7 +198,7 @@ const SaveSection: Component = () => {
           </p>
         </Show>
         <div class={saveButtonRoot} data-tauri-drag-region-exclude>
-          <button class={saveButtonMainButton} onClick={async () => await save()}>
+          <button class={saveButtonMainButton} disabled={saveLoading()} onClick={async () => await save()}>
             <p
               style={{
                 color: saveLoading() ? color.muted : color.accent,

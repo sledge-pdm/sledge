@@ -2,7 +2,7 @@ import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGener
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
-import { logSystemError, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
+import { logSystemError, logSystemWarn, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
 import { makeSnapshotsAllRuntime } from '~/features/snapshot';
 import { ioStore, setIOStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
@@ -43,15 +43,47 @@ export async function getPackedCurrentProject(): Promise<Uint8Array> {
   return packed;
 }
 
+/**
+ * @description write through a temporary file and swap it in, so an interrupted write cannot destroy the existing project.
+ */
+async function writeProjectFile(path: string, data: Uint8Array): Promise<void> {
+  const tempPath = `${path}.saving`;
+  await fs.writeFile(tempPath, data);
+  try {
+    await fs.rename(tempPath, path);
+  } catch (error) {
+    try {
+      await fs.remove(tempPath);
+    } catch (_e) {
+      // leaving the temp file behind is not worth masking the rename error
+    }
+    throw error;
+  }
+}
+
+let saveInFlight: Promise<boolean> | undefined;
+
+/**
+ * @description save the current project.
+ *   saving a large project takes seconds, so concurrent calls (Ctrl+S repeats, double clicks) share the
+ *   in-flight save instead of writing the same file twice.
+ */
 export async function saveProject(name?: string, existingPath?: string): Promise<boolean> {
+  if (saveInFlight) {
+    logSystemWarn('Save already in progress. Reusing the in-flight save.', { label: 'ProjectSave' });
+    return saveInFlight;
+  }
+
+  saveInFlight = saveProjectInternal(name, existingPath).finally(() => {
+    saveInFlight = undefined;
+  });
+  return saveInFlight;
+}
+
+async function saveProjectInternal(name?: string, existingPath?: string): Promise<boolean> {
   const LOG_LABEL = 'ProjectSave';
   if (!core.isTauri()) {
     try {
-      setIOStore('loadProjectVersion', {
-        sledge: await getCurrentVersion(),
-        project: CURRENT_PROJECT_VERSION,
-      });
-
       const fileNameWOExtension = getFileNameWithoutExtension(name ?? ioStore.savedLocation.name ?? 'new project');
       const fileName = `${fileNameWOExtension}.sledge`;
       const bytes = await getPackedCurrentProject();
@@ -65,6 +97,10 @@ export async function saveProject(name?: string, existingPath?: string): Promise
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
+      setIOStore('loadProjectVersion', {
+        sledge: await getCurrentVersion(),
+        project: CURRENT_PROJECT_VERSION,
+      });
       setIOStore('openAs', 'project');
       setIOStore('savedLocation', {
         path: undefined,
@@ -122,20 +158,17 @@ After overwrite, you cannot open this project in old version of sledge.`,
 
   if (typeof selectedPath === 'string') {
     try {
-      // overwrite project versions
+      // const thumbpath = await saveThumbnailData(selectedPath);
+
+      const data = await getPackedCurrentProject();
+      await writeProjectFile(selectedPath, data);
+      addRecentFile(pathToFileLocation(selectedPath));
+
+      // the file on disk is V2 only once the write succeeded, so update the loaded version here and not earlier.
       setIOStore('loadProjectVersion', {
         sledge: await getCurrentVersion(),
         project: CURRENT_PROJECT_VERSION,
       });
-
-      // const thumbpath = await saveThumbnailData(selectedPath);
-
-      let data = await getPackedCurrentProject();
-      await fs.writeFile(selectedPath, data);
-      // @ts-ignore
-      data = null;
-      addRecentFile(pathToFileLocation(selectedPath));
-
       setIOStore('openAs', 'project');
       setSavedLocation(selectedPath);
       // @ts-ignore

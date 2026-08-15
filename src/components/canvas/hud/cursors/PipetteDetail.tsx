@@ -4,6 +4,7 @@ import { color, ColorBox, fonts } from '@sledge-pdm/ui';
 import { Component, Show } from 'solid-js';
 import { currentColor } from '~/features/color';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { getColorSelectionPreviewColor, getColorSelectionTargetColor, isColorSelectionPicking } from '~/features/selection/color_selection';
 import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 
@@ -31,8 +32,14 @@ const PipetteDetail: Component<Props> = (props) => {
   const getCurrentPointingColor = (): RGBA | undefined => {
     const x = Math.floor(interactStore.lastPointerOnCanvas.x);
     const y = Math.floor(interactStore.lastPointerOnCanvas.y);
+    if (isColorSelectionPicking()) {
+      return getColorSelectionPreviewColor(x, y);
+    }
     return layerManager.readPixelCanvas(projectStore.layers.state.activeLayerId, x, y);
   };
+
+  const currentReferenceColor = () => (isColorSelectionPicking() ? getColorSelectionTargetColor() : currentColor());
+
   const getCurrentPointingColorHex = (): string | undefined => {
     const color = getCurrentPointingColor();
     return color
@@ -65,7 +72,7 @@ const PipetteDetail: Component<Props> = (props) => {
           </p>
         }
       >
-        <ColorBox currentColor={currentColor} color={getCurrentPointingColorHex()!} sizePx={21} forceBorderColor={color.onBackground} />
+        <ColorBox currentColor={currentReferenceColor} color={getCurrentPointingColorHex()!} sizePx={21} forceBorderColor={color.onBackground} />
 
         <p
           style={{

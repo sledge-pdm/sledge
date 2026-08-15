@@ -1,9 +1,7 @@
-import { lazy } from 'solid-js';
 import { Consts } from '~/Consts';
+import SizeHistoryRow from '~/components/section/editor/tool/SizeHistoryRow';
 import { PenPresetConfig, TOOL_CATEGORIES } from '~/features/tools/Tools';
 import { PresetFieldMeta, ToolPresetMeta } from './PresetMeta';
-
-const SizeHistoryRow = lazy(() => import('~/components/section/editor/tool/SizeHistoryRow'));
 
 export const penPresetFields: PresetFieldMeta<PenPresetConfig>[] = [
   {

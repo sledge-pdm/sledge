@@ -8,7 +8,7 @@ import { ioStore, markProjectSaved, setIOStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
-import { eventBus } from '~/utils/EventBus';
+import { eventBus, SaveProgressPhase } from '~/utils/EventBus';
 import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation, projectSaveDir } from '~/utils/FileUtils';
 import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
 import { getCurrentVersion } from '~/utils/VersionUtils';
@@ -37,9 +37,18 @@ async function saveThumbnailData(selectedPath: string) {
 /**
  * @description get MessagePack-compressed current project (including buffers)
  */
-export async function getPackedCurrentProject(): Promise<Uint8Array> {
-  const project = await getProjectFromRuntime();
+export async function getPackedCurrentProject(options?: { signal?: AbortSignal; reportProgress?: boolean }): Promise<Uint8Array> {
+  const report = options?.reportProgress
+    ? (phase: SaveProgressPhase, done: number, total: number) => eventBus.emit('project:saveProgress', { phase, done, total })
+    : undefined;
+
+  const project = await getProjectFromRuntime({ signal: options?.signal, onProgress: report });
+
+  options?.signal?.throwIfAborted();
+  // packing is one indivisible call, so it can only be reported as started and finished
+  report?.('pack', 0, 1);
   const packed = packr.pack(project);
+  report?.('pack', 1, 1);
   return packed;
 }
 
@@ -62,6 +71,7 @@ async function writeProjectFile(path: string, data: Uint8Array): Promise<void> {
 }
 
 let saveInFlight: Promise<boolean> | undefined;
+let saveAbort: AbortController | undefined;
 
 /**
  * @description save the current project.
@@ -74,13 +84,37 @@ export async function saveProject(name?: string, existingPath?: string): Promise
     return saveInFlight;
   }
 
-  saveInFlight = saveProjectInternal(name, existingPath).finally(() => {
+  const controller = new AbortController();
+  saveAbort = controller;
+  saveInFlight = saveProjectInternal(name, existingPath, controller.signal).finally(() => {
     saveInFlight = undefined;
+    if (saveAbort === controller) saveAbort = undefined;
   });
   return saveInFlight;
 }
 
-async function saveProjectInternal(name?: string, existingPath?: string): Promise<boolean> {
+/** @description whether a save is running and could still be cancelled. */
+export function isSaveInProgress(): boolean {
+  return saveInFlight !== undefined;
+}
+
+/**
+ * @description stop the running save. it gives up between buffers, so nothing partly written reaches
+ *   the project file - the write only starts once every buffer is in hand.
+ */
+export function cancelSave(): void {
+  saveAbort?.abort();
+}
+
+/** @description a save the user stopped is not a failure; report it as the cancellation it is. */
+function handleSaveAborted(error: unknown, signal: AbortSignal | undefined, label: string): boolean {
+  if (!signal?.aborted) return false;
+  logSystemWarn('Save cancelled.', { label, details: [error] });
+  eventBus.emit('project:saveCancelled', {});
+  return true;
+}
+
+async function saveProjectInternal(name?: string, existingPath?: string, signal?: AbortSignal): Promise<boolean> {
   const LOG_LABEL = 'ProjectSave';
   if (!core.isTauri()) {
     try {
@@ -88,7 +122,8 @@ async function saveProjectInternal(name?: string, existingPath?: string): Promis
       const fileName = `${fileNameWOExtension}.sledge`;
       // read before assembling: whatever the user draws while we build these bytes is not in them.
       const savedRevision = ioStore.projectRevision;
-      const bytes = await getPackedCurrentProject();
+      const bytes = await getPackedCurrentProject({ signal, reportProgress: true });
+      eventBus.emit('project:saveProgress', { phase: 'write', done: 0, total: 1 });
       const blob = new Blob([bytes.slice()], { type: 'application/octet-stream' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -111,10 +146,12 @@ async function saveProjectInternal(name?: string, existingPath?: string): Promis
       setProjectStore('project', 'lastSavedAt', new Date());
       makeSnapshotsAllRuntime();
 
+      eventBus.emit('project:saveProgress', { phase: 'write', done: 1, total: 1 });
       markProjectSaved(savedRevision);
       logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
       return true;
     } catch (error) {
+      if (handleSaveAborted(error, signal, LOG_LABEL)) return false;
       logSystemError('Error saving project.', { label: LOG_LABEL, details: [error] });
       logUserError('project save failed.', { label: LOG_LABEL, details: [error], persistent: true });
       eventBus.emit('project:saveFailed', { error: error });
@@ -164,8 +201,12 @@ After overwrite, you cannot open this project in old version of sledge.`,
 
       // read before assembling: whatever the user draws while we build these bytes is not in them.
       const savedRevision = ioStore.projectRevision;
-      const data = await getPackedCurrentProject();
+      const data = await getPackedCurrentProject({ signal, reportProgress: true });
+      // past this point the save is committed: the bytes are complete and cancelling would only
+      // leave a temp file behind.
+      eventBus.emit('project:saveProgress', { phase: 'write', done: 0, total: 1 });
       await writeProjectFile(selectedPath, data);
+      eventBus.emit('project:saveProgress', { phase: 'write', done: 1, total: 1 });
       addRecentFile(pathToFileLocation(selectedPath));
 
       // the file on disk is V2 only once the write succeeded, so update the loaded version here and not earlier.
@@ -186,6 +227,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
       logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
       return true;
     } catch (error) {
+      if (handleSaveAborted(error, signal, LOG_LABEL)) return false;
       logSystemError('Error saving project.', { label: LOG_LABEL, details: [error, selectedPath] });
       logUserError('project save failed.', { label: LOG_LABEL, details: [error], persistent: true });
       eventBus.emit('project:saveFailed', { error: error });

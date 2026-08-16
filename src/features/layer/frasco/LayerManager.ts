@@ -113,6 +113,23 @@ export class LayerManager {
       const raw = layer.readPixels({ flipY: true });
       return new Uint8ClampedArray(raw.buffer);
     }
+    return this.exportPendingCanvas(layerId);
+  }
+
+  /**
+   * @description exportRawCanvas without stalling on the GPU. bulk readers - saving above all - should
+   *   prefer this; callers that need the pixels within the same tick have to stay on the synchronous one.
+   */
+  async exportRawCanvasAsync(layerId: string): Promise<Uint8ClampedArray> {
+    const layer = this.layers.get(layerId);
+    if (layer) {
+      const raw = await layer.readPixelsAsync({ flipY: true });
+      return new Uint8ClampedArray(raw.buffer);
+    }
+    return this.exportPendingCanvas(layerId);
+  }
+
+  private exportPendingCanvas(layerId: string): Uint8ClampedArray {
     const pending = this.pending.get(layerId);
     if (!pending) {
       throw new Error(`LayerManager: layer not found for layerId: ${layerId}`);

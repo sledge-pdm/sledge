@@ -109,12 +109,22 @@ export async function initRuntimeProject(project: ProjectBase) {
   setProjectStore(runtime);
 }
 
+/** @description the parts of assembling a project that take long enough to be worth reporting. */
+export type ProjectAssemblyPhase = 'layers' | 'history';
+
 export interface GetProjectFromRuntimeOptions {
   /**
    * @description restore snapshot bodies from the saved file (default: true).
    *   pass false when the caller discards snapshots anyway - restoring them reads and unpacks the whole project file.
    */
   includeSnapshots?: boolean;
+  /**
+   * @description abort the assembly. checked between layers and between history stacks, so a cancel takes
+   *   effect within one buffer rather than at the end.
+   */
+  signal?: AbortSignal;
+  /** @description progress within each phase. left out by callers that are not user-visible work. */
+  onProgress?: (phase: ProjectAssemblyPhase, done: number, total: number) => void;
 }
 
 /**
@@ -136,18 +146,25 @@ export async function getProjectFromRuntime(options?: GetProjectFromRuntimeOptio
     else staleLayerIds.push(l.id);
   }
 
+  // cached layers cost nothing, so progress is reported over the ones actually being compressed.
+  options?.onProgress?.('layers', 0, staleLayerIds.length);
+
   // read back on demand: deflateAllAsync only asks for a layer when it is about to compress it.
   const captureTokens = new Array<number>(staleLayerIds.length);
   const deflatedStale = await deflateAllAsync(
-    staleLayerIds.map((layerId, i) => () => {
+    staleLayerIds.map((layerId, i) => async () => {
       // token taken right before the read, so an edit arriving during the compression voids this result.
       captureTokens[i] = bufferCache.beginCapture(layerId);
       try {
-        return layerManager.exportRawCanvas(layerId);
+        return await layerManager.exportRawCanvasAsync(layerId);
       } catch {
         return new Uint8ClampedArray(size.width * size.height * 4);
       }
-    })
+    }),
+    {
+      signal: options?.signal,
+      onEach: (done, total) => options?.onProgress?.('layers', done, total),
+    }
   );
   staleLayerIds.forEach((layerId, i) => {
     bufferCache.commit(layerId, captureTokens[i], deflatedStale[i]);
@@ -169,15 +186,15 @@ export async function getProjectFromRuntime(options?: GetProjectFromRuntimeOptio
 
   const serializedHistory = serializeHistoryStacks(historyManager.getUndoStack(), historyManager.getRedoStack());
   const layerHistories: Record<string, { undoStack: HistoryPackedSnapshot[]; redoStack: HistoryPackedSnapshot[] }> = {};
-  for (const l of layers) {
+  options?.onProgress?.('history', 0, layers.length);
+  for (const [index, l] of layers.entries()) {
+    options?.signal?.throwIfAborted();
     const layer = layerManager.getLayerOptional(l.id);
-    if (!layer) continue;
     // frasco hands back the deflate it already holds for each snapshot and only reads one off the GPU when
     // it has none, so snapshots that survived the previous save cost nothing here.
-    const packed = await layer.exportHistoryPacked();
-    if (!packed) continue;
-
-    layerHistories[l.id] = packed;
+    const packed = await layer?.exportHistoryPacked();
+    if (packed) layerHistories[l.id] = packed;
+    options?.onProgress?.('history', index + 1, layers.length);
   }
 
   const runtimeSnapshots = options?.includeSnapshots === false ? [] : await getAllFullSnapshots();

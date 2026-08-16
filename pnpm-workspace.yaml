@@ -3,8 +3,7 @@ allowBuilds:
   msgpackr-extract: true
   simple-git-hooks: true
 minimumReleaseAgeExclude:
-  - '@sledge-pdm/core@1.2.7'
-  - '@sledge-pdm/frasco@0.2.5'
+  - '@sledge-pdm/*'
 onlyBuiltDependencies:
   - '@swc/core'
   - esbuild

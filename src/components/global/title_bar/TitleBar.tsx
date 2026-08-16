@@ -7,7 +7,7 @@ import { createStore } from 'solid-js/store';
 import SaveSection from '~/components/global/title_bar/SaveSection';
 import TopMenuBar from '~/components/global/title_bar/TopMenuBar';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
-import { ioStore } from '~/stores/EditorStores';
+import { ioStore, isProjectChanged } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexRow } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
@@ -226,7 +226,7 @@ export default function TitleBar() {
                           <Icon src='/assets/icons/title_bar/image.png' base={8} />
                         </div>
                       </Show>
-                      <p class={titleBarTitleSub}>{ioStore.isProjectChangedAfterSave ? ' (unsaved)' : ''}</p>
+                      <p class={titleBarTitleSub}>{isProjectChanged() ? ' (unsaved)' : ''}</p>
                     </div>
                     {/* project version (shown when older version, or DEV environment) */}
                     <Show

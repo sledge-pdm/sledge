@@ -1,5 +1,5 @@
 import { saveProject } from '~/features/io/project/save';
-import { ioStore } from '~/stores/EditorStores';
+import { ioStore, isProjectChanged } from '~/stores/EditorStores';
 import { CloseRequestedEvent, dialog } from '~/utils/platform';
 
 const BUTTON_YES = 'Save and Quit';
@@ -7,7 +7,7 @@ const BUTTON_NO = 'Discard and Quit';
 const BUTTON_CANCEL = 'Cancel';
 
 export const handleCloseRequest = async (event: CloseRequestedEvent) => {
-  if (ioStore.isProjectChangedAfterSave) {
+  if (isProjectChanged()) {
     const button = await dialog.message('There are unsaved changes.\nSure to quit?', {
       kind: 'warning',
       title: 'Unsaved Changes',

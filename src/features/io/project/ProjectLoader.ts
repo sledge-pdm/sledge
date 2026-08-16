@@ -11,7 +11,7 @@ import { logSystemError, logUserError } from '~/features/log/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import { defaultInteractStore } from '~/stores/editor/InteractStore';
-import { setIOStore, setInteractStore } from '~/stores/EditorStores';
+import { markProjectSaved, setIOStore, setInteractStore } from '~/stores/EditorStores';
 import { initRuntimeProject } from '~/stores/RuntimeProject';
 import { resetRuntimeProjectStore } from '~/stores/RuntimeProjectStore';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
@@ -170,7 +170,7 @@ function initBeforeLoad() {
   setInteractStore(structuredClone(defaultInteractStore));
   setIOStore('savedLocation', { name: undefined, path: undefined });
   setIOStore('loadProjectVersion', undefined);
-  setIOStore('isProjectChangedAfterSave', false);
+  markProjectSaved();
 }
 
 async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLoadResult> {
@@ -194,7 +194,7 @@ async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLo
         uniqueName: false,
       }
     );
-    setIOStore('isProjectChangedAfterSave', false);
+    markProjectSaved();
     return {
       ok: true,
     };
@@ -278,7 +278,7 @@ async function loadFromPathImage(path: string): Promise<InternalLoadResult> {
       width: imageData.width,
       height: imageData.height,
     });
-    setIOStore('isProjectChangedAfterSave', false);
+    markProjectSaved();
     return {
       ...result,
       path,
@@ -300,7 +300,7 @@ async function loadFromProjectObj(options: ProjectObjLoadOption): Promise<Intern
     const project = options.project;
     await initRuntimeProject(project);
     if (options.locationOverride) setIOStore('savedLocation', options.locationOverride);
-    setIOStore('isProjectChangedAfterSave', false);
+    markProjectSaved();
     return {
       ok: true,
     };
@@ -358,7 +358,7 @@ async function loadFromClipboard(options: ClipboardLoadOptions): Promise<Interna
       height,
       buffer,
     });
-    setIOStore('isProjectChangedAfterSave', false);
+    markProjectSaved();
     return {
       ok: true,
     };

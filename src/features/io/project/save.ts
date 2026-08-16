@@ -4,7 +4,7 @@ import { addRecentFile } from '~/features/config/RecentFileController';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { logSystemError, logSystemWarn, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
 import { makeSnapshotsAllRuntime } from '~/features/snapshot';
-import { ioStore, setIOStore } from '~/stores/EditorStores';
+import { ioStore, markProjectSaved, setIOStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
@@ -86,6 +86,8 @@ async function saveProjectInternal(name?: string, existingPath?: string): Promis
     try {
       const fileNameWOExtension = getFileNameWithoutExtension(name ?? ioStore.savedLocation.name ?? 'new project');
       const fileName = `${fileNameWOExtension}.sledge`;
+      // read before assembling: whatever the user draws while we build these bytes is not in them.
+      const savedRevision = ioStore.projectRevision;
       const bytes = await getPackedCurrentProject();
       const blob = new Blob([bytes.slice()], { type: 'application/octet-stream' });
       const url = URL.createObjectURL(blob);
@@ -109,7 +111,7 @@ async function saveProjectInternal(name?: string, existingPath?: string): Promis
       setProjectStore('project', 'lastSavedAt', new Date());
       makeSnapshotsAllRuntime();
 
-      setIOStore('isProjectChangedAfterSave', false);
+      markProjectSaved(savedRevision);
       logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
       return true;
     } catch (error) {
@@ -160,6 +162,8 @@ After overwrite, you cannot open this project in old version of sledge.`,
     try {
       // const thumbpath = await saveThumbnailData(selectedPath);
 
+      // read before assembling: whatever the user draws while we build these bytes is not in them.
+      const savedRevision = ioStore.projectRevision;
       const data = await getPackedCurrentProject();
       await writeProjectFile(selectedPath, data);
       addRecentFile(pathToFileLocation(selectedPath));
@@ -178,7 +182,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
       const loc = pathToFileLocation(selectedPath);
       if (loc) eventBus.emit('project:saved', { location: loc });
 
-      setIOStore('isProjectChangedAfterSave', false);
+      markProjectSaved(savedRevision);
       logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
       return true;
     } catch (error) {

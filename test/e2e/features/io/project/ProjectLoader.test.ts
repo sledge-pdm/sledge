@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { ErrorTypes, ProjectLoader } from '~/features/io/project/ProjectLoader';
-import { ioStore, setIOStore } from '~/stores/EditorStores';
+import { ioStore, isProjectChanged, markProjectChanged, setIOStore } from '~/stores/EditorStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { setPlatform } from '~/utils/platform';
 import { TestMockPlatform } from '~/utils/platform/TestMockPlatform';
@@ -16,7 +16,7 @@ describe('io/project/ProjectLoader (e2e)', () => {
     setIOStore('openAs', 'new_project');
     setIOStore('savedLocation', { path: undefined, name: undefined });
     setIOStore('recentFiles', []);
-    setIOStore('isProjectChangedAfterSave', true);
+    markProjectChanged();
 
     setProjectStore('canvas', 'size', { width: 16, height: 16 });
     setProjectStore('layers', 'layers', []);
@@ -36,7 +36,7 @@ describe('io/project/ProjectLoader (e2e)', () => {
       project: CURRENT_PROJECT_VERSION,
       sledge: '1.0.0',
     });
-    expect(ioStore.isProjectChangedAfterSave).toBe(false);
+    expect(isProjectChanged()).toBe(false);
     expect(projectStore.canvas.size).toEqual({ width: 32, height: 24 });
     expect(projectStore.layers.layers).toHaveLength(1);
   });

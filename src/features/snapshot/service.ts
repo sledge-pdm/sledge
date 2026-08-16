@@ -2,7 +2,7 @@ import { getProjectAdapter, gzipDeflate, ProjectBase, ProjectSnapshot, Size2D } 
 import { batch, createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { logSystemError, logSystemWarn, logUserError } from '~/features/log/service';
-import { ioStore, setIOStore } from '~/stores/EditorStores';
+import { ioStore, markProjectSaved } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { normalizeJoin } from '~/utils/FileUtils';
@@ -194,7 +194,7 @@ This will NOT backup your current state (unless you did manually backup.)`,
   // load snapshot
   await ProjectLoader.fromProjectObj({ project: fullSnapshot.project, locationOverride: { ...ioStore.savedLocation } }).load();
 
-  setIOStore('isProjectChangedAfterSave', false);
+  markProjectSaved();
 
   setProjectStore('snapshots', savedSnapshotStore);
   updateFrascoCanvas('snapshot loaded');

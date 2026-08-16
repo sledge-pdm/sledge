@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { saveProject, saveThumbnailExternal } from '~/features/io/project/save';
-import { ioStore, setIOStore } from '~/stores/EditorStores';
+import { ioStore, isProjectChanged, markProjectChanged, setIOStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
 import { setPlatform } from '~/utils/platform';
@@ -18,7 +18,7 @@ describe('io/project/save (e2e)', () => {
     setIOStore('openAs', 'new_project');
     setIOStore('savedLocation', { path: 'C:/work', name: 'demo.sledge' });
     setIOStore('loadProjectVersion', { project: CURRENT_PROJECT_VERSION, sledge: '1.0.0' });
-    setIOStore('isProjectChangedAfterSave', true);
+    markProjectChanged();
     setIOStore('recentFiles', []);
 
     setProjectStore('canvas', 'size', { width: 16, height: 16 });
@@ -78,7 +78,7 @@ describe('io/project/save (e2e)', () => {
     expect(platform.fs.remove).not.toHaveBeenCalled();
     expect(ioStore.openAs).toBe('project');
     expect(ioStore.savedLocation).toEqual({ path: 'C:/work', name: 'demo.sledge' });
-    expect(ioStore.isProjectChangedAfterSave).toBe(false);
+    expect(isProjectChanged()).toBe(false);
     expect(ioStore.loadProjectVersion).toEqual({
       sledge: '1.2.3',
       project: CURRENT_PROJECT_VERSION,
@@ -116,6 +116,34 @@ describe('io/project/save (e2e)', () => {
     expect(emit).toHaveBeenCalledWith('project:saveFailed', {
       error: expect.any(Error),
     });
+  });
+
+  it('stays unsaved when a change lands while the save is running', async () => {
+    setIOStore('openAs', 'project');
+    setIOStore('savedLocation', { path: 'C:/work', name: 'demo.sledge' });
+    // the drawing that arrives mid-save is not in the bytes being written, so completing the write
+    // must not report the project as saved
+    platform.fs.writeFile = vi.fn(async () => {
+      markProjectChanged();
+    }) as any;
+
+    const result = await saveProject('demo.sledge', 'C:/work');
+
+    expect(result).toBe(true);
+    expect(isProjectChanged()).toBe(true);
+  });
+
+  it('stays unsaved when the write fails', async () => {
+    setIOStore('openAs', 'project');
+    setIOStore('savedLocation', { path: 'C:/work', name: 'demo.sledge' });
+    platform.fs.writeFile = vi.fn(async () => {
+      throw new Error('disk full');
+    }) as any;
+
+    const result = await saveProject('demo.sledge', 'C:/work');
+
+    expect(result).toBe(false);
+    expect(isProjectChanged()).toBe(true);
   });
 
   it('saveThumbnailExternal creates thumbnail dir and writes png bytes', async () => {

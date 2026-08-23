@@ -91,24 +91,35 @@ async function writeProjectFile(path: string, data: Uint8Array): Promise<void> {
   }
 }
 
+type SaveTarget = { name?: string; existingPath?: string };
+
 let saveInFlight: Promise<boolean> | undefined;
+let saveInFlightTarget: SaveTarget | undefined;
 let saveAbort: AbortController | undefined;
 
 /**
  * @description save the current project.
- *   saving a large project takes seconds, so concurrent calls (Ctrl+S repeats, double clicks) share the
- *   in-flight save instead of writing the same file twice.
+ *   saving a large project takes seconds, so a repeat of the running save (Ctrl+S held down, the button and
+ *   the shortcut together) shares it instead of writing the same file twice. a call aimed somewhere else is
+ *   a different request: handing it the running save's result would report a file it never wrote, so it is
+ *   turned down and the user is told.
  */
 export async function saveProject(name?: string, existingPath?: string): Promise<boolean> {
   if (saveInFlight) {
-    logSystemWarn('Save already in progress. Reusing the in-flight save.', { label: 'ProjectSave' });
-    return saveInFlight;
+    if (saveInFlightTarget?.name === name && saveInFlightTarget?.existingPath === existingPath) {
+      logSystemWarn('Save already in progress. Reusing the in-flight save.', { label: LOG_LABEL });
+      return saveInFlight;
+    }
+    logUserWarn('another save is still running.', { label: LOG_LABEL, persistent: true });
+    return false;
   }
 
   const controller = new AbortController();
   saveAbort = controller;
+  saveInFlightTarget = { name, existingPath };
   saveInFlight = saveProjectInternal(name, existingPath, controller.signal).finally(() => {
     saveInFlight = undefined;
+    saveInFlightTarget = undefined;
     if (saveAbort === controller) saveAbort = undefined;
   });
   return saveInFlight;

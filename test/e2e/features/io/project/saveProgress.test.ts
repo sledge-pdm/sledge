@@ -193,6 +193,21 @@ describe('io/project/save progress and cancellation (e2e)', () => {
     expect(isProjectChanged()).toBe(false);
   });
 
+  it('shares a repeat of the running save and turns down one aimed elsewhere', async () => {
+    const running = saveProject('demo.sledge', 'C:/work');
+    // the same request again: Ctrl+S held down, or the button and the shortcut together
+    const repeat = saveProject('demo.sledge', 'C:/work');
+    // Save As while that runs. sharing would answer it with a file it never asked for
+    const elsewhere = saveProject();
+    expect(logStore.bottomBarText).toBe('another save is still running.');
+
+    expect(await elsewhere).toBe(false);
+    expect(await repeat).toBe(true);
+    expect(await running).toBe(true);
+    // the picker for the other target never opened
+    expect(platform.dialog.save).not.toHaveBeenCalled();
+  });
+
   it('reads the app version before the write, not after the abort check', async () => {
     const calls: string[] = [];
     platform.app.getVersion = vi.fn(async () => {

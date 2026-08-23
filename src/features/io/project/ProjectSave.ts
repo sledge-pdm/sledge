@@ -143,6 +143,9 @@ async function saveProjectInternal(name?: string, existingPath?: string, signal?
       const fileName = `${fileNameWOExtension}.sledge`;
       // read before assembling: whatever the user draws while we build these bytes is not in them.
       const savedRevision = ioStore.projectRevision;
+      // read up front so the abort check below is the last thing in this path that can yield: everything it
+      // guards has to run in one tick, or a project loaded while we awaited would be handed this save's state.
+      const sledgeVersion = await getCurrentVersion();
       const bytes = await getPackedCurrentProject({ signal, onProgress: report });
       report('write', 0, 1);
       const blob = new Blob([bytes.slice()], { type: 'application/octet-stream' });
@@ -158,7 +161,7 @@ async function saveProjectInternal(name?: string, existingPath?: string, signal?
       signal?.throwIfAborted();
 
       setIOStore('loadProjectVersion', {
-        sledge: await getCurrentVersion(),
+        sledge: sledgeVersion,
         project: CURRENT_PROJECT_VERSION,
       });
       setIOStore('openAs', 'project');
@@ -224,6 +227,9 @@ After overwrite, you cannot open this project in old version of sledge.`,
 
       // read before assembling: whatever the user draws while we build these bytes is not in them.
       const savedRevision = ioStore.projectRevision;
+      // read up front so the abort check below is the last thing in this path that can yield: everything it
+      // guards has to run in one tick, or a project loaded while we awaited would be handed this save's state.
+      const sledgeVersion = await getCurrentVersion();
       const data = await getPackedCurrentProject({ signal, onProgress: report });
       // past this point the file is committed: the bytes are complete, and the write goes through a temp file,
       // so a cancel arriving now cannot leave a partial project behind.
@@ -238,7 +244,7 @@ After overwrite, you cannot open this project in old version of sledge.`,
 
       // the file on disk is V2 only once the write succeeded, so update the loaded version here and not earlier.
       setIOStore('loadProjectVersion', {
-        sledge: await getCurrentVersion(),
+        sledge: sledgeVersion,
         project: CURRENT_PROJECT_VERSION,
       });
       setIOStore('openAs', 'project');

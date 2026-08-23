@@ -20,26 +20,25 @@ const SNAPSHOT_LOG_LABEL = 'Snapshot';
  * @description read + unpack the saved project file and collect snapshot bodies as id -> project.
  *   both are heavy operations against the whole project, so callers must share a single result
  *   instead of doing this per snapshot.
+ *
+ *   a file that cannot be read or unpacked throws rather than coming back empty: the only copy of every
+ *   snapshot body is in that file, and a caller that is about to overwrite it must not treat "read failed"
+ *   as "there were none". callers that are not writing anything catch this themselves.
  */
 async function loadStoredSnapshotProjects(): Promise<Map<string, ProjectBase> | undefined> {
   const projectLoc = ioStore.savedLocation;
   if (!projectLoc || !projectLoc.path || !projectLoc.name) return undefined;
 
-  try {
-    const rootProject = await unpackFromPath(normalizeJoin(projectLoc.path, projectLoc.name));
-    if (!rootProject) return undefined;
-    const adapter = getProjectAdapter(rootProject);
-    if (!adapter) return undefined;
-    const snapshots = await adapter.getSnapshots();
-    const stored = new Map<string, ProjectBase>();
-    snapshots?.forEach((s) => {
-      if (s.project) stored.set(s.id, s.project);
-    });
-    return stored;
-  } catch (error) {
-    logSystemError('Failed to read snapshots from saved project.', { label: SNAPSHOT_LOG_LABEL, details: [error] });
-    return undefined;
-  }
+  const rootProject = await unpackFromPath(normalizeJoin(projectLoc.path, projectLoc.name));
+  if (!rootProject) return undefined;
+  const adapter = getProjectAdapter(rootProject);
+  if (!adapter) return undefined;
+  const snapshots = await adapter.getSnapshots();
+  const stored = new Map<string, ProjectBase>();
+  snapshots?.forEach((s) => {
+    if (s.project) stored.set(s.id, s.project);
+  });
+  return stored;
 }
 
 export async function getAllFullSnapshots(): Promise<ProjectSnapshot[]> {
@@ -81,7 +80,15 @@ export function makeSnapshotsAllRuntime() {
 export async function loadFullSnapshot(snapshot: ProjectSnapshot | RuntimeProjectSnapshot): Promise<ProjectSnapshot | undefined> {
   if (snapshot.project) return snapshot;
 
-  const stored = await loadStoredSnapshotProjects();
+  // restoring one snapshot for the user writes nothing, and the caller reports the failure, so a file that
+  // cannot be read is answered with "not restorable" rather than thrown at them.
+  let stored: Map<string, ProjectBase> | undefined;
+  try {
+    stored = await loadStoredSnapshotProjects();
+  } catch (error) {
+    logSystemError('Failed to read snapshots from saved project.', { label: SNAPSHOT_LOG_LABEL, details: [error] });
+    return undefined;
+  }
   const project = stored?.get(snapshot.id);
   if (!project) return undefined;
 

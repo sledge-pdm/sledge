@@ -26,6 +26,7 @@ describe('io/project/save (e2e)', () => {
     setProjectStore('layers', 'layers', []);
     setProjectStore('layers', 'state', 'activeLayerId', '');
     setProjectStore('layers', 'state', 'selected', new Set<string>());
+    setProjectStore('snapshots', []);
 
     platform.dialog.save = vi.fn(async () => 'C:/work/demo.sledge') as any;
     platform.dialog.confirm = vi.fn(async () => true) as any;
@@ -131,6 +132,23 @@ describe('io/project/save (e2e)', () => {
     const result = await saveProject('demo.sledge', 'C:/work');
 
     expect(result).toBe(true);
+    expect(isProjectChanged()).toBe(true);
+  });
+
+  it('fails the save rather than dropping snapshots it could not read', async () => {
+    setIOStore('openAs', 'project');
+    setIOStore('savedLocation', { path: 'C:/work', name: 'demo.sledge' });
+    // the body of this snapshot lives only in the file this save is about to overwrite
+    setProjectStore('snapshots', [{ id: 's1', name: 'snap', description: undefined, createdAt: 0, project: undefined }]);
+    platform.fs.readFile = vi.fn(async () => {
+      throw new Error('read failed');
+    }) as any;
+
+    const result = await saveProject('demo.sledge', 'C:/work');
+
+    expect(result).toBe(false);
+    // writing a snapshot-less file over the only copy of them would lose them for good
+    expect(platform.fs.writeFile).not.toHaveBeenCalled();
     expect(isProjectChanged()).toBe(true);
   });
 

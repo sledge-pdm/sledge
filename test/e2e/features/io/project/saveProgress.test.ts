@@ -193,6 +193,24 @@ describe('io/project/save progress and cancellation (e2e)', () => {
     expect(isProjectChanged()).toBe(false);
   });
 
+  it('reads the app version before the write, not after the abort check', async () => {
+    const calls: string[] = [];
+    platform.app.getVersion = vi.fn(async () => {
+      calls.push('getVersion');
+      return '1.2.3';
+    }) as any;
+    platform.fs.writeFile = vi.fn(async () => {
+      calls.push('writeFile');
+    }) as any;
+
+    expect(await saveProject('demo.sledge', 'C:/work')).toBe(true);
+
+    // the abort check after the write is what stops a finished save from applying its location and snapshots
+    // to a project loaded meanwhile. anything that yields between it and that state - getVersion is an IPC
+    // round-trip - reopens the window it was put there to close.
+    expect(calls.lastIndexOf('getVersion')).toBeLessThan(calls.indexOf('writeFile'));
+  });
+
   it('does not apply the result of a save cancelled during the write', async () => {
     markProjectChanged();
     // the project is replaced while the bytes are on their way to disk

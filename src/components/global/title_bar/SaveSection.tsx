@@ -1,12 +1,11 @@
 import { css } from '@acab/ecsstatic';
 import { color, Icon, MenuList, MenuListOption } from '@sledge-pdm/ui';
-import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { saveProject } from '~/features/io/project/save';
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { ioStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { eventBus } from '~/utils/EventBus';
+import { eventBus, Events } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { useTimeAgoText } from '~/utils/TimeUtils';
@@ -31,11 +30,6 @@ const saveTimeTextStyle = css`
   white-space: nowrap;
   opacity: 0.5;
   font-family: ZFB03;
-`;
-
-const saveLogTextStyle = css`
-  white-space: nowrap;
-  opacity: 0.8;
 `;
 
 const saveButtonRoot = css`
@@ -84,24 +78,18 @@ const saveButtonSide = css`
 
 const SaveSection: Component = () => {
   const [isSaveMenuShown, setIsSaveMenuShown] = createSignal(false);
-  const [saveLog, setSaveLog] = createSignal<
-    | {
-        text: string;
-        color: string;
-      }
-    | undefined
-  >(undefined);
   const isOWPossible = () => ioStore.savedLocation.name !== undefined && ioStore.savedLocation.path !== undefined && ioStore.openAs === 'project';
 
-  const [saveLoading, setSaveLoading] = createSignal<boolean>(false);
+  /**
+   * a save announces itself through the progress stream wherever it was started from - Ctrl+S, the context
+   * menu, the close prompt. a flag set around the two calls in this component would only cover those two.
+   * what the save is doing is reported by the bottom bar; here it only decides whether the button is live.
+   */
+  const [saveLoading, setSaveLoading] = createSignal(false);
+
   const save = async () => {
     if (saveLoading()) return;
-    setSaveLoading(true);
-    try {
-      await saveProject(ioStore.savedLocation.name, ioStore.savedLocation.path);
-    } finally {
-      setSaveLoading(false);
-    }
+    await saveProject(ioStore.savedLocation.name, ioStore.savedLocation.path);
   };
 
   const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(projectStore.project.lastSavedAt?.getTime());
@@ -110,37 +98,13 @@ const SaveSection: Component = () => {
     updatePastTimeStamp(projectStore.project.lastSavedAt?.getTime());
   });
 
-  const setTimeredSaveLog = (text: { text: string; color: string }) => {
-    setSaveLog(text);
-    makeTimer(
-      () => {
-        setSaveLog(undefined);
-      },
-      2000,
-      setTimeout
-    );
+  const handleProgress = (e: Events['project:saveProgress']) => {
+    // the write finishing is the last thing a save reports, and `project:saved` does not reach every path
+    // (a browser download has no file location to announce), so clear on that rather than waiting for it.
+    setSaveLoading(!(e.phase === 'write' && e.done >= e.total));
   };
 
-  const handleSaved = () => {
-    setTimeredSaveLog({
-      text: 'saved!',
-      color: color.enabled,
-    });
-  };
-
-  const handleSaveFailed = () => {
-    setTimeredSaveLog({
-      text: 'save failed.',
-      color: color.error,
-    });
-  };
-
-  const handleSaveCancelled = () => {
-    setTimeredSaveLog({
-      text: 'save cancelled.',
-      color: color.muted,
-    });
-  };
+  const handleSaveEnded = () => setSaveLoading(false);
 
   const [patternOffset, setPatternOffset] = createSignal(0);
   const updatePatternOffset = () => {
@@ -149,15 +113,17 @@ const SaveSection: Component = () => {
   let updatePatternInterval: ReturnType<typeof setInterval> | undefined;
 
   onMount(() => {
-    eventBus.on('project:saved', handleSaved);
-    eventBus.on('project:saveFailed', handleSaveFailed);
-    eventBus.on('project:saveCancelled', handleSaveCancelled);
+    eventBus.on('project:saveProgress', handleProgress);
+    eventBus.on('project:saved', handleSaveEnded);
+    eventBus.on('project:saveFailed', handleSaveEnded);
+    eventBus.on('project:saveCancelled', handleSaveEnded);
     updatePatternInterval = setInterval(updatePatternOffset, 30);
   });
   onCleanup(() => {
-    eventBus.off('project:saved', handleSaved);
-    eventBus.off('project:saveFailed', handleSaveFailed);
-    eventBus.off('project:saveCancelled', handleSaveCancelled);
+    eventBus.off('project:saveProgress', handleProgress);
+    eventBus.off('project:saved', handleSaveEnded);
+    eventBus.off('project:saveFailed', handleSaveEnded);
+    eventBus.off('project:saveCancelled', handleSaveEnded);
     if (updatePatternInterval) clearInterval(updatePatternInterval);
   });
 
@@ -167,12 +133,7 @@ const SaveSection: Component = () => {
       label: 'Save As...',
       onSelect: async () => {
         if (saveLoading()) return;
-        setSaveLoading(true);
-        try {
-          await saveProject(ioStore.savedLocation.name);
-        } finally {
-          setSaveLoading(false);
-        }
+        await saveProject(ioStore.savedLocation.name);
       },
       disabled: saveLoading(),
       color: color.onBackground,
@@ -192,11 +153,7 @@ const SaveSection: Component = () => {
   return (
     <>
       <div class={saveSectionContainer} data-tauri-drag-region-exclude>
-        <Show when={saveLog()} fallback={<p class={saveTimeTextStyle}>{saveTimeText()}</p>}>
-          <p class={saveLogTextStyle} style={{ color: saveLog()?.color }}>
-            {saveLog()?.text}
-          </p>
-        </Show>
+        <p class={saveTimeTextStyle}>{saveTimeText()}</p>
         <div class={saveButtonRoot} data-tauri-drag-region-exclude>
           <button class={saveButtonMainButton} disabled={saveLoading()} onClick={async () => await save()}>
             <p

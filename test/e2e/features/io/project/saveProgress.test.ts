@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { cancelSave, isSaveInProgress, saveProject } from '~/features/io/project/save';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { isProjectChanged, markProjectChanged, setIOStore } from '~/stores/EditorStores';
+import { isProjectChanged, logStore, markProjectChanged, setIOStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
 import { setPlatform } from '~/utils/platform';
@@ -41,6 +41,19 @@ describe('io/project/save progress and cancellation (e2e)', () => {
     platform.app.getVersion = vi.fn(async () => '1.2.3') as any;
   });
 
+  /** what the bottom bar read at each tick. the line is written before the event, so it is this tick's. */
+  const collectBottomBar = () => {
+    const seen: string[] = [];
+    const listener = () => {
+      if (seen[seen.length - 1] !== logStore.bottomBarText) seen.push(logStore.bottomBarText);
+    };
+    eventBus.on('project:saveProgress', listener as any);
+    return {
+      seen,
+      stop: () => eventBus.off('project:saveProgress', listener as any),
+    };
+  };
+
   const collectProgress = () => {
     const seen: { phase: string; done: number; total: number }[] = [];
     const listener = (e: { phase: string; done: number; total: number }) => seen.push({ ...e });
@@ -59,13 +72,24 @@ describe('io/project/save progress and cancellation (e2e)', () => {
 
     expect(result).toBe(true);
     const phases = progress.seen.map((p) => p.phase);
-    expect(phases).toContain('layers');
-    expect(phases).toContain('history');
-    expect(phases).toContain('pack');
-    expect(phases).toContain('write');
+    const order = ['layers', 'history', 'snapshots', 'pack', 'write'];
+    order.forEach((phase) => expect(phases).toContain(phase));
     // phases never interleave, so the first sighting of each keeps the running order
-    const firstSeen = ['layers', 'history', 'pack', 'write'].map((phase) => phases.indexOf(phase));
+    const firstSeen = order.map((phase) => phases.indexOf(phase));
     expect(firstSeen).toEqual([...firstSeen].sort((a, b) => a - b));
+  });
+
+  it('leaves no silent stretch between history and pack', async () => {
+    const progress = collectProgress();
+
+    await saveProject('demo.sledge', 'C:/work');
+    progress.stop();
+
+    // restoring snapshot bodies rereads the whole saved file. without a phase of its own the display
+    // would sit at history 100% for the length of that read.
+    const phases = progress.seen.map((p) => p.phase);
+    expect(phases[phases.lastIndexOf('history') + 1]).toBe('snapshots');
+    expect(phases[phases.lastIndexOf('snapshots') + 1]).toBe('pack');
   });
 
   it('counts layers up to the number actually compressed', async () => {
@@ -92,6 +116,28 @@ describe('io/project/save progress and cancellation (e2e)', () => {
     expect(layerSteps[0].total).toBe(1);
   });
 
+  it('walks the bottom bar through the phases, then reports the result', async () => {
+    const bottomBar = collectBottomBar();
+
+    await saveProject('demo.sledge', 'C:/work');
+    bottomBar.stop();
+
+    expect(bottomBar.seen[0]).toBe('saving project... [layers 0/2]');
+    expect(bottomBar.seen).toContain('saving project... [pack]');
+    expect(bottomBar.seen).toContain('saving project... [write]');
+    expect(logStore.bottomBarText).toBe('project saved.');
+  });
+
+  it('says a cancelled save was cancelled', async () => {
+    markProjectChanged();
+
+    const running = saveProject('demo.sledge', 'C:/work');
+    cancelSave();
+    await running;
+
+    expect(logStore.bottomBarText).toBe('project save cancelled.');
+  });
+
   it('reports no save in progress once it settles', async () => {
     const running = saveProject('demo.sledge', 'C:/work');
     expect(isSaveInProgress()).toBe(true);
@@ -115,6 +161,22 @@ describe('io/project/save progress and cancellation (e2e)', () => {
     expect(emit).not.toHaveBeenCalledWith('project:saveFailed', expect.anything());
     // nothing reached the disk, so the changes are still only in the runtime
     expect(isProjectChanged()).toBe(true);
+  });
+
+  it('gives up before rereading the saved file', async () => {
+    markProjectChanged();
+    const progress = collectProgress();
+
+    const running = saveProject('demo.sledge', 'C:/work');
+    cancelSave();
+    await running;
+    progress.stop();
+
+    // the snapshot restore and the pack both sit behind an abort check, so neither runs
+    const phases = progress.seen.map((p) => p.phase);
+    expect(phases).toContain('layers');
+    expect(phases).not.toContain('snapshots');
+    expect(phases).not.toContain('pack');
   });
 
   it('leaves the cache usable after a cancel', async () => {

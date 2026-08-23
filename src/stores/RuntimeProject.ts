@@ -110,7 +110,7 @@ export async function initRuntimeProject(project: ProjectBase) {
 }
 
 /** @description the parts of assembling a project that take long enough to be worth reporting. */
-export type ProjectAssemblyPhase = 'layers' | 'history';
+export type ProjectAssemblyPhase = 'layers' | 'history' | 'snapshots';
 
 export interface GetProjectFromRuntimeOptions {
   /**
@@ -197,7 +197,14 @@ export async function getProjectFromRuntime(options?: GetProjectFromRuntimeOptio
     options?.onProgress?.('history', index + 1, layers.length);
   }
 
+  // restoring snapshot bodies reads and unpacks the whole saved file: one long step with nothing to report
+  // from inside it. check the signal on both sides so a cancel neither has to sit through it nor through
+  // the pack that follows.
+  options?.signal?.throwIfAborted();
+  options?.onProgress?.('snapshots', 0, 1);
   const runtimeSnapshots = options?.includeSnapshots === false ? [] : await getAllFullSnapshots();
+  options?.onProgress?.('snapshots', 1, 1);
+  options?.signal?.throwIfAborted();
 
   // snapshots are replaced below, and cloning them would duplicate every buffer they hold. clone the rest.
   const { snapshots: _snapshots, ...storeWithoutSnapshots } = unwrap(projectStore);

@@ -2,7 +2,7 @@ import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGener
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
-import { logSystemError, logSystemWarn, logUserError, logUserSuccess, logUserWarn } from '~/features/log/service';
+import { logSystemError, logSystemWarn, logUserError, logUserInfo, logUserSuccess, logUserWarn } from '~/features/log/service';
 import { makeSnapshotsAllRuntime } from '~/features/snapshot';
 import { ioStore, markProjectSaved, setIOStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
@@ -34,21 +34,41 @@ async function saveThumbnailData(selectedPath: string) {
   return await saveThumbnailExternal(fileId, thumbnailDataUrl);
 }
 
+const LOG_LABEL = 'ProjectSave';
+
+type SaveProgressReporter = (phase: SaveProgressPhase, done: number, total: number) => void;
+
+/**
+ * @description report a save's progress to everyone watching: the event stream, and the same line to the
+ *   bottom bar, the devtools console and stdout. phases that take one step report twice (start, finish),
+ *   which reads as the same line, so identical consecutive lines are not logged again.
+ */
+function createProgressReporter(): SaveProgressReporter {
+  let lastLine: string | undefined;
+  return (phase, done, total) => {
+    const line = `saving project... [${total > 1 ? `${phase} ${done}/${total}` : phase}]`;
+    if (line !== lastLine) {
+      lastLine = line;
+      logUserInfo(line, { label: LOG_LABEL, persistent: true });
+    }
+    // the line is up before the event, so anything the event wakes reads the same tick, not the last one
+    eventBus.emit('project:saveProgress', { phase, done, total });
+  };
+}
+
 /**
  * @description get MessagePack-compressed current project (including buffers)
  */
-export async function getPackedCurrentProject(options?: { signal?: AbortSignal; reportProgress?: boolean }): Promise<Uint8Array> {
-  const report = options?.reportProgress
-    ? (phase: SaveProgressPhase, done: number, total: number) => eventBus.emit('project:saveProgress', { phase, done, total })
-    : undefined;
+export async function getPackedCurrentProject(options?: { signal?: AbortSignal; onProgress?: SaveProgressReporter }): Promise<Uint8Array> {
+  const { signal, onProgress } = options ?? {};
 
-  const project = await getProjectFromRuntime({ signal: options?.signal, onProgress: report });
+  const project = await getProjectFromRuntime({ signal, onProgress });
 
-  options?.signal?.throwIfAborted();
+  signal?.throwIfAborted();
   // packing is one indivisible call, so it can only be reported as started and finished
-  report?.('pack', 0, 1);
+  onProgress?.('pack', 0, 1);
   const packed = packr.pack(project);
-  report?.('pack', 1, 1);
+  onProgress?.('pack', 1, 1);
   return packed;
 }
 
@@ -109,21 +129,21 @@ export function cancelSave(): void {
 /** @description a save the user stopped is not a failure; report it as the cancellation it is. */
 function handleSaveAborted(error: unknown, signal: AbortSignal | undefined, label: string): boolean {
   if (!signal?.aborted) return false;
-  logSystemWarn('Save cancelled.', { label, details: [error] });
+  logUserWarn('project save cancelled.', { label, details: [error] });
   eventBus.emit('project:saveCancelled', {});
   return true;
 }
 
 async function saveProjectInternal(name?: string, existingPath?: string, signal?: AbortSignal): Promise<boolean> {
-  const LOG_LABEL = 'ProjectSave';
+  const report = createProgressReporter();
   if (!core.isTauri()) {
     try {
       const fileNameWOExtension = getFileNameWithoutExtension(name ?? ioStore.savedLocation.name ?? 'new project');
       const fileName = `${fileNameWOExtension}.sledge`;
       // read before assembling: whatever the user draws while we build these bytes is not in them.
       const savedRevision = ioStore.projectRevision;
-      const bytes = await getPackedCurrentProject({ signal, reportProgress: true });
-      eventBus.emit('project:saveProgress', { phase: 'write', done: 0, total: 1 });
+      const bytes = await getPackedCurrentProject({ signal, onProgress: report });
+      report('write', 0, 1);
       const blob = new Blob([bytes.slice()], { type: 'application/octet-stream' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -146,7 +166,7 @@ async function saveProjectInternal(name?: string, existingPath?: string, signal?
       setProjectStore('project', 'lastSavedAt', new Date());
       makeSnapshotsAllRuntime();
 
-      eventBus.emit('project:saveProgress', { phase: 'write', done: 1, total: 1 });
+      report('write', 1, 1);
       markProjectSaved(savedRevision);
       logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
       return true;
@@ -201,12 +221,12 @@ After overwrite, you cannot open this project in old version of sledge.`,
 
       // read before assembling: whatever the user draws while we build these bytes is not in them.
       const savedRevision = ioStore.projectRevision;
-      const data = await getPackedCurrentProject({ signal, reportProgress: true });
+      const data = await getPackedCurrentProject({ signal, onProgress: report });
       // past this point the save is committed: the bytes are complete and cancelling would only
       // leave a temp file behind.
-      eventBus.emit('project:saveProgress', { phase: 'write', done: 0, total: 1 });
+      report('write', 0, 1);
       await writeProjectFile(selectedPath, data);
-      eventBus.emit('project:saveProgress', { phase: 'write', done: 1, total: 1 });
+      report('write', 1, 1);
       addRecentFile(pathToFileLocation(selectedPath));
 
       // the file on disk is V2 only once the write succeeded, so update the loaded version here and not earlier.

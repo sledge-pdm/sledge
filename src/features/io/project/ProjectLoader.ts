@@ -22,6 +22,7 @@ import { getCurrentVersion } from '~/utils/VersionUtils';
 import { tryGetImageFromClipboard } from '../clipboard/ClipboardUtils';
 import { CURRENT_PROJECT_VERSION } from './Project';
 import { applyProjectLocation, applyProjectLocationFromPathOrEmpty } from './ProjectLocationManager';
+import { cancelSave } from './save';
 
 type LoadType = 'new' | 'path' | 'projectObj' | 'image' | 'clipboard';
 
@@ -160,6 +161,9 @@ export class ProjectLoader<T extends LoadOption> {
 }
 
 function initBeforeLoad() {
+  // a save assembling right now is describing the project we are about to throw away, and it reads from
+  // the layers disposeAll is about to take down.
+  cancelSave();
   floatingMoveManager.cancel();
   selectionManager.clearAll();
   historyManager.clearHistory();

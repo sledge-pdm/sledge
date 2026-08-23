@@ -1,8 +1,8 @@
 import { FileLocation, Size2D } from '@sledge-pdm/core';
 import mitt from 'mitt';
 
-/** @description the four stretches of a save, in the order they run. */
-export type SaveProgressPhase = 'layers' | 'history' | 'pack' | 'write';
+/** @description the stretches of a save, in the order they run. */
+export type SaveProgressPhase = 'layers' | 'history' | 'snapshots' | 'pack' | 'write';
 
 export type Events = {
   'project:saved': { location: FileLocation };

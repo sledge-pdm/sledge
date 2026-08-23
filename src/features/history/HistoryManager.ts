@@ -1,6 +1,6 @@
 // New history management system.
 
-import { markProjectChanged } from '~/stores/EditorStores';
+import { markProjectChanged } from '~/features/project';
 import { globalConfig } from '~/stores/GlobalStores';
 import { HistoryEntry } from './entry/HistoryEntry';
 

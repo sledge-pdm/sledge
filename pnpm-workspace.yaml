@@ -4,8 +4,3 @@ allowBuilds:
   simple-git-hooks: true
 minimumReleaseAgeExclude:
   - '@sledge-pdm/*'
-onlyBuiltDependencies:
-  - '@swc/core'
-  - esbuild
-  - msgpackr-extract
-  - simple-git-hooks

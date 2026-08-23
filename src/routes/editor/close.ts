@@ -1,5 +1,6 @@
-import { saveProject } from '~/features/io/project/save';
-import { ioStore, isProjectChanged } from '~/stores/EditorStores';
+import { saveProject } from '~/features/io/project/ProjectSave';
+import { isProjectChanged } from '~/features/project';
+import { ioStore } from '~/stores/EditorStores';
 import { CloseRequestedEvent, dialog } from '~/utils/platform';
 
 const BUTTON_YES = 'Save and Quit';

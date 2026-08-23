@@ -1,10 +1,11 @@
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
-import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { logSystemError, logSystemWarn, logUserError, logUserInfo, logUserSuccess, logUserWarn } from '~/features/log/service';
+import { markProjectSaved } from '~/features/project';
+import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
 import { makeSnapshotsAllRuntime } from '~/features/snapshot';
-import { ioStore, markProjectSaved, setIOStore } from '~/stores/EditorStores';
+import { ioStore, setIOStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
@@ -153,6 +154,8 @@ async function saveProjectInternal(name?: string, existingPath?: string, signal?
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      // same as the tauri path: the download is out, but the runtime this save describes may already be gone.
+      signal?.throwIfAborted();
 
       setIOStore('loadProjectVersion', {
         sledge: await getCurrentVersion(),
@@ -222,10 +225,14 @@ After overwrite, you cannot open this project in old version of sledge.`,
       // read before assembling: whatever the user draws while we build these bytes is not in them.
       const savedRevision = ioStore.projectRevision;
       const data = await getPackedCurrentProject({ signal, onProgress: report });
-      // past this point the save is committed: the bytes are complete and cancelling would only
-      // leave a temp file behind.
+      // past this point the file is committed: the bytes are complete, and the write goes through a temp file,
+      // so a cancel arriving now cannot leave a partial project behind.
       report('write', 0, 1);
       await writeProjectFile(selectedPath, data);
+      // the bytes are on disk and complete, but a project loaded while we were writing has already replaced
+      // the runtime this save describes - applying the state below to it would point the new project at this
+      // file and drop its snapshots.
+      signal?.throwIfAborted();
       report('write', 1, 1);
       addRecentFile(pathToFileLocation(selectedPath));
 

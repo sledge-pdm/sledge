@@ -2,7 +2,8 @@ import { getProjectAdapter, gzipDeflate, ProjectBase, ProjectSnapshot, Size2D } 
 import { batch, createUniqueId } from 'solid-js';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { logSystemError, logSystemWarn, logUserError } from '~/features/log/service';
-import { ioStore, markProjectSaved } from '~/stores/EditorStores';
+import { markProjectSaved } from '~/features/project';
+import { ioStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { normalizeJoin } from '~/utils/FileUtils';

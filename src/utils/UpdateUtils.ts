@@ -1,5 +1,5 @@
 import { logSystemError, logSystemInfo } from '~/features/log/service';
-import { isProjectChanged } from '~/stores/EditorStores';
+import { isProjectChanged } from '~/features/project';
 import { globalConfig } from '~/stores/GlobalStores';
 import { dialog, process, Update, updater } from './platform';
 

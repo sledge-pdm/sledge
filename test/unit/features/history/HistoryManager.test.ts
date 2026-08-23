@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HistoryEntry } from '~/features/history';
 import { HistoryManager } from '~/features/history/HistoryManager';
-import { isProjectChanged, markProjectSaved } from '~/stores/EditorStores';
+import { isProjectChanged, markProjectSaved } from '~/features/project';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 
 class TestEntry extends HistoryEntry {

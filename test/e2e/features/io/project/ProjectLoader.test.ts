@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { ErrorTypes, ProjectLoader } from '~/features/io/project/ProjectLoader';
-import { ioStore, isProjectChanged, markProjectChanged, setIOStore } from '~/stores/EditorStores';
+import { isProjectChanged, markProjectChanged } from '~/features/project';
+import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
+import { ioStore, setIOStore } from '~/stores/EditorStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { setPlatform } from '~/utils/platform';
 import { TestMockPlatform } from '~/utils/platform/TestMockPlatform';

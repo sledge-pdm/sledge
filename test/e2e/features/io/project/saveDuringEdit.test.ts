@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
 import { ProjectLoader } from '~/features/io/project/ProjectLoader';
-import { saveProject } from '~/features/io/project/save';
+import { saveProject } from '~/features/io/project/ProjectSave';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
 import { setIOStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { unpackFromBytes } from '~/utils/msgpackr';

@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
-import { cancelSave, isSaveInProgress, saveProject } from '~/features/io/project/save';
+import { cancelSave, isSaveInProgress, saveProject } from '~/features/io/project/ProjectSave';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { isProjectChanged, logStore, markProjectChanged, setIOStore } from '~/stores/EditorStores';
-import { setProjectStore } from '~/stores/RuntimeProjectStore';
+import { isProjectChanged, markProjectChanged } from '~/features/project';
+import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
+import { ioStore, logStore, setIOStore } from '~/stores/EditorStores';
+import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
 import { setPlatform } from '~/utils/platform';
 import { TestMockPlatform } from '~/utils/platform/TestMockPlatform';
@@ -190,5 +191,24 @@ describe('io/project/save progress and cancellation (e2e)', () => {
 
     expect(result).toBe(true);
     expect(isProjectChanged()).toBe(false);
+  });
+
+  it('does not apply the result of a save cancelled during the write', async () => {
+    markProjectChanged();
+    // the project is replaced while the bytes are on their way to disk
+    platform.fs.writeFile = vi.fn(async () => {
+      cancelSave();
+    }) as any;
+    const emit = vi.spyOn(eventBus, 'emit');
+
+    const result = await saveProject('demo.sledge', 'C:/work');
+
+    expect(result).toBe(false);
+    // the file itself is complete - it is only the state describing the replaced project that is skipped
+    expect(platform.fs.rename).toHaveBeenCalled();
+    expect(emit).toHaveBeenCalledWith('project:saveCancelled', {});
+    expect(ioStore.recentFiles).toEqual([]);
+    expect(projectStore.project.lastSavedAt).toBeUndefined();
+    expect(isProjectChanged()).toBe(true);
   });
 });

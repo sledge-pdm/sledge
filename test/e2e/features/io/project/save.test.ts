@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CURRENT_PROJECT_VERSION } from '~/features/io/project/Project';
-import { saveProject, saveThumbnailExternal } from '~/features/io/project/save';
-import { ioStore, isProjectChanged, markProjectChanged, setIOStore } from '~/stores/EditorStores';
+import { saveProject, saveThumbnailExternal } from '~/features/io/project/ProjectSave';
+import { isProjectChanged, markProjectChanged } from '~/features/project';
+import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
+import { ioStore, setIOStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus } from '~/utils/EventBus';
 import { setPlatform } from '~/utils/platform';

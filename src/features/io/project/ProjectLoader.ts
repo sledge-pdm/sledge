@@ -8,10 +8,12 @@ import { setImagePoolImages } from '~/features/image_pool/imageStore';
 import { addLayer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
+import { markProjectSaved } from '~/features/project';
+import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import { defaultInteractStore } from '~/stores/editor/InteractStore';
-import { markProjectSaved, setIOStore, setInteractStore } from '~/stores/EditorStores';
+import { setIOStore, setInteractStore } from '~/stores/EditorStores';
 import { initRuntimeProject } from '~/stores/RuntimeProject';
 import { resetRuntimeProjectStore } from '~/stores/RuntimeProjectStore';
 import { loadImageData, loadLocalImage } from '~/utils/DataUtils';
@@ -20,9 +22,8 @@ import { unpackFromPath } from '~/utils/msgpackr';
 import { fs } from '~/utils/platform';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { tryGetImageFromClipboard } from '../clipboard/ClipboardUtils';
-import { CURRENT_PROJECT_VERSION } from './Project';
 import { applyProjectLocation, applyProjectLocationFromPathOrEmpty } from './ProjectLocationManager';
-import { cancelSave } from './save';
+import { cancelSave } from './ProjectSave';
 
 type LoadType = 'new' | 'path' | 'projectObj' | 'image' | 'clipboard';
 

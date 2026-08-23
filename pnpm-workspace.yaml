@@ -1,5 +1,6 @@
-onlyBuiltDependencies:
-  - '@swc/core'
-  - esbuild
-  - msgpackr-extract
-  - simple-git-hooks
+allowBuilds:
+  esbuild: true
+  msgpackr-extract: true
+  simple-git-hooks: true
+minimumReleaseAgeExclude:
+  - '@sledge-pdm/*'

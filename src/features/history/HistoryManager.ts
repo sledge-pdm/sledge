@@ -1,6 +1,6 @@
 // New history management system.
 
-import { setIOStore } from '~/stores/EditorStores';
+import { markProjectChanged } from '~/features/project';
 import { globalConfig } from '~/stores/GlobalStores';
 import { HistoryEntry } from './entry/HistoryEntry';
 
@@ -75,7 +75,7 @@ export class HistoryManager {
   private emitChange(markDirty = true) {
     const snap = { canUndo: this.canUndo(), canRedo: this.canRedo() };
     this.listeners.forEach((l) => l(snap));
-    if (markDirty) setIOStore('isProjectChangedAfterSave', true);
+    if (markDirty) markProjectChanged();
   }
 }
 

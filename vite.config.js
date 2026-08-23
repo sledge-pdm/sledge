@@ -44,9 +44,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '~': path.join(__dirname, 'src'),
-      '@sledge/wasm': path.join(__dirname, 'wasm/pkg/sledge_wasm.js'),
-      '@assets': path.join(__dirname, 'public/assets'),
+      '~': path.join(import.meta.dirname, 'src'),
+      '@sledge/wasm': path.join(import.meta.dirname, 'wasm/pkg/sledge_wasm.js'),
+      '@assets': path.join(import.meta.dirname, 'public/assets'),
     },
   },
 });

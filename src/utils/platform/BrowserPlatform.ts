@@ -22,6 +22,7 @@ export const createBrowserPlatform = (): Platform => ({
     writeTextFile: async () => {},
     readDir: async () => [],
     remove: async () => {},
+    rename: async () => {},
     stat: async () => ({ size: 0, isFile: true, isDirectory: false }),
   },
   dialog: {

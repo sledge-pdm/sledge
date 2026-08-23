@@ -8,6 +8,8 @@ import { setImagePoolImages } from '~/features/image_pool/imageStore';
 import { addLayer } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { logSystemError, logUserError } from '~/features/log/service';
+import { markProjectSaved } from '~/features/project';
+import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import { defaultInteractStore } from '~/stores/editor/InteractStore';
@@ -20,8 +22,8 @@ import { unpackFromPath } from '~/utils/msgpackr';
 import { fs } from '~/utils/platform';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { tryGetImageFromClipboard } from '../clipboard/ClipboardUtils';
-import { CURRENT_PROJECT_VERSION } from './Project';
 import { applyProjectLocation, applyProjectLocationFromPathOrEmpty } from './ProjectLocationManager';
+import { cancelSave } from './ProjectSave';
 
 type LoadType = 'new' | 'path' | 'projectObj' | 'image' | 'clipboard';
 
@@ -160,6 +162,9 @@ export class ProjectLoader<T extends LoadOption> {
 }
 
 function initBeforeLoad() {
+  // a save assembling right now is describing the project we are about to throw away, and it reads from
+  // the layers disposeAll is about to take down.
+  cancelSave();
   floatingMoveManager.cancel();
   selectionManager.clearAll();
   historyManager.clearHistory();
@@ -170,7 +175,7 @@ function initBeforeLoad() {
   setInteractStore(structuredClone(defaultInteractStore));
   setIOStore('savedLocation', { name: undefined, path: undefined });
   setIOStore('loadProjectVersion', undefined);
-  setIOStore('isProjectChangedAfterSave', false);
+  markProjectSaved();
 }
 
 async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLoadResult> {
@@ -194,7 +199,7 @@ async function loadNewProject(options: NewProjectLoadOption): Promise<InternalLo
         uniqueName: false,
       }
     );
-    setIOStore('isProjectChangedAfterSave', false);
+    markProjectSaved();
     return {
       ok: true,
     };
@@ -278,7 +283,7 @@ async function loadFromPathImage(path: string): Promise<InternalLoadResult> {
       width: imageData.width,
       height: imageData.height,
     });
-    setIOStore('isProjectChangedAfterSave', false);
+    markProjectSaved();
     return {
       ...result,
       path,
@@ -300,7 +305,7 @@ async function loadFromProjectObj(options: ProjectObjLoadOption): Promise<Intern
     const project = options.project;
     await initRuntimeProject(project);
     if (options.locationOverride) setIOStore('savedLocation', options.locationOverride);
-    setIOStore('isProjectChangedAfterSave', false);
+    markProjectSaved();
     return {
       ok: true,
     };
@@ -358,7 +363,7 @@ async function loadFromClipboard(options: ClipboardLoadOptions): Promise<Interna
       height,
       buffer,
     });
-    setIOStore('isProjectChangedAfterSave', false);
+    markProjectSaved();
     return {
       ok: true,
     };

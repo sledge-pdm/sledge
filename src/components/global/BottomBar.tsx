@@ -11,7 +11,7 @@ const bottomInfoRoot = css`
   flex-direction: row;
   box-sizing: content-box;
   flex-wrap: wrap;
-  background-color: var(--color-background);
+  background-color: var(--color-controls);
   border-top: 1px solid var(--color-border);
   height: 18px;
   padding-left: 8px;
@@ -27,6 +27,8 @@ const bottomInfoContainer = css`
   width: 100%;
   align-items: center;
   gap: var(--spacing-md);
+  border-top: 1px solid var(--color-shadow-top-light);
+  border-bottom: 1px solid var(--color-shadow-bottom-shadow);
 `;
 
 const bottomInfoContainerRight = css`

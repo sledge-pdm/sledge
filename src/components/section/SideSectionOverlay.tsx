@@ -129,9 +129,6 @@ const SideSectionsOverlay: Component<Props> = (props) => {
 
         left: props.side === 'leftSide' ? '0' : 'unset',
         right: props.side === 'rightSide' ? '0' : 'unset',
-
-        'border-right': props.side === 'leftSide' && appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
-        'border-left': props.side === 'rightSide' && appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
       }}
     >
       <div
@@ -140,6 +137,9 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         style={{
           display: appearanceStore[props.side].content ? 'flex' : 'none',
           width: appearanceStore[props.side].content ? '300px' : '0px',
+
+          'border-right': props.side === 'leftSide' && appearanceStore[props.side].content ? `1px solid ${color.borderSecondary}` : '',
+          'border-left': props.side === 'leftSide' && appearanceStore[props.side].content ? '' : `1px solid ${color.borderSecondary}`,
         }}
       >
         <ScrollFadeContainer class={sideAreaContentWrapper}>

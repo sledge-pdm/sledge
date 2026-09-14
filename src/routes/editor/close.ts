@@ -12,12 +12,9 @@ const BUTTON_STOP_SAVING = 'Stop Saving';
 const BUTTON_WAIT = 'Wait';
 
 /**
- * @description tell the user why the quit was turned down, and offer to stop the save if it can still be
- *   stopped. reported here rather than in the bottom bar, which is the opposite corner from the button they
- *   just pressed and so goes unread.
- *
- *   this never quits. stopping the save only clears what was in the way; closing again then goes through the
- *   normal prompt.
+ * @description say why the quit was turned down, and offer to stop the save if it can still be stopped. a
+ *   dialog rather than the bottom bar, which is the opposite corner from the button just pressed.
+ *   this never quits: stopping the save only clears what was in the way.
  */
 const reportQuitRefused = async (): Promise<void> => {
   const lines = ['Cannot quit while an operation is running.'];
@@ -46,7 +43,7 @@ const reportQuitRefused = async (): Promise<void> => {
 };
 
 export const handleCloseRequest = async (event: CloseRequestedEvent) => {
-  // an operation holding the window is describing a project that quitting would take away underneath it.
+  // an operation holding the window is reading a project that quitting would take away.
   if (isBusy()) {
     event.preventDefault();
     await reportQuitRefused();
@@ -67,17 +64,13 @@ export const handleCloseRequest = async (event: CloseRequestedEvent) => {
       switch (button) {
         case BUTTON_YES: {
           // the prompt and this save are one stretch of the same operation, so the save runs inside the
-          // window this already holds. nothing could be edited between the two - so one save answers the
-          // changes the prompt was about, and there is nothing for a second attempt to pick up.
-          //
-          // the modal is left to that save to raise: a project that has never been saved opens a file
-          // dialog first, and covering the window behind that is the thing being avoided here.
+          // window this already holds. the modal is left to that save to raise: an unsaved project opens a
+          // file dialog first, and covering the window behind that is what `deferDialog` avoids.
           const result = await saveProject(ioStore.savedLocation.name, ioStore.savedLocation.path, { busy: 'inherit' });
           if (result === 'saved' && !isProjectChanged()) return false;
 
-          // the changes are still there, so the window stays. a save the user stopped - or a destination they
-          // declined - is not a failure, and was already reported as the cancellation it is: saying it failed
-          // on top of that would tell them their own answer went wrong.
+          // the changes are still there, so the window stays. a cancelled save was already reported as a
+          // cancellation; reporting a failure on top of that would be wrong.
           event.preventDefault();
           return result !== 'cancelled';
         }
@@ -102,6 +95,6 @@ export const handleCloseRequest = async (event: CloseRequestedEvent) => {
     }
   );
 
-  // said after the window is given back, so this is not another native dialog with our modal behind it.
+  // said after the window is given back, so this is not another native dialog with the busy modal behind it.
   if (saveFailed) await dialog.message('Save failed. Try save project manually.');
 };

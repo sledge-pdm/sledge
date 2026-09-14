@@ -46,9 +46,8 @@ export async function initRuntimeProject(project: ProjectBase) {
   selectionManager.resize(canvasInfo.size);
 
   const layers = adapter.getLayers() ?? [];
-  // one layer failing to inflate must not end this while the others are still decoding: the load holds the
-  // window, and giving it back with registerLayer calls still to come would let the next operation read a
-  // half-built runtime.
+  // one layer failing to inflate must not end this while the others are still decoding: releasing the
+  // window with registerLayer calls still to come would expose a half-built runtime.
   await settleAll(
     layers.map(async (layer) => {
       let buffer = await adapter.getRawBufferOf(layer.id);
@@ -122,10 +121,7 @@ export interface GetProjectFromRuntimeOptions {
    *   pass false when the caller discards snapshots anyway - restoring them reads and unpacks the whole project file.
    */
   includeSnapshots?: boolean;
-  /**
-   * @description abort the assembly. checked between layers and between history stacks, so a cancel takes
-   *   effect within one buffer rather than at the end.
-   */
+  /** @description abort the assembly. checked between layers and between history stacks. */
   signal?: AbortSignal;
   /** @description progress within each phase. left out by callers that are not user-visible work. */
   onProgress?: (phase: ProjectAssemblyPhase, done: number, total: number) => void;
@@ -139,9 +135,8 @@ export async function getProjectFromRuntime(options?: GetProjectFromRuntimeOptio
   const layers = allLayers();
   const bufferCache = layerManager.bufferCache;
 
-  // layers that have not been touched since the last save keep the bytes produced back then. take those
-  // bytes now rather than after the compressions below: an edit landing mid-save drops the cache entry,
-  // and re-reading it then would leave the layer out of the file entirely.
+  // untouched layers keep the bytes from the last save. take them before the compressions below: an edit
+  // during the save drops the cache entry, and re-reading then would leave the layer out of the file.
   const deflatedByLayer = new Map<string, Uint8Array>();
   const staleLayerIds: string[] = [];
   for (const l of layers) {
@@ -202,8 +197,7 @@ export async function getProjectFromRuntime(options?: GetProjectFromRuntimeOptio
   }
 
   // restoring snapshot bodies reads and unpacks the whole saved file: one long step with nothing to report
-  // from inside it. check the signal on both sides so a cancel neither has to sit through it nor through
-  // the pack that follows.
+  // from inside it. signal checked on both sides so a cancel skips it and the pack that follows.
   options?.signal?.throwIfAborted();
   options?.onProgress?.('snapshots', 0, 1);
   const runtimeSnapshots = options?.includeSnapshots === false ? [] : await getAllFullSnapshots();

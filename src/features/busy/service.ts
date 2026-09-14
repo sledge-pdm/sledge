@@ -13,20 +13,17 @@ export interface BusyHandle {
   readonly operation: BusyOperationId;
   setProgress(progress: BusyProgress | undefined): void;
   /**
-   * @description put the modal up, for an operation started with `deferDialog`. called once the native
-   *   dialog it was waiting behind has been answered. it only ever turns the modal on: a step running
-   *   inside someone else's period must not be able to take their modal down.
+   * @description put the modal up, for an operation started with `deferDialog`. only ever turns the modal
+   *   on: a step inheriting someone else's period must not be able to take their modal down.
    */
   presentDialog(): void;
 }
 
 /**
  * - `acquire` (default): take the window, or turn the call down if something else already has it.
- * - `inherit`: run inside the exclusive period the caller already holds. for the inner steps of a larger
- *   operation - the copy inside a cut, the backup and the load inside a snapshot restore - which must not
- *   release and re-take it partway through.
- * - `skip`: run with no exclusion at all. only for the startup load, which runs before there is a window
- *   to take.
+ * - `inherit`: run inside the period the caller already holds, for inner steps that must not release and
+ *   re-take it partway through.
+ * - `skip`: run with no exclusion. only for the startup load, which runs before there is a window to take.
  */
 export type BusyMode = 'acquire' | 'inherit' | 'skip';
 
@@ -35,9 +32,8 @@ export interface RunExclusiveOptions<T> {
   /** @description overrides the operation's usual wording in the modal. */
   label?: string;
   /**
-   * @description take the window but leave the modal down until the body calls `presentDialog()`. for an
-   *   operation that opens a native dialog first: the restriction is on from the start either way, so all
-   *   this changes is that the user picks their folder without our modal sitting behind the OS one.
+   * @description take the window but leave the modal down until the body calls `presentDialog()`, for an
+   *   operation that opens a native dialog first. the restriction is on from the start either way.
    *   ignored unless this call is the one acquiring, so an inherited step cannot hide the modal already up.
    */
   deferDialog?: boolean;
@@ -51,11 +47,8 @@ export interface RunExclusiveOptions<T> {
 let currentOwner: object | undefined;
 
 /**
- * @description whether an operation holds the window.
- *
- *   read from the store rather than from `currentOwner`, which is a plain variable: a `disabled={isBusy()}`
- *   in a component has to re-evaluate when the answer changes, and only a store write can cause that. the
- *   two are set and cleared together in `runExclusive`, so they never disagree.
+ * @description whether an operation holds the window. reads the store rather than `currentOwner`, because
+ *   only a store write makes a `disabled={isBusy()}` re-evaluate. `runExclusive` sets and clears both.
  */
 export function isBusy(): boolean {
   return busyStore.operation !== undefined;
@@ -72,12 +65,8 @@ export function setBusyProgress(progress: BusyProgress | undefined): void {
 }
 
 /**
- * @description run `body` with the window to itself.
- *
- *   the window is taken before this function's first await, so it is already taken by the time control
- *   returns to the caller - a second operation arriving in the same tick finds it gone rather than slipping
- *   in alongside. it is given back in a `finally`, so a throw, a cancelled dialog and a plain failure all
- *   release it.
+ * @description run `body` with the window to itself. the window is taken before this function's first
+ *   await, so a second operation arriving in the same tick finds it gone. released in a `finally`.
  */
 export async function runExclusive<T>(
   operation: BusyOperationId,
@@ -105,9 +94,8 @@ export async function runExclusive<T>(
     progress: undefined,
     dialogVisible: !options?.deferDialog,
   });
-  // a context menu is mounted on `document.body`, outside the pane the modal covers and beyond the reach of
-  // its inert - so one left open stays clickable where the modal does not. every item on one edits the
-  // project this operation is about to read, so it comes down rather than being left for the user to notice.
+  // a context menu is mounted on `document.body`, outside the pane the modal covers and beyond its inert,
+  // so one left open stays clickable. its items edit the project this operation is about to read.
   closeContextMenu();
 
   try {

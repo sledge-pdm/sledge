@@ -1,10 +1,8 @@
 import type { SaveProgressPhase } from '~/utils/EventBus';
 
 /**
- * @description the operations that take the window for themselves while they run.
- *   everything here either writes the project file or rebuilds the runtime from something outside it, so
- *   letting a second one start - or letting the user edit underneath one - would have it working from a
- *   state that no longer exists.
+ * @description operations that hold the window for themselves. each one either writes the project file or
+ *   rebuilds the runtime, so it requires the state it reads to stay fixed for its whole run.
  */
 export type BusyOperationId =
   | 'save'
@@ -35,11 +33,8 @@ export interface BusyState {
   label: string;
   progress: BusyProgress | undefined;
   /**
-   * @description whether the modal is up. separate from `operation`, because an operation that opens a
-   *   native dialog first holds the window from the start but has nothing worth covering the window for
-   *   until that dialog is answered - the OS dialog is modal to this window anyway, and putting ours up
-   *   behind it only means the user stares at it while picking a folder.
-   *
+   * @description whether the modal is up. separate from `operation` because an operation that opens a native
+   *   dialog first holds the window from the start, and the OS dialog is already modal to this window.
    *   the restriction never waits on this: the input guards read `operation`.
    */
   dialogVisible: boolean;

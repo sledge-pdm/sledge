@@ -18,7 +18,6 @@ import './title_bar_region.css';
 const titleBarRoot = css`
   position: relative;
   pointer-events: all;
-  border-top: 1px solid var(--color-shadow-top-light);
 `;
 
 const titleBarContentRoot = css`
@@ -195,8 +194,11 @@ export default function TitleBar() {
         class={titleBarRoot}
         style={{
           'background-color': isTitleLess() ? 'transparent' : color.controls,
-          'border-bottom': isTitleLess() ? undefined : `2px solid ${color.shadowBottomShadow}`,
-          // 'padding-bottom': shouldShowTitle() ? '1px' : undefined,
+          // the separator has to read against the canvas area below it, so it stays an opaque border.
+          'border-bottom': isTitleLess() ? undefined : `1px solid ${color.border}`,
+          // the bevel is drawn just inside that line and costs no layout, same as FoldBox / DialogContent.
+          // it goes away with the background: a translucent highlight over nothing is not a bevel.
+          'box-shadow': isTitleLess() ? undefined : `inset 0 1px 0 ${color.shadowTopLight}, inset 0 -1px 0 ${color.shadowBottomShadow}`,
         }}
       >
         <Show when={!windowState.decorated}>

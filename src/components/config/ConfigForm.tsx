@@ -316,8 +316,12 @@ const ConfigForm: Component<Props> = (props) => {
 
                   const componentName = typeof meta.component === 'string' ? meta.component : undefined;
                   const componentProp = componentName ? componentProps.get(componentName) : undefined;
-                  const shouldShowLeftLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'left';
-                  const shouldShowRightLabel = !componentProp?.labelByComponent && componentProp?.labelMode === 'right';
+                  // Boolean controls show their value (enabled/disabled) here. The ui controls would otherwise
+                  // print the field name next to the switch, repeating the header right above it.
+                  const isBooleanControl = componentName === 'CheckBox' || componentName === 'RadioButton' || componentName === 'ToggleSwitch';
+                  const shouldShowLeftLabel = !isBooleanControl && !componentProp?.labelByComponent && componentProp?.labelMode === 'left';
+                  const shouldShowRightLabel = isBooleanControl || (!componentProp?.labelByComponent && componentProp?.labelMode === 'right');
+                  const controlField = (isBooleanControl ? { ...meta, props: { ...meta.props, labelMode: 'none' } } : meta) as ConfigField;
                   const value = () => getValueFromMetaPath(meta);
                   const onChange = (v: any) => {
                     const arrPath = pathToArray(meta.path);
@@ -342,7 +346,7 @@ const ConfigForm: Component<Props> = (props) => {
                             {getParsedValueFromMetaPath(meta)}.
                           </label>
                         </Show>
-                        <ConfigFieldRenderer field={meta as ConfigField} value={value} onChange={onChange} />
+                        <ConfigFieldRenderer field={controlField} value={value} onChange={onChange} />
                         <Show when={shouldShowRightLabel}>
                           <label for={meta.path.toString()} class={configFormFieldControlLabel} style={{ 'padding-left': 'var(--spacing-sm)' }}>
                             {getParsedValueFromMetaPath(meta)}.

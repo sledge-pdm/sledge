@@ -2,9 +2,10 @@ import { css } from '@acab/ecsstatic';
 import { CleanupFn } from '@atlaskit/pragmatic-drag-and-drop/dist/types/internal-types';
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { clsx, Layer } from '@sledge-pdm/core';
-import { Checkbox, color, Icon, Light, showContextMenu } from '@sledge-pdm/ui';
+import { Checkbox, color, Icon, Light } from '@sledge-pdm/ui';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
+import { isBusy } from '~/features/busy';
 import { allLayers, findLayerById, mergeToBelowLayer, reorderLayer, setActiveLayerId, setLayerProp, toggleLayerVisibility } from '~/features/layer';
 import {
   clearLayersFromUser,
@@ -19,6 +20,7 @@ import {
 import { logUserWarn } from '~/features/log';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { flexRow } from '~/styles/styles';
+import { showContextMenu } from '~/utils/contextMenu';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { updateFrascoCanvas } from '~/webgl/service';
 
@@ -264,6 +266,8 @@ const LayerItem: Component<LayerItemProps> = (props) => {
           onContextMenu={async (e) => {
             e.preventDefault();
             e.stopImmediatePropagation();
+            // every item on this menu edits the project; none are offered while an operation holds the window.
+            if (isBusy()) return;
 
             // const menu = await LayerMenu.create(props.layer.id);
             // menu.show(new LogicalPosition(e.clientX, e.clientY));

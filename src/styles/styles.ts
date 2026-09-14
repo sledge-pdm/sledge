@@ -72,6 +72,8 @@ export const accentedButton = css`
 `;
 
 export const pageRoot = css`
+  /* ModalDialog がこの中に収まるための基準。static のままだと backdrop が外へ広がる */
+  position: relative;
   display: flex;
   flex-direction: row;
   height: 100%;

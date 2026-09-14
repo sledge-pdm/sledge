@@ -6,14 +6,16 @@ import About from './routes/about/index';
 import Editor from './routes/editor/index';
 import Home from './routes/start/index';
 
-import { applyTheme, showContextMenu } from '@sledge-pdm/ui';
+import { applyTheme } from '@sledge-pdm/ui';
 import { createEffect, onCleanup, onMount } from 'solid-js';
+import { isBusy } from '~/features/busy';
 import { loadGlobalConfig } from '~/features/io/config/load';
 import { logSystemError, logSystemInfo } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
+import { showContextMenu } from '~/utils/contextMenu';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
-import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
 import { event, window as platformWindow, UnlistenFn, webview } from '~/utils/platform';
+import { reportCriticalError, zoomForIntegerize } from '~/utils/WindowUtils';
 import Settings from './routes/settings/index';
 import { listenEvent } from './utils/TauriUtils';
 
@@ -100,6 +102,7 @@ export default function App() {
             class={appRoot}
             onContextMenu={(e) => {
               e.preventDefault();
+              if (isBusy()) return;
               showContextMenu(import.meta.env.DEV ? [ContextMenuItems.DevRefresh, ContextMenuItems.DevOpenDevTools] : [], e);
             }}
           >

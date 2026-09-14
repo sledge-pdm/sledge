@@ -1,6 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { color, ColorBox, Dialog, Icon, RadioButton, Slider } from '@sledge-pdm/ui';
-import { Component, createMemo, Show } from 'solid-js';
+import { Component, createEffect, createMemo, Show } from 'solid-js';
+import { isBusy } from '~/features/busy';
 import {
   applyColorSelection,
   cancelColorSelectionPick,
@@ -96,9 +97,18 @@ const ColorSelectionDialog: Component = () => {
   const isCanvasTarget = createMemo(() => colorSelectionStore.target === 'canvas');
   const targetTextValue = createMemo(() => (isCanvasTarget() ? 'canvas.' : 'layer.'));
 
+  // この Dialog は Portal で body 直下へ出るため、エディターにかかる modal の inert が届かない。
+  // タイトルバー（移動と閉じる）は害がないので残し、操作部分だけを落とす。
+  let contentRef: HTMLDivElement | undefined;
+  createEffect(() => {
+    if (!contentRef) return;
+    if (isBusy()) contentRef.setAttribute('inert', '');
+    else contentRef.removeAttribute('inert');
+  });
+
   return (
     <Dialog title='Color Selection.' onClose={closeColorSelectionDialog} initialPosition={initialPosition()}>
-      <div class={contentRoot}>
+      <div class={contentRoot} ref={(el) => (contentRef = el)}>
         <div class={row}>
           <p class={label}>color.</p>
           <ColorBox color={colorSelectionStore.targetColor} sizePx={24} forceBorderColor={color.onBackground} />
@@ -132,14 +142,14 @@ const ColorSelectionDialog: Component = () => {
               name='color-selection-target'
               label='canvas'
               labelMode='right'
-              value={isCanvasTarget()}
+              checked={isCanvasTarget()}
               onChange={() => setColorSelectionTarget('canvas')}
             />
             <RadioButton
               name='color-selection-target'
               label='layer'
               labelMode='right'
-              value={!isCanvasTarget()}
+              checked={!isCanvasTarget()}
               onChange={() => setColorSelectionTarget('layer')}
             />
           </div>

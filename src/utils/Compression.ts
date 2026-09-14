@@ -27,18 +27,37 @@ export async function deflateAllAsync(providers: readonly DeflateBufferProvider[
   const deflated = new Array<Uint8Array>(providers.length);
   let nextIndex = 0;
   let completed = 0;
+  let failure: { error: unknown } | undefined;
 
   const runner = async () => {
     for (;;) {
-      options?.signal?.throwIfAborted();
+      // a failure or an abort means the rest of this result is thrown away, so stop taking new buffers -
+      // but do not leave here until the ones already in hand are done. the caller's `finally` releases the
+      // window and the history stacks these reads are still working from.
+      if (failure) return;
+      try {
+        options?.signal?.throwIfAborted();
+      } catch (error) {
+        failure ??= { error };
+        return;
+      }
       const index = nextIndex++;
       if (index >= providers.length) return;
-      deflated[index] = await gzipDeflateAsync(await providers[index]());
+      try {
+        deflated[index] = await gzipDeflateAsync(await providers[index]());
+      } catch (error) {
+        // keep the first failure: the ones after it are usually fallout from the same cause.
+        failure ??= { error };
+        return;
+      }
       completed++;
       options?.onEach?.(completed, providers.length);
     }
   };
 
+  // the runners never reject, so this waits for every one of them rather than for the first to give up.
   await Promise.all(Array.from({ length: Math.min(DEFLATE_CONCURRENCY, providers.length) }, runner));
+
+  if (failure) throw failure.error;
   return deflated;
 }

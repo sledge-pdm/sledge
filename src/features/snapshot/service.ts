@@ -1,5 +1,6 @@
 import { getProjectAdapter, gzipDeflate, ProjectBase, ProjectSnapshot, Size2D } from '@sledge-pdm/core';
 import { batch, createUniqueId } from 'solid-js';
+import { finalizePendingInput, runExclusive, type BusyMode } from '~/features/busy';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { logSystemError, logSystemWarn, logUserError } from '~/features/log/service';
 import { markProjectSaved } from '~/features/project';
@@ -129,12 +130,29 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
   }
 }
 
-export async function registerCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot | RuntimeProjectSnapshot> {
-  const snapshot = await createCurrentProjectSnapshot(name);
-  if (snapshot) {
-    setProjectStore('snapshots', [...projectStore.snapshots, snapshot]);
-  }
-  return snapshot;
+/**
+ * @description take a snapshot of the project as it stands and keep it.
+ *
+ *   assembling the project reads every layer back, so the editor is held still for it the same way a save
+ *   is. `busy: 'inherit'` is for the backup a snapshot restore takes first: that is one step of the restore,
+ *   not an operation of its own.
+ */
+export async function registerCurrentProjectSnapshot(
+  name?: string,
+  options?: { busy?: BusyMode }
+): Promise<ProjectSnapshot | RuntimeProjectSnapshot | undefined> {
+  return await runExclusive(
+    'snapshotCreate',
+    async () => {
+      finalizePendingInput();
+      const snapshot = await createCurrentProjectSnapshot(name);
+      if (snapshot) {
+        setProjectStore('snapshots', [...projectStore.snapshots, snapshot]);
+      }
+      return snapshot;
+    },
+    { mode: options?.busy ?? 'acquire' }
+  );
 }
 
 export function addSnapshot(snapshot: ProjectSnapshot | RuntimeProjectSnapshot) {
@@ -151,19 +169,28 @@ export function overwriteSnapshotWithName(name: string, snapshot: ProjectSnapsho
 }
 
 export async function deleteSnapshot(snapshot: ProjectSnapshot | RuntimeProjectSnapshot) {
-  const confirmResult = await dialog.confirm(`Sure to delete snapshot "${snapshot.name}"?`, {
-    cancelLabel: 'Cancel',
-    okLabel: 'Delete',
-    kind: 'info',
-    title: 'Delete Snapshot',
-  });
+  // the confirmation is part of the operation: the snapshot list must be the one the user was shown when
+  // the answer comes back, so nothing may edit it while the prompt is up. no modal is raised at any point -
+  // the prompt is modal to this window already, and the removal that answers it is one synchronous step.
+  await runExclusive(
+    'snapshotDelete',
+    async () => {
+      const confirmResult = await dialog.confirm(`Sure to delete snapshot "${snapshot.name}"?`, {
+        cancelLabel: 'Cancel',
+        okLabel: 'Delete',
+        kind: 'info',
+        title: 'Delete Snapshot',
+      });
 
-  if (!confirmResult) return;
+      if (!confirmResult) return;
 
-  setProjectStore('snapshots', (snapshots: (ProjectSnapshot | RuntimeProjectSnapshot)[]) =>
-    snapshots.filter((s) => {
-      return s.id !== snapshot.id;
-    })
+      setProjectStore('snapshots', (snapshots: (ProjectSnapshot | RuntimeProjectSnapshot)[]) =>
+        snapshots.filter((s) => {
+          return s.id !== snapshot.id;
+        })
+      );
+    },
+    { deferDialog: true }
   );
 }
 
@@ -173,37 +200,53 @@ export async function loadSnapshot(
     backup?: boolean;
   }
 ) {
-  if (option?.backup) {
-    // backup current state
-    const created = await registerCurrentProjectSnapshot('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString());
-    if (!created) return;
-  } else {
-    const confirmResult = await dialog.confirm(
-      `Sure to load snapshot "${snapshot.name}"?
+  // the backup, the read from the file and the load that replaces the runtime are one operation. releasing
+  // between them would leave a window where the project has been backed up but not yet replaced.
+  await runExclusive(
+    'snapshotLoad',
+    async (handle) => {
+      finalizePendingInput();
+
+      if (option?.backup) {
+        // nothing is asked on this path, and the backup below already assembles the whole project
+        handle.presentDialog();
+        // backup current state
+        const created = await registerCurrentProjectSnapshot('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString(), {
+          busy: 'inherit',
+        });
+        if (!created) return;
+      } else {
+        const confirmResult = await dialog.confirm(
+          `Sure to load snapshot "${snapshot.name}"?
 This will NOT backup your current state (unless you did manually backup.)`,
-      {
-        cancelLabel: 'Cancel',
-        okLabel: 'Discard and Load',
-        kind: 'info',
-        title: 'Load Snapshot',
+          {
+            cancelLabel: 'Cancel',
+            okLabel: 'Discard and Load',
+            kind: 'info',
+            title: 'Load Snapshot',
+          }
+        );
+
+        if (!confirmResult) return;
+        handle.presentDialog();
       }
-    );
 
-    if (!confirmResult) return;
-  }
+      const savedSnapshotStore = [...projectStore.snapshots];
 
-  const savedSnapshotStore = [...projectStore.snapshots];
+      const fullSnapshot = await loadFullSnapshot(snapshot);
+      if (!fullSnapshot) {
+        logUserError(`Failed to load project (failed to load full snapshot from file.)`);
+        return;
+      }
+      // load snapshot
+      await ProjectLoader.fromProjectObj({ project: fullSnapshot.project, locationOverride: { ...ioStore.savedLocation } }).load({ busy: 'inherit' });
 
-  const fullSnapshot = await loadFullSnapshot(snapshot);
-  if (!fullSnapshot) {
-    logUserError(`Failed to load project (failed to load full snapshot from file.)`);
-    return;
-  }
-  // load snapshot
-  await ProjectLoader.fromProjectObj({ project: fullSnapshot.project, locationOverride: { ...ioStore.savedLocation } }).load();
+      markProjectSaved();
 
-  markProjectSaved();
-
-  setProjectStore('snapshots', savedSnapshotStore);
-  updateFrascoCanvas('snapshot loaded');
+      setProjectStore('snapshots', savedSnapshotStore);
+      updateFrascoCanvas('snapshot loaded');
+    },
+    // the confirmation on the other path is modal to this window already; a declined restore shows no modal.
+    { deferDialog: true }
+  );
 }

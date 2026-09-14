@@ -1,4 +1,5 @@
 import { gzipInflate } from '@sledge-pdm/core';
+import { runExclusive } from '~/features/busy';
 import { normalizeRotation } from '~/features/canvas';
 import { activeLayer } from '~/features/layer';
 import { getLayer } from '~/features/layer/frasco/LayerManager';
@@ -14,18 +15,22 @@ import { getEntry } from './service';
 import { IMAGE_POOL_TRANSFER_300ES } from './shader';
 
 export async function transferToCurrentLayer(entryId: string, removeAfter: boolean) {
-  const active = activeLayer();
-  if (!active) return;
+  // the decode, the draw and the history entry that records it are one operation: a save reading the layer
+  // between the draw and the entry would write pixels that undo does not know how to walk back.
+  await runExclusive('imageTransfer', async () => {
+    const active = activeLayer();
+    if (!active) return;
 
-  try {
-    const transferred = await transferToLayer(active.id, entryId);
-    if (!transferred) return;
-    registerTransferHistory(active.id);
-    if (removeAfter) removeEntry(entryId);
-    logUserInfo('Image transferred to active layer.');
-  } catch (e) {
-    logSystemError('Image transfer failed.', { label: 'ImagePool', details: [e] });
-  }
+    try {
+      const transferred = await transferToLayer(active.id, entryId);
+      if (!transferred) return;
+      registerTransferHistory(active.id);
+      if (removeAfter) removeEntry(entryId);
+      logUserInfo('Image transferred to active layer.');
+    } catch (e) {
+      logSystemError('Image transfer failed.', { label: 'ImagePool', details: [e] });
+    }
+  });
 }
 
 async function transferToLayer(layerId: string, entryId: string): Promise<boolean> {

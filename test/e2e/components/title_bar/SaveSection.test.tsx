@@ -1,9 +1,9 @@
 import { render } from 'solid-js/web';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import SaveSection from '~/components/global/title_bar/SaveSection';
+import { runExclusive } from '~/features/busy';
 import { setIOStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
-import { eventBus } from '~/utils/EventBus';
 
 const mocks = vi.hoisted(() => ({
   saveProject: vi.fn(async () => true),
@@ -40,38 +40,55 @@ describe('SaveSection (e2e)', () => {
     document.body.innerHTML = '';
   });
 
+  /** @description hold the window for the length of `body`, the way a real operation does. */
+  const whileRunning = (operation: Parameters<typeof runExclusive>[0], body: () => Promise<void>) =>
+    runExclusive(operation, async () => {
+      await settled();
+      await body();
+    });
+
   it('follows a save it did not start', async () => {
     expect(button().textContent).toBe('save');
     expect(button().disabled).toBe(false);
 
-    // what a Ctrl+S save looks like from here: this button was never clicked, only the stream moved
-    eventBus.emit('project:saveProgress', { phase: 'layers', done: 1, total: 4 });
-    await settled();
-    expect(button().textContent).toBe('saving...');
-    expect(button().disabled).toBe(true);
-    // what the save is doing belongs to the bottom bar; this section only keeps the last save's age
-    expect(texts()).toEqual(['3 hours ago']);
+    // what a Ctrl+S save looks like from here: this button was never clicked, the window was just taken
+    await whileRunning('save', async () => {
+      expect(button().textContent).toBe('saving...');
+      expect(button().disabled).toBe(true);
+      // what the save is doing belongs to the bottom bar; this section only keeps the last save's age
+      expect(texts()).toEqual(['3 hours ago']);
+    });
   });
 
-  it('returns to idle once the write finishes', async () => {
-    eventBus.emit('project:saveProgress', { phase: 'layers', done: 0, total: 2 });
-    eventBus.emit('project:saveProgress', { phase: 'write', done: 1, total: 1 });
+  it('returns to idle once the operation releases the window', async () => {
+    await whileRunning('save', async () => {
+      expect(button().disabled).toBe(true);
+    });
     await settled();
 
     expect(button().textContent).toBe('save');
     expect(button().disabled).toBe(false);
   });
 
-  it('returns to idle when a save fails or is cancelled', async () => {
-    eventBus.emit('project:saveProgress', { phase: 'history', done: 1, total: 3 });
-    eventBus.emit('project:saveCancelled', {});
+  it('returns to idle when a save fails', async () => {
+    await expect(
+      runExclusive('save', async () => {
+        await settled();
+        expect(button().disabled).toBe(true);
+        throw new Error('nope');
+      })
+    ).rejects.toThrow('nope');
     await settled();
-    expect(button().disabled).toBe(false);
 
-    eventBus.emit('project:saveProgress', { phase: 'history', done: 1, total: 3 });
-    eventBus.emit('project:saveFailed', { error: new Error('nope') });
-    await settled();
     expect(button().disabled).toBe(false);
+  });
+
+  it('is out of use while an operation that is not a save is running', async () => {
+    await whileRunning('imageImport', async () => {
+      // there is no saving over an import, but this button must not claim to be the thing running either
+      expect(button().disabled).toBe(true);
+      expect(button().textContent).toBe('save');
+    });
   });
 
   it('cannot start a second save while one is running', async () => {
@@ -79,10 +96,10 @@ describe('SaveSection (e2e)', () => {
     await settled();
     expect(mocks.saveProject).toHaveBeenCalledTimes(1);
 
-    eventBus.emit('project:saveProgress', { phase: 'layers', done: 0, total: 2 });
-    await settled();
-    button().click();
-    await settled();
+    await whileRunning('save', async () => {
+      button().click();
+      await settled();
+    });
 
     expect(mocks.saveProject).toHaveBeenCalledTimes(1);
   });

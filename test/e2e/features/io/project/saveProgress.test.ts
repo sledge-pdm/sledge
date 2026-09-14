@@ -71,7 +71,7 @@ describe('io/project/save progress and cancellation (e2e)', () => {
     const result = await saveProject('demo.sledge', 'C:/work');
     progress.stop();
 
-    expect(result).toBe(true);
+    expect(result).toBe('saved');
     const phases = progress.seen.map((p) => p.phase);
     const order = ['layers', 'history', 'snapshots', 'pack', 'write'];
     order.forEach((phase) => expect(phases).toContain(phase));
@@ -155,7 +155,7 @@ describe('io/project/save progress and cancellation (e2e)', () => {
     cancelSave();
     const result = await running;
 
-    expect(result).toBe(false);
+    expect(result).toBe('cancelled');
     // the write only starts once every buffer is in hand, so a cancel cannot leave a partial file
     expect(platform.fs.writeFile).not.toHaveBeenCalled();
     expect(emit).toHaveBeenCalledWith('project:saveCancelled', {});
@@ -189,7 +189,7 @@ describe('io/project/save progress and cancellation (e2e)', () => {
     // whatever finished compressing before the cancel is still valid, and the next save completes
     const result = await saveProject('demo.sledge', 'C:/work');
 
-    expect(result).toBe(true);
+    expect(result).toBe('saved');
     expect(isProjectChanged()).toBe(false);
   });
 
@@ -201,9 +201,9 @@ describe('io/project/save progress and cancellation (e2e)', () => {
     const elsewhere = saveProject();
     expect(logStore.bottomBarText).toBe('another save is still running.');
 
-    expect(await elsewhere).toBe(false);
-    expect(await repeat).toBe(true);
-    expect(await running).toBe(true);
+    expect(await elsewhere).toBe('failed');
+    expect(await repeat).toBe('saved');
+    expect(await running).toBe('saved');
     // the picker for the other target never opened
     expect(platform.dialog.save).not.toHaveBeenCalled();
   });
@@ -218,7 +218,7 @@ describe('io/project/save progress and cancellation (e2e)', () => {
       calls.push('writeFile');
     }) as any;
 
-    expect(await saveProject('demo.sledge', 'C:/work')).toBe(true);
+    expect(await saveProject('demo.sledge', 'C:/work')).toBe('saved');
 
     // the abort check after the write is what stops a finished save from applying its location and snapshots
     // to a project loaded meanwhile. anything that yields between it and that state - getVersion is an IPC
@@ -226,22 +226,24 @@ describe('io/project/save progress and cancellation (e2e)', () => {
     expect(calls.lastIndexOf('getVersion')).toBeLessThan(calls.indexOf('writeFile'));
   });
 
-  it('does not apply the result of a save cancelled during the write', async () => {
+  it('refuses a cancel that arrives during the write, and records what it wrote', async () => {
     markProjectChanged();
-    // the project is replaced while the bytes are on their way to disk
     platform.fs.writeFile = vi.fn(async () => {
       cancelSave();
     }) as any;
     const emit = vi.spyOn(eventBus, 'emit');
+    // spyOn hands back the same spy each time in this file, so only this save's emits are in question
+    emit.mockClear();
 
     const result = await saveProject('demo.sledge', 'C:/work');
 
-    expect(result).toBe(false);
-    // the file itself is complete - it is only the state describing the replaced project that is skipped
+    // the write cannot be interrupted, so the file exists either way. taking the cancel would only drop the
+    // state that records it, leaving the editor on the old file with the new one already on disk.
+    expect(result).toBe('saved');
     expect(platform.fs.rename).toHaveBeenCalled();
-    expect(emit).toHaveBeenCalledWith('project:saveCancelled', {});
-    expect(ioStore.recentFiles).toEqual([]);
-    expect(projectStore.project.lastSavedAt).toBeUndefined();
-    expect(isProjectChanged()).toBe(true);
+    expect(emit).not.toHaveBeenCalledWith('project:saveCancelled', {});
+    expect(ioStore.recentFiles.length).toBeGreaterThan(0);
+    expect(projectStore.project.lastSavedAt).toBeInstanceOf(Date);
+    expect(isProjectChanged()).toBe(false);
   });
 });

@@ -1,11 +1,13 @@
 import { ImagePoolEntry } from '@sledge-pdm/core';
-import { color, showContextMenu } from '@sledge-pdm/ui';
+import { color } from '@sledge-pdm/ui';
 import { Component, For } from 'solid-js';
+import { isBusy } from '~/features/busy';
 import { selectEntry } from '~/features/image_pool';
 import { buildImagePoolEntryContextMenu } from '~/features/image_pool/contextMenu';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { flexCol, flexRow } from '~/styles/styles';
+import { showContextMenu } from '~/utils/contextMenu';
 
 const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
   const imageSrc = useImageBlobUrl(() => props.entry.id);
@@ -25,6 +27,8 @@ const Item: Component<{ entry: ImagePoolEntry }> = (props) => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
+        // every item on this menu edits the project; none are offered while an operation holds the window.
+        if (isBusy()) return;
         showContextMenu(buildImagePoolEntryContextMenu(props.entry), e);
       }}
     >

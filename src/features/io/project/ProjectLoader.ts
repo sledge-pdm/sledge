@@ -1,4 +1,5 @@
 import { FileLocation, ProjectBase, RawPixelData } from '@sledge-pdm/core';
+import { runExclusive, type BusyMode } from '~/features/busy';
 import { changeCanvasSize } from '~/features/canvas';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
@@ -23,7 +24,6 @@ import { fs } from '~/utils/platform';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { tryGetImageFromClipboard } from '../clipboard/ClipboardUtils';
 import { applyProjectLocation, applyProjectLocationFromPathOrEmpty } from './ProjectLocationManager';
-import { cancelSave } from './ProjectSave';
 
 type LoadType = 'new' | 'path' | 'projectObj' | 'image' | 'clipboard';
 
@@ -133,7 +133,27 @@ export class ProjectLoader<T extends LoadOption> {
     return path.endsWith('.sledge');
   }
 
-  public async load(): Promise<LoadResult> {
+  /**
+   * @description replace what this window holds with the project this loader describes.
+   *
+   *   loading takes the window: it tears the runtime down and rebuilds it, so an operation reading that
+   *   runtime - a save, above all - must not be running alongside. a save that is already running is no
+   *   longer interrupted for this; the load is turned down instead, and the user can load once it is done.
+   */
+  public async load(options?: { busy?: BusyMode }): Promise<LoadResult> {
+    return (
+      (await runExclusive('projectLoad', () => this.loadInternal(), {
+        mode: options?.busy ?? 'acquire',
+        onRejected: (): LoadResult => ({
+          ok: false,
+          error: { type: ErrorTypes.INTERNAL_ERROR, detail: 'Another operation is running. Try loading again once it finishes.' },
+          type: this.type,
+        }),
+      })) ?? { ok: false, type: this.type }
+    );
+  }
+
+  private async loadInternal(): Promise<LoadResult> {
     let result: InternalLoadResult;
     switch (this.type) {
       case 'new':
@@ -162,9 +182,9 @@ export class ProjectLoader<T extends LoadOption> {
 }
 
 function initBeforeLoad() {
-  // a save assembling right now is describing the project we are about to throw away, and it reads from
-  // the layers disposeAll is about to take down.
-  cancelSave();
+  // a save assembling right now would be describing the project this is about to throw away, and would be
+  // reading from the layers disposeAll takes down. it is not stopped here - loading holds the window for
+  // its whole run, so a save cannot have been running when this was reached.
   floatingMoveManager.cancel();
   selectionManager.clearAll();
   historyManager.clearHistory();

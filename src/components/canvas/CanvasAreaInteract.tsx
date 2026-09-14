@@ -1,4 +1,5 @@
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
+import { isBusy } from '~/features/busy';
 import { clipZoom, rotateInCenter, setOffset, zoomTowardWindowPos } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { tryRedo, tryUndo } from '~/features/history';
@@ -128,6 +129,8 @@ class CanvasAreaInteract {
   }
 
   private handleMouseDown(e: MouseEvent) {
+    // the side buttons are undo/redo, which rewrite the very layers a running operation is reading.
+    if (isBusy()) return;
     if (e.button === 3) {
       e.preventDefault();
       tryUndo();
@@ -138,6 +141,9 @@ class CanvasAreaInteract {
   }
 
   private handlePointerDown(e: PointerEvent) {
+    // no new gesture starts while an operation holds the window. move and up are left alone below, so a
+    // gesture that was already under way still gets to end and release its pointers.
+    if (isBusy()) return;
     const start = new Date().getTime();
     logDebug(`handlePointerDown start`);
     this.lastPointX = e.clientX;
@@ -332,6 +338,7 @@ class CanvasAreaInteract {
   }
 
   private handleWheel(e: WheelEvent) {
+    if (isBusy()) return;
     if (e.shiftKey) {
       const amount = globalConfig.editor.rotateDegreePerWheelScroll;
       const mousePos: WindowPos = WindowPos.from({
@@ -371,6 +378,8 @@ class CanvasAreaInteract {
   private KEY_ZOOM_MULT = 1.3;
 
   private handleKeyDown(e: KeyboardEvent) {
+    // on `window`, so it is still heard while the modal has focus.
+    if (isBusy()) return;
     if (e.ctrlKey) {
       if (e.key === '+') {
         // in

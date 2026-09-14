@@ -1,10 +1,12 @@
 import { css } from '@acab/ecsstatic';
 import { FileLocation } from '@sledge-pdm/core';
-import { color, Icon, MenuListOption, showContextMenu } from '@sledge-pdm/ui';
+import { color, Icon, MenuListOption } from '@sledge-pdm/ui';
 import { Component, createMemo, Show } from 'solid-js';
+import { isBusy } from '~/features/busy';
 import { createEntryFromLocalImage, insertEntry, selectEntry } from '~/features/image_pool';
 import { getFileExtensionInfo, isImportableFile, isOpenableFile } from '~/features/io/Extensions';
 import { openExistingProject } from '~/features/io/window';
+import { showContextMenu } from '~/utils/contextMenu';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { DirEntry } from '~/utils/platform';
@@ -141,6 +143,8 @@ const FileItem: Component<{
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
+        // opening a project from here replaces what a running operation is reading.
+        if (isBusy()) return;
 
         showContextMenu(contextMenuOptions(), e);
       }}

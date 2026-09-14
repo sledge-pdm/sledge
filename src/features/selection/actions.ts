@@ -1,3 +1,4 @@
+import { runExclusive } from '~/features/busy';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 import { createTexture, deleteTexture } from '~/utils/TextureUtils';
 import { combine_masks_subtract, flip_pixels_vertically } from '~/utils/wasm';
@@ -96,6 +97,12 @@ export function invertSelectionArea() {
 }
 
 export async function convertSelectionToImage(deleteAfter?: boolean) {
+  // the entry is inserted, the area is cleared and the history entry covering both is registered around an
+  // await. releasing between them - or letting a save read between them - would record one without the other.
+  await runExclusive('selectionToImage', () => convertSelectionToImageInternal(deleteAfter));
+}
+
+async function convertSelectionToImageInternal(deleteAfter?: boolean) {
   const selectionData = getCurrentSelectionBuffer();
   if (!selectionData) return;
   const { buffer, bbox } = selectionData;

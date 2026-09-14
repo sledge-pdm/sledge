@@ -39,13 +39,13 @@ describe('io/project/save (e2e)', () => {
     platform.app.getVersion = vi.fn(async () => '1.2.3') as any;
   });
 
-  it('returns false and emits cancel event when save dialog is cancelled', async () => {
+  it('reports the cancellation and emits cancel event when save dialog is cancelled', async () => {
     const emit = vi.spyOn(eventBus, 'emit');
     platform.dialog.save = vi.fn(async () => null) as any;
 
     const result = await saveProject('new project.sledge');
 
-    expect(result).toBe(false);
+    expect(result).toBe('cancelled');
     expect(emit).toHaveBeenCalledWith('project:saveCancelled', {});
   });
 
@@ -57,7 +57,7 @@ describe('io/project/save (e2e)', () => {
 
     const result = await saveProject('demo.sledge', 'C:/work');
 
-    expect(result).toBe(false);
+    expect(result).toBe('cancelled');
     expect(platform.dialog.confirm).toHaveBeenCalledTimes(1);
     expect(platform.fs.writeFile).not.toHaveBeenCalled();
   });
@@ -70,7 +70,7 @@ describe('io/project/save (e2e)', () => {
 
     const result = await saveProject('demo.sledge', 'C:/work');
 
-    expect(result).toBe(true);
+    expect(result).toBe('saved');
     // the project is written to a temp file and renamed into place, so an interrupted save cannot
     // leave a half-written .sledge behind
     expect(platform.fs.writeFile).toHaveBeenCalledTimes(1);
@@ -90,7 +90,7 @@ describe('io/project/save (e2e)', () => {
     });
   });
 
-  it('returns false and emits failure event when file write fails', async () => {
+  it('reports the failure and emits failure event when file write fails', async () => {
     const emit = vi.spyOn(eventBus, 'emit');
     platform.fs.writeFile = vi.fn(async () => {
       throw new Error('disk full');
@@ -98,7 +98,7 @@ describe('io/project/save (e2e)', () => {
 
     const result = await saveProject('demo.sledge', 'C:/work');
 
-    expect(result).toBe(false);
+    expect(result).toBe('failed');
     expect(emit).toHaveBeenCalledWith('project:saveFailed', {
       error: expect.any(Error),
     });
@@ -112,7 +112,7 @@ describe('io/project/save (e2e)', () => {
 
     const result = await saveProject('demo.sledge', 'C:/work');
 
-    expect(result).toBe(false);
+    expect(result).toBe('failed');
     // the existing .sledge is still whatever it was, so the half-written temp file must not be left around
     expect(platform.fs.remove).toHaveBeenCalledWith('C:/work/demo.sledge.saving');
     expect(emit).toHaveBeenCalledWith('project:saveFailed', {
@@ -131,7 +131,7 @@ describe('io/project/save (e2e)', () => {
 
     const result = await saveProject('demo.sledge', 'C:/work');
 
-    expect(result).toBe(true);
+    expect(result).toBe('saved');
     expect(isProjectChanged()).toBe(true);
   });
 
@@ -146,7 +146,7 @@ describe('io/project/save (e2e)', () => {
 
     const result = await saveProject('demo.sledge', 'C:/work');
 
-    expect(result).toBe(false);
+    expect(result).toBe('failed');
     // writing a snapshot-less file over the only copy of them would lose them for good
     expect(platform.fs.writeFile).not.toHaveBeenCalled();
     expect(isProjectChanged()).toBe(true);
@@ -161,7 +161,7 @@ describe('io/project/save (e2e)', () => {
 
     const result = await saveProject('demo.sledge', 'C:/work');
 
-    expect(result).toBe(false);
+    expect(result).toBe('failed');
     expect(isProjectChanged()).toBe(true);
   });
 

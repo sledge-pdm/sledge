@@ -11,6 +11,7 @@ import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';
 import { getAllFullSnapshots, RuntimeProjectSnapshot } from '~/features/snapshot';
+import { settleAll } from '~/utils/Async';
 import { deflateAllAsync } from '~/utils/Compression';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { setIOStore } from './EditorStores';
@@ -45,7 +46,10 @@ export async function initRuntimeProject(project: ProjectBase) {
   selectionManager.resize(canvasInfo.size);
 
   const layers = adapter.getLayers() ?? [];
-  await Promise.all(
+  // one layer failing to inflate must not end this while the others are still decoding: the load holds the
+  // window, and giving it back with registerLayer calls still to come would let the next operation read a
+  // half-built runtime.
+  await settleAll(
     layers.map(async (layer) => {
       let buffer = await adapter.getRawBufferOf(layer.id);
       if (!buffer) {

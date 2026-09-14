@@ -1,13 +1,15 @@
 import { css } from '@acab/ecsstatic';
 import { clsx, ImagePoolEntry } from '@sledge-pdm/core';
-import { color, Icon, showContextMenu } from '@sledge-pdm/ui';
+import { color, Icon } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, onMount } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
+import { isBusy } from '~/features/busy';
 import { cloneEntry, registerEntryUpdate, selectEntry, updateEntryPartial } from '~/features/image_pool';
 import { buildImagePoolEntryContextMenu } from '~/features/image_pool/contextMenu';
 import { useImageBlobUrl } from '~/features/image_pool/useWebpBlobUrl';
 import { interactStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
+import { showContextMenu } from '~/utils/contextMenu';
 
 const imageRoot = css`
   position: absolute;
@@ -162,6 +164,8 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
 
   const handleContextMenu = (e: PointerEvent | MouseEvent) => {
     e.preventDefault();
+    // every item on this menu edits the project; none are offered while an operation holds the window.
+    if (isBusy()) return;
     e.stopPropagation();
     e.stopImmediatePropagation();
     selectEntry(entry.id);

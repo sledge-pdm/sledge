@@ -83,7 +83,7 @@ describe('io/project/save interrupted by an undo (e2e)', () => {
       return packing;
     });
 
-    expect(await saveProject('demo.sledge', 'C:/work')).toBe(true);
+    expect(await saveProject('demo.sledge', 'C:/work')).toBe('saved');
     expect(written).toBeDefined();
 
     const project = unpackFromBytes(written!);

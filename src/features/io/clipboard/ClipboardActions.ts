@@ -1,4 +1,5 @@
 import { toUint8Array } from '@sledge-pdm/core';
+import { runExclusive } from '~/features/busy';
 import { doCommands } from '~/features/history';
 import { cutPasteSnippet } from '~/features/history/commands';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
@@ -15,6 +16,11 @@ import { isInputFocused, tryGetImageFromClipboard, tryGetTextFromClipboard } fro
 const LOG_LABEL = 'ClipboardActions';
 
 export async function clipboardCopy(e?: ClipboardEvent): Promise<'layer' | 'selection' | undefined> {
+  return await runExclusive('clipboardCopy', () => copyInternal(e));
+}
+
+/** @description the copy itself, without taking the window - a cut runs this inside its own period. */
+async function copyInternal(e?: ClipboardEvent): Promise<'layer' | 'selection' | undefined> {
   const inputFocused = isInputFocused();
   if (inputFocused) return;
   e?.preventDefault();
@@ -43,11 +49,17 @@ export async function clipboardCopy(e?: ClipboardEvent): Promise<'layer' | 'sele
 }
 
 export async function clipboardCut(e?: ClipboardEvent) {
+  await runExclusive('clipboardCut', () => cutInternal(e));
+}
+
+async function cutInternal(e?: ClipboardEvent) {
   const inputFocused = isInputFocused();
   if (inputFocused) return;
   e?.preventDefault();
 
-  const copyMode = await clipboardCopy(e); // this doesn't add history
+  // the copy is the first half of the cut, not an operation of its own: it runs inside the window the cut
+  // already holds, so the delete below removes exactly what was copied.
+  const copyMode = await copyInternal(e); // this doesn't add history
   if (!copyMode) return;
 
   if (copyMode === 'layer') {
@@ -64,6 +76,10 @@ export async function clipboardCut(e?: ClipboardEvent) {
 }
 
 export async function clipboardPaste(e?: ClipboardEvent) {
+  await runExclusive('clipboardPaste', () => pasteInternal(e));
+}
+
+async function pasteInternal(e?: ClipboardEvent) {
   const inputFocused = isInputFocused();
   if (inputFocused) return;
   e?.preventDefault();

@@ -1,12 +1,13 @@
 import { css } from '@acab/ecsstatic';
 import { clsx, Vec2 } from '@sledge-pdm/core';
 import { CircleKernel, SquareKernel } from '@sledge-pdm/frasco';
-import { color, showContextMenu } from '@sledge-pdm/ui';
+import { color } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import { previewMaskManager } from '~/features/tools/behaviors/draw/PreviewMaskManager';
 import { getCurrentPresetConfig, updateToolPresetConfig } from '~/features/tools/ToolController';
 import { DEFAULT_PRESET, EraserPresetConfig, PenPresetConfig } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
+import { showContextMenu } from '~/utils/contextMenu';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 
 const root = css`

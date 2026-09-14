@@ -4,9 +4,11 @@ import { onCleanup, onMount, Show } from 'solid-js';
 import CanvasArea from '~/components/canvas/CanvasArea';
 import BottomBar from '~/components/global/BottomBar';
 import Loading from '~/components/global/common/Loading';
+import BusyDialog from '~/components/global/dialog/busy/BusyDialog';
 import ColorSelectionDialogHost from '~/components/global/dialog/color_selection/ColorSelectionDialogHost';
 import OnscreenControl from '~/components/global/onscreen_control/OnscreenControl';
 import SideSectionControls from '~/components/section/SideSectionControls';
+import { isBusy } from '~/features/busy';
 import { adjustZoomToFit } from '~/features/canvas';
 import { addImagesFromFiles, addImagesFromLocal } from '~/features/image_pool';
 import ClipboardListener from '~/features/io/clipboard/ClipboardListener';
@@ -42,6 +44,13 @@ const mainContent = css`
   height: 100%;
   width: 100%;
 `;
+
+/**
+ * the loads below run before the editor exists - the window is showing its loading screen, and there is
+ * nothing for an exclusive period to hold back. taking one here would only put the busy modal on top of
+ * that screen, so these opt out of it. every load after startup goes through the normal, exclusive path.
+ */
+const STARTUP_LOAD = { busy: 'skip' } as const;
 
 export default function Editor() {
   const isFirst = isFirstStartup();
@@ -89,12 +98,12 @@ export default function Editor() {
             await saveEditorStateImmediate(['lastPath']);
           }
           await reportLoadTimeout(targetPath);
-          const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();
+          const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load(STARTUP_LOAD);
           return fallbackResult.ok;
         }
       }
 
-      const result = await loader.load();
+      const result = await loader.load(STARTUP_LOAD);
       if (result.ok) {
         return true;
       } else {
@@ -106,7 +115,7 @@ export default function Editor() {
             await saveEditorStateImmediate(['lastPath']);
           case InitialLoadTypes.PATH_PROJECT:
           case InitialLoadTypes.PATH_IMAGE_PROJECT:
-            const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load();
+            const fallbackResult = await ProjectLoader.fromNew({ ...globalConfig.default.canvasSize }).load(STARTUP_LOAD);
             if (fallbackResult.ok) {
               await reportInitialLoadError(initialLoadType, result.error, undefined, targetPath);
               return true;
@@ -177,6 +186,9 @@ export default function Editor() {
   const handleFileDrop = async (event: DragEvent) => {
     if (!isFileDrag(event)) return;
     event.preventDefault();
+    // the import would be turned down by its own exclusion anyway, but a drop that reached here would also
+    // have moved focus out of the modal. nothing is taken from the drop at all.
+    if (isBusy()) return;
 
     const files = Array.from(event.dataTransfer?.files ?? []);
     if (files.length === 0) return;
@@ -203,6 +215,7 @@ export default function Editor() {
       <div
         class={pageRoot}
         onDragOver={(e) => {
+          if (isBusy()) return;
           if (isFileDrag(e)) e.preventDefault();
         }}
         onDrop={handleFileDrop}
@@ -230,6 +243,8 @@ export default function Editor() {
         <KeyListener />
         <ClipboardListener />
         <ColorSelectionDialogHost />
+        {/* scoped to this pane: the title bar above it stays live and disables itself. */}
+        <BusyDialog />
       </div>
     </Show>
   );

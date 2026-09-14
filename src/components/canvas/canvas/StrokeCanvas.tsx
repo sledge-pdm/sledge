@@ -1,9 +1,9 @@
 import { css } from '@acab/ecsstatic';
 import { Vec2 } from '@sledge-pdm/core';
-import { showContextMenu } from '@sledge-pdm/ui';
 import { batch, Component, createSignal, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
+import { isBusy, registerInputFinalizer } from '~/features/busy';
 import CanvasToolOperator, { DrawState } from '~/features/canvas/CanvasToolOperator';
 import { getCanvasMousePosition, getWindowMousePosition } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { clipboardCopy, clipboardCut } from '~/features/io/clipboard/ClipboardActions';
@@ -15,6 +15,7 @@ import { getActiveToolCategory } from '~/features/tools/ToolController';
 import { TOOLS_ALLOWED_IN_MOVE_MODE } from '~/features/tools/Tools';
 import { interactStore, setInteractStore, toolStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
+import { showContextMenu } from '~/utils/contextMenu';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 
@@ -51,6 +52,11 @@ export const StrokeCanvas: Component = () => {
   const handledPointerDown = new WeakSet<PointerEvent>();
 
   function isDrawableClick(e: PointerEvent): boolean {
+    // an operation holding the window is reading these layers. it also finalized any stroke that was open
+    // when it started, so there is nothing here to continue either.
+    if (isBusy()) {
+      return false;
+    }
     if (interactStore.isCanvasSizeFrameMode) {
       return false;
     }
@@ -166,6 +172,20 @@ export const StrokeCanvas: Component = () => {
     setIsInStroke(false);
   }
 
+  /**
+   * @description end a stroke that is still being drawn, as though the pointer had been lifted where it
+   *   last was.
+   *
+   *   the tool's `onEnd` is what registers the stroke's history entry, so a stroke abandoned rather than
+   *   ended would reach the file as pixels with no entry behind them - the image and undo would disagree
+   *   the moment the project was reloaded.
+   */
+  function finalizeStroke() {
+    if (!isInStroke()) return;
+    operator.handleDraw(DrawState.end, new PointerEvent('pointerup'), getActiveToolCategory(), interactStore.lastPointerOnCanvas);
+    setIsInStroke(false);
+  }
+
   function isOnCanvas(canvasPosition: Vec2): boolean {
     return (
       canvasPosition.x >= 0 &&
@@ -188,6 +208,8 @@ export const StrokeCanvas: Component = () => {
   onMount(() => {
     outerArea = document.getElementById('outer-stroke-detect-area') as HTMLDivElement | null;
 
+    const unregisterFinalizer = registerInputFinalizer(finalizeStroke);
+
     innerArea!.addEventListener('pointerdown', handlePointerDown);
     outerArea!.addEventListener('pointerdown', handlePointerDown);
 
@@ -200,6 +222,9 @@ export const StrokeCanvas: Component = () => {
     platformWindow
       .getCurrentWindow()
       .onFocusChanged(({ payload: focused }) => {
+        // an operation's own native dialog taking focus fires this. it already ended whatever stroke was
+        // open, and cancelling into its layers now would undo work it has read.
+        if (isBusy()) return;
         if (!focused) {
           operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 });
         } else {
@@ -213,6 +238,7 @@ export const StrokeCanvas: Component = () => {
       });
 
     return () => {
+      unregisterFinalizer();
       innerArea!.removeEventListener('pointerdown', handlePointerDown);
       outerArea!.removeEventListener('pointerdown', handlePointerDown);
 
@@ -238,6 +264,9 @@ export const StrokeCanvas: Component = () => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
+        // every item on this menu edits the project or starts an operation of its own, so the menu itself
+        // is not offered while one is running.
+        if (isBusy()) return;
         const position = getCanvasMousePosition(e);
 
         // selection

@@ -186,7 +186,7 @@ export default function TitleBar() {
   });
 
   const titleLessWindowLabels: string[] = ['about'];
-  const isTitleLess = () => titleLessWindowLabels.find((l) => l === platformWindow.getCurrentWindow().label);
+  const isTitleLess = () => titleLessWindowLabels.some((l) => l === platformWindow.getCurrentWindow().label);
 
   return (
     <header>

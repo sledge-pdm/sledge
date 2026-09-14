@@ -1,5 +1,4 @@
 import { finalizePendingInput, isBusy, runExclusive, setBusyProgress, type BusyHandle, type BusyMode } from '~/features/busy';
-import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
 import { logSystemError, logSystemWarn, logUserError, logUserInfo, logUserSuccess, logUserWarn } from '~/features/log/service';
@@ -8,14 +7,12 @@ import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
 import { makeSnapshotsAllRuntime } from '~/features/snapshot';
 import { ioStore, setIOStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
-import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
-import { blobToDataUrl, dataUrlToBytes } from '~/utils/DataUtils';
+import { setProjectStore } from '~/stores/RuntimeProjectStore';
 import { eventBus, SaveProgressPhase } from '~/utils/EventBus';
-import { getFileNameWithoutExtension, getFileUniqueId, normalizeJoin, pathToFileLocation, projectSaveDir } from '~/utils/FileUtils';
-import { calcThumbnailSize } from '~/utils/ThumbnailUtils';
+import { getFileNameWithoutExtension, normalizeJoin, pathToFileLocation, projectSaveDir } from '~/utils/FileUtils';
 import { getCurrentVersion } from '~/utils/VersionUtils';
 import { packr } from '~/utils/msgpackr';
-import { core, dialog, fs, path } from '~/utils/platform';
+import { core, dialog, fs } from '~/utils/platform';
 
 async function folderSelection(nameWOExtension: string) {
   const defaultPath = normalizeJoin(await projectSaveDir(), `${nameWOExtension}.sledge`);
@@ -25,15 +22,6 @@ async function folderSelection(nameWOExtension: string) {
     canCreateDirectories: true,
     filters: [{ name: 'sledge project', extensions: ['sledge'] }],
   });
-}
-
-async function saveThumbnailData(selectedPath: string) {
-  const fileId = await getFileUniqueId(selectedPath);
-  const { width, height } = projectStore.canvas.size;
-  const thumbSize = calcThumbnailSize(width, height);
-  const thumbnailBlob = await canvasThumbnailGenerator.generateCanvasThumbnailBlob(thumbSize.width, thumbSize.height);
-  const thumbnailDataUrl = await blobToDataUrl(thumbnailBlob);
-  return await saveThumbnailExternal(fileId, thumbnailDataUrl);
 }
 
 const LOG_LABEL = 'ProjectSave';
@@ -90,6 +78,19 @@ async function writeProjectFile(path: string, data: Uint8Array): Promise<void> {
     }
     throw error;
   }
+}
+
+/** @description hand the bytes to the browser as a download. the counterpart of `writeProjectFile`. */
+function downloadProjectFile(fileName: string, data: Uint8Array): void {
+  const blob = new Blob([data.slice()], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 type SaveTarget = { name?: string; existingPath?: string };
@@ -149,12 +150,12 @@ export async function saveProject(name?: string, existingPath?: string, options?
       // open gestures and pending history entries are committed first, so the assembled bytes match the
       // canvas and the undo stack. runs before the first await below, so no input can arrive in between.
       finalizePendingInput();
-      return await saveProjectInternal(name, existingPath, controller.signal, handle);
+      return await saveProjectExclusive(name, existingPath, controller.signal, handle);
     },
     {
       mode: busyMode,
       // the destination comes first, and the dialog asking for it is already modal to this window. the
-      // modal goes up once there is a destination - see `presentDialog` calls in saveProjectInternal.
+      // modal goes up once there is a destination - see `presentDialog` calls in saveProjectExclusive.
       deferDialog: true,
       onRejected: (): SaveResult => 'failed',
     }
@@ -237,8 +238,43 @@ After overwrite, you cannot open this project in old version of sledge.`,
   return await folderSelection(name ? getFileNameWithoutExtension(name) : 'new project');
 }
 
-async function saveProjectInternal(name?: string, existingPath?: string, signal?: AbortSignal, handle?: BusyHandle): Promise<SaveResult> {
+/**
+ * @description record a save that landed. the version is only current once the write succeeded, so this runs
+ *   after it and not earlier.
+ */
+function applySaveToStores(sledgeVersion: string, savedRevision: number): void {
+  setIOStore('loadProjectVersion', {
+    sledge: sledgeVersion,
+    project: CURRENT_PROJECT_VERSION,
+  });
+  setIOStore('openAs', 'project');
+  setProjectStore('project', 'lastSavedAt', new Date());
+  makeSnapshotsAllRuntime();
+  markProjectSaved(savedRevision);
+}
+
+/** @description report a save that threw. a cancellation is answered by the caller before this. */
+function reportSaveFailure(error: unknown, options?: { systemMessage?: string; details?: unknown[] }): SaveResult {
+  logSystemError(options?.systemMessage ?? 'Error saving project.', { label: LOG_LABEL, details: [error, ...(options?.details ?? [])] });
+  logUserError('project save failed.', { label: LOG_LABEL, details: [error], persistent: true });
+  eventBus.emit('project:saveFailed', { error });
+  return 'failed';
+}
+
+/** @description a declined destination. the same answer whichever dialog asked. */
+function reportSaveDeclined(): SaveResult {
+  eventBus.emit('project:saveCancelled', {});
+  logUserWarn('project save cancelled.', { label: LOG_LABEL });
+  return 'cancelled';
+}
+
+/**
+ * @description the body of a save, run while the window is held. `saveProject` is the only caller: calling
+ *   this directly would read the project without the exclusion and in-flight bookkeeping it depends on.
+ */
+async function saveProjectExclusive(name?: string, existingPath?: string, signal?: AbortSignal, handle?: BusyHandle): Promise<SaveResult> {
   const report = createProgressReporter();
+
   if (!core.isTauri()) {
     // a browser save has no destination to ask for - the download is named and taken at the end - so there
     // is nothing to wait behind and the modal goes up straight away.
@@ -256,40 +292,21 @@ async function saveProjectInternal(name?: string, existingPath?: string, signal?
       // here on for the same reason as the tauri path.
       writeStarted = true;
       report('write', 0, 1);
-      const blob = new Blob([bytes.slice()], { type: 'application/octet-stream' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      downloadProjectFile(fileName, bytes);
       // same as the tauri path: the download is out, but the runtime this save describes may already be gone.
       signal?.throwIfAborted();
+      report('write', 1, 1);
 
-      setIOStore('loadProjectVersion', {
-        sledge: sledgeVersion,
-        project: CURRENT_PROJECT_VERSION,
-      });
-      setIOStore('openAs', 'project');
       setIOStore('savedLocation', {
         path: undefined,
         name: fileName,
       });
-      setProjectStore('project', 'lastSavedAt', new Date());
-      makeSnapshotsAllRuntime();
-
-      report('write', 1, 1);
-      markProjectSaved(savedRevision);
+      applySaveToStores(sledgeVersion, savedRevision);
       logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
       return 'saved';
     } catch (error) {
       if (handleSaveAborted(error, signal, LOG_LABEL)) return 'cancelled';
-      logSystemError('Error saving project.', { label: LOG_LABEL, details: [error] });
-      logUserError('project save failed.', { label: LOG_LABEL, details: [error], persistent: true });
-      eventBus.emit('project:saveFailed', { error: error });
-      return 'failed';
+      return reportSaveFailure(error);
     }
   }
 
@@ -299,77 +316,44 @@ async function saveProjectInternal(name?: string, existingPath?: string, signal?
   } catch (error) {
     // a dialog that fails is not a declined one: reported as a failure rather than thrown out of a call
     // whose callers expect a SaveResult.
-    logSystemError('Error selecting save destination.', { label: LOG_LABEL, details: [error] });
-    logUserError('project save failed.', { label: LOG_LABEL, details: [error], persistent: true });
-    eventBus.emit('project:saveFailed', { error });
-    return 'failed';
+    return reportSaveFailure(error, { systemMessage: 'Error selecting save destination.' });
   }
+  if (typeof selectedPath !== 'string') return reportSaveDeclined();
 
-  if (typeof selectedPath === 'string') {
-    // there is a destination, so from here the save is work rather than a question. a declined save never
-    // raises the modal at all.
-    handle?.presentDialog();
-    try {
-      // const thumbpath = await saveThumbnailData(selectedPath);
+  // there is a destination, so from here the save is work rather than a question. a declined save never
+  // raises the modal at all.
+  handle?.presentDialog();
+  try {
+    // const thumbpath = await saveThumbnailData(selectedPath); // see ProjectThumbnail.ts
 
-      // read before assembly; later edits are not in these bytes.
-      const savedRevision = ioStore.projectRevision;
-      // read up front so the abort check below is the last yield in this path: what it guards has to run in
-      // one tick, or a project loaded in between would be handed this save's state.
-      const sledgeVersion = await getCurrentVersion();
-      const data = await getPackedCurrentProject({ signal, onProgress: report });
-      // the bytes are complete and the write goes through a temp file, so a cancel arriving now cannot leave
-      // a partial project behind. it is refused from here on - see `isSaveCancellable`.
-      writeStarted = true;
-      report('write', 0, 1);
-      await writeProjectFile(selectedPath, data);
-      // the bytes are on disk, but a project loaded during the write has already replaced the runtime this
-      // save describes - applying the state below would point that project at this file and drop its snapshots.
-      signal?.throwIfAborted();
-      report('write', 1, 1);
-      addRecentFile(pathToFileLocation(selectedPath));
+    // read before assembly; later edits are not in these bytes.
+    const savedRevision = ioStore.projectRevision;
+    // read up front so the abort check below is the last yield in this path: what it guards has to run in
+    // one tick, or a project loaded in between would be handed this save's state.
+    const sledgeVersion = await getCurrentVersion();
+    const data = await getPackedCurrentProject({ signal, onProgress: report });
+    // the bytes are complete and the write goes through a temp file, so a cancel arriving now cannot leave
+    // a partial project behind. it is refused from here on - see `isSaveCancellable`.
+    writeStarted = true;
+    report('write', 0, 1);
+    await writeProjectFile(selectedPath, data);
+    // the bytes are on disk, but a project loaded during the write has already replaced the runtime this
+    // save describes - applying the state below would point that project at this file and drop its snapshots.
+    signal?.throwIfAborted();
+    report('write', 1, 1);
 
-      // the file on disk is V2 only once the write succeeded, so update the loaded version here and not earlier.
-      setIOStore('loadProjectVersion', {
-        sledge: sledgeVersion,
-        project: CURRENT_PROJECT_VERSION,
-      });
-      setIOStore('openAs', 'project');
-      setSavedLocation(selectedPath);
-      // @ts-ignore
-      window.__PATH__ = selectedPath;
-      setProjectStore('project', 'lastSavedAt', new Date());
-      makeSnapshotsAllRuntime();
-      const loc = pathToFileLocation(selectedPath);
-      if (loc) eventBus.emit('project:saved', { location: loc });
+    addRecentFile(pathToFileLocation(selectedPath));
+    setSavedLocation(selectedPath);
+    // @ts-ignore
+    window.__PATH__ = selectedPath;
+    applySaveToStores(sledgeVersion, savedRevision);
+    const loc = pathToFileLocation(selectedPath);
+    if (loc) eventBus.emit('project:saved', { location: loc });
 
-      markProjectSaved(savedRevision);
-      logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
-      return 'saved';
-    } catch (error) {
-      if (handleSaveAborted(error, signal, LOG_LABEL)) return 'cancelled';
-      logSystemError('Error saving project.', { label: LOG_LABEL, details: [error, selectedPath] });
-      logUserError('project save failed.', { label: LOG_LABEL, details: [error], persistent: true });
-      eventBus.emit('project:saveFailed', { error: error });
-      return 'failed';
-    }
+    logUserSuccess('project saved.', { label: LOG_LABEL, persistent: true });
+    return 'saved';
+  } catch (error) {
+    if (handleSaveAborted(error, signal, LOG_LABEL)) return 'cancelled';
+    return reportSaveFailure(error, { details: [selectedPath] });
   }
-
-  eventBus.emit('project:saveCancelled', {});
-  logUserWarn('project save cancelled.', { label: LOG_LABEL });
-  return 'cancelled';
-}
-
-export const thumbnailDir = async () => normalizeJoin(await path.appDataDir(), 'thumbnails');
-export const thumbnailPath = async (fileId: string) => normalizeJoin(await path.appDataDir(), 'thumbnails', fileId);
-
-export async function saveThumbnailExternal(fileId: string, dataUrl: string): Promise<string> {
-  const dir = await thumbnailDir();
-  if (!(await fs.exists(dir))) {
-    await fs.mkdir(dir, { recursive: true });
-  }
-  const path = normalizeJoin(dir, `${fileId}.png`);
-  const bytes = dataUrlToBytes(dataUrl);
-  await fs.writeFile(path, bytes);
-  return path;
 }

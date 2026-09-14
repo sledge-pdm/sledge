@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { saveProject, saveThumbnailExternal } from '~/features/io/project/ProjectSave';
+import { saveProject } from '~/features/io/project/ProjectSave';
+import { saveThumbnailExternal } from '~/features/io/project/ProjectThumbnail';
 import { isProjectChanged, markProjectChanged } from '~/features/project';
 import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
 import { ioStore, setIOStore } from '~/stores/EditorStores';

@@ -1,4 +1,5 @@
 import { Component, JSX, Show } from 'solid-js';
+import { isBusy, registerInputFinalizer } from '~/features/busy';
 import { normalizeRotation } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { interactStore } from '~/stores/EditorStores';
@@ -123,6 +124,9 @@ export class OnCanvasFrameInteract {
   private pointerActive = false;
   private mode: 'drag' | 'resize' | 'rotate' | undefined;
   private capturedHandlePos: ResizePos | undefined;
+  /** the pointer this element captured, so a gesture ended without an event of its own can release it. */
+  private capturedPointerId: number | undefined;
+  private unregisterFinalizer: (() => void) | undefined;
 
   private startRect: FrameRect | undefined;
   private startPointerCanvasX = 0;
@@ -146,6 +150,9 @@ export class OnCanvasFrameInteract {
   }
 
   private handlePointerDown = (e: PointerEvent) => {
+    // an operation holding the window has already committed whatever transform was under the pointer; a new
+    // one must not start against the state it is reading.
+    if (isBusy()) return;
     // 左クリック(通常: button===0) 以外は無視
     if (e.button !== 0) return;
     const target = e.target as HTMLElement;
@@ -180,6 +187,7 @@ export class OnCanvasFrameInteract {
     }
 
     this.pointerActive = true;
+    this.capturedPointerId = e.pointerId;
     this.frameRoot.setPointerCapture(e.pointerId);
   };
 
@@ -219,6 +227,7 @@ export class OnCanvasFrameInteract {
   private resetState() {
     this.mode = undefined;
     this.capturedHandlePos = undefined;
+    this.capturedPointerId = undefined;
     this.startRect = undefined;
     this.startPointerCanvasX = 0;
     this.startPointerCanvasY = 0;
@@ -354,8 +363,37 @@ export class OnCanvasFrameInteract {
     }
   }
 
+  /**
+   * @description end a drag, resize or rotate that is still under the pointer, at the position it last
+   *   reached - the same thing lifting the pointer there would have done.
+   *
+   *   `onCommit` is where the owner registers the transform's history entry, so a drag merely dropped would
+   *   leave the moved image in the file with nothing in history to move it back. the pointer capture goes
+   *   too: leaving it held would send the events after the operation somewhere the user is no longer
+   *   pointing.
+   */
+  public finalizeInteraction = (): void => {
+    if (!this.pointerActive || !this.startRect) return;
+
+    const startRect = this.startRect;
+    const endRect = this.getRect();
+    const pointerId = this.capturedPointerId;
+    this.pointerActive = false;
+    if (pointerId !== undefined) {
+      try {
+        this.frameRoot.releasePointerCapture(pointerId);
+      } catch {
+        // the capture can already be gone - a pointercancel the browser sent, or the element being replaced.
+      }
+    }
+    this.options.onCommit?.(startRect, endRect, new PointerEvent('pointerup', pointerId === undefined ? {} : { pointerId }));
+    this.resetState();
+  };
+
   public setInteractListeners() {
     this.removeInteractListeners();
+    this.unregisterFinalizer?.();
+    this.unregisterFinalizer = registerInputFinalizer(this.finalizeInteraction);
     this.frameRoot.addEventListener('pointerdown', this.handlePointerDown as EventListener);
     this.frameRoot.addEventListener('pointermove', this.handlePointerMove as EventListener);
     this.frameRoot.addEventListener('pointerup', this.handlePointerUp as EventListener);
@@ -363,6 +401,8 @@ export class OnCanvasFrameInteract {
   }
 
   public removeInteractListeners() {
+    this.unregisterFinalizer?.();
+    this.unregisterFinalizer = undefined;
     this.frameRoot.removeEventListener('pointerdown', this.handlePointerDown as EventListener);
     this.frameRoot.removeEventListener('pointermove', this.handlePointerMove as EventListener);
     this.frameRoot.removeEventListener('pointerup', this.handlePointerUp as EventListener);

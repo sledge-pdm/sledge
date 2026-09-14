@@ -5,8 +5,7 @@ import { Component, createMemo, JSX, Show } from 'solid-js';
 import ImagePoolGrid from '~/components/section/editor/image_pool/ImagePoolGrid';
 import SectionItem from '~/components/section/SectionItem';
 import { sectionContent } from '~/components/section/SectionStyles';
-import { addImagesFromLocal, getEntry, removeEntry } from '~/features/image_pool';
-import { openImageImportDialog } from '~/features/io/image_pool/import';
+import { getEntry, importImagesFromDialog, removeEntry } from '~/features/image_pool';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { core } from '~/utils/platform';
 
@@ -46,10 +45,7 @@ const Images: Component = () => {
               alert('adding image is not supported in browser');
               return;
             }
-            const path = await openImageImportDialog();
-            if (path !== undefined) {
-              addImagesFromLocal(path);
-            }
+            await importImagesFromDialog();
           },
         },
         {

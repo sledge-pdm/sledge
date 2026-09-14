@@ -1,8 +1,9 @@
 import { Component, onCleanup, onMount } from 'solid-js';
+import { isBusy } from '~/features/busy';
 import { clipZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { clearCoordinateCache } from '~/features/canvas/transform/CanvasPositionCalculator';
 import { tryRedo, tryUndo } from '~/features/history';
-import { saveProject } from '~/features/io/project/save';
+import { saveProject } from '~/features/io/project/ProjectSave';
 import { toggleLayerVisibility } from '~/features/layer';
 import { clearLayersFromUser, duplicateLayers, removeLayersFromUser } from '~/features/layer/service';
 import { deleteSelectedArea } from '~/features/selection/actions';
@@ -35,6 +36,10 @@ const KeyListener: Component = () => {
     if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
       e.preventDefault();
     }
+
+    // this listener is on `window`, so it still hears keys while the modal holds focus. every shortcut
+    // below either edits the project or starts an operation of its own, so none of them run.
+    if (isBusy()) return;
 
     if (e.key === 'F6') {
       e.preventDefault();
@@ -133,6 +138,7 @@ const KeyListener: Component = () => {
   };
 
   const handleKeyUp = (e: KeyboardEvent) => {
+    if (isBusy()) return;
     if (!isKeyMatchesToEntry(e, keyConfigStore()['pipette']) && getActiveToolCategoryId() === 'pipette') {
       e.preventDefault();
       setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
@@ -144,6 +150,9 @@ const KeyListener: Component = () => {
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     unlistenUnfocusPipetteObserve = await platformWindow.getCurrentWindow().onFocusChanged(({ payload: focused }) => {
+      // the OS tells us about focus whatever is happening in here, including while an operation holds the
+      // window - and a native dialog of that operation's own taking focus is exactly when it fires.
+      if (isBusy()) return;
       if (!focused && getActiveToolCategoryId() === 'pipette') {
         setActiveToolCategory(getPrevActiveToolCategoryId() || 'pen');
       }

@@ -3,10 +3,7 @@ import { fs } from '~/utils/platform';
 type FsOptions = Record<string, unknown> | undefined;
 
 type JsonFileReadResult<T> =
-  | { kind: 'ok'; value: T }
-  | { kind: 'not_found' }
-  | { kind: 'read_error'; error: unknown }
-  | { kind: 'parse_error'; error: unknown };
+  { kind: 'ok'; value: T } | { kind: 'not_found' } | { kind: 'read_error'; error: unknown } | { kind: 'parse_error'; error: unknown };
 
 export interface JsonFileLoadHandlers<TResult, TParsed> {
   onNotFound: () => Promise<TResult> | TResult;

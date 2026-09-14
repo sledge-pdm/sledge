@@ -25,5 +25,6 @@ export interface FsPlatform {
   writeTextFile(path: string, data: string, options?: Record<string, unknown>): Promise<void>;
   readDir(path: string, options?: Record<string, unknown>): Promise<DirEntry[]>;
   remove(path: string, options?: Record<string, unknown>): Promise<void>;
+  rename(oldPath: string, newPath: string, options?: Record<string, unknown>): Promise<void>;
   stat(path: string, options?: Record<string, unknown>): Promise<FileInfo>;
 }

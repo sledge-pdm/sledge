@@ -1,4 +1,5 @@
 import { HistoryContext } from '@sledge-pdm/core';
+import { isBusy } from '~/features/busy';
 import { logUserWarn } from '../log';
 import { HistoryCommand } from './command/HistoryCommand';
 import { CommandLine, CommandsHistoryEntry } from './entry/CommandsHistoryEntry';
@@ -37,7 +38,19 @@ export function doCommands(commands: HistoryCommandsInput, options?: DoCommandsO
   if (register) registerCommandsHistory(commands, { context });
 }
 
+/**
+ * @description undo and redo rewrite the very layers and stacks an operation in flight is reading, so they
+ *   are refused for as long as one holds the window. the guard is here rather than at each button and
+ *   shortcut, so a call site added later is covered without being remembered.
+ */
+function canStepHistory(): boolean {
+  if (!isBusy()) return true;
+  logUserWarn('cannot undo or redo while an operation is running.');
+  return false;
+}
+
 export function tryUndo() {
+  if (!canStepHistory()) return;
   if (historyManager.canUndo()) {
     historyManager.undo();
   } else {
@@ -46,6 +59,7 @@ export function tryUndo() {
 }
 
 export function tryRedo() {
+  if (!canStepHistory()) return;
   if (historyManager.canRedo()) {
     historyManager.redo();
   } else {

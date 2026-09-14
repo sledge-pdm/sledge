@@ -1,7 +1,8 @@
 import { css } from '@acab/ecsstatic';
 import { Dropdown, Slider } from '@sledge-pdm/ui';
 import { debounce } from '@solid-primitives/scheduled';
-import { Component } from 'solid-js';
+import { Component, onCleanup } from 'solid-js';
+import { registerInputFinalizer } from '~/features/busy';
 import { registerCommandsHistory } from '~/features/history';
 import { LayerPropsCommand } from '~/features/history/commands';
 import { activeLayer, blendModeOptions, findLayerById, setLayerProp } from '~/features/layer';
@@ -37,6 +38,16 @@ const LayerListPropsRow: Component = () => {
   };
 
   const setHistoryDebounced = debounce(setHistory, 200);
+
+  // the opacity already applied to the layer; only its history entry is waiting on that 200ms. an operation
+  // starting inside the wait would read the new opacity with nothing in history to undo it, so the entry is
+  // registered now and the timer dropped - `setHistory` clears the pending state, so it cannot run twice.
+  onCleanup(
+    registerInputFinalizer(() => {
+      setHistoryDebounced.clear();
+      setHistory();
+    })
+  );
 
   return (
     <div class={layerConfigRow}>

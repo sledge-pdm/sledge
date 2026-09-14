@@ -1,5 +1,5 @@
 import { logSystemError, logSystemInfo } from '~/features/log/service';
-import { ioStore } from '~/stores/EditorStores';
+import { isProjectChanged } from '~/features/project';
 import { globalConfig } from '~/stores/GlobalStores';
 import { dialog, process, Update, updater } from './platform';
 
@@ -49,7 +49,7 @@ ${update.currentVersion} -> ${update.version}`,
       if (!confirmed) return;
 
       // Alert if there's unsaved changes
-      if (ioStore.isProjectChangedAfterSave) {
+      if (isProjectChanged()) {
         const confirmed = await dialog.confirm('There are unsaved changes.\nSure to update without save?', {
           kind: 'warning',
           title: 'Unsaved Changes',

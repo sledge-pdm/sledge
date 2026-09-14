@@ -7,9 +7,9 @@ import { doCommands, registerCommandsHistory } from '~/features/history';
 import { CanvasSizeCommand, layerMergeSnippet } from '~/features/history/commands';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
 import { logUserError, logUserInfo, logUserWarn } from '~/features/log/service';
+import { markProjectChanged } from '~/features/project';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { cancelMove, cancelSelection } from '~/features/selection/service';
-import { setIOStore } from '~/stores/EditorStores';
 import { globalConfig } from '~/stores/GlobalStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { dialog } from '~/utils/platform';
@@ -232,14 +232,14 @@ export function setBaseLayerColorMode(colorMode: BaseLayerColorMode, customColor
   const updatedBaseLayer = changeBaseLayerColor(projectStore.layers.state.baseLayer, colorMode, customColor);
   setProjectStore('layers', 'state', 'baseLayer', updatedBaseLayer);
   updateFrascoCanvas(`BaseLayer color mode changed to ${colorMode}`);
-  setIOStore('isProjectChangedAfterSave', true);
+  markProjectChanged();
 }
 
 export function setBaseLayerCustomColor(customColor: string) {
   const updatedBaseLayer = changeBaseLayerColor(projectStore.layers.state.baseLayer, 'custom', customColor);
   setProjectStore('layers', 'state', 'baseLayer', updatedBaseLayer);
   updateFrascoCanvas(`BaseLayer custom color changed to ${customColor}`);
-  setIOStore('isProjectChangedAfterSave', true);
+  markProjectChanged();
 }
 
 export function selectLayer(layerId: string) {

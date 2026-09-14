@@ -1,3 +1,4 @@
+import { ecsstatic } from '@acab/ecsstatic/vite';
 import { playwright } from '@vitest/browser-playwright';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -13,7 +14,9 @@ const sharedAliases = {
 const testEnv = dotenv.config({ path: path.resolve(__dirname, './test/.env.vitest') }).parsed;
 
 export default defineConfig({
-  plugins: [wasmPlugin(), solidPlugin()],
+  // ecsstatic has to match vite.config.js: without it the `css` tag stays untransformed and any styled
+  // component fails to import, which rules out testing components rather than just the modules under them.
+  plugins: [wasmPlugin(), ecsstatic(), solidPlugin()],
   resolve: {
     alias: {
       ...sharedAliases,
@@ -21,6 +24,9 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
+    // ships untranspiled JSX, so it has to reach solidPlugin rather than the dep pre-bundler.
+    // vite.config.js excludes it for the same reason.
+    exclude: ['@sledge-pdm/ui'],
     include: [
       'solid-js',
       'solid-js/store',

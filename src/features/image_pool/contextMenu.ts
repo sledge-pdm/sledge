@@ -1,5 +1,6 @@
 import { ImagePoolEntry } from '@sledge-pdm/core';
-import { MenuListOption, showContextMenu } from '@sledge-pdm/ui';
+import { MenuListOption } from '@sledge-pdm/ui';
+import { showContextMenu } from '~/utils/contextMenu';
 import { ContextMenuItems } from '~/utils/ContextMenuItems';
 import { hideEntry, removeEntry, showEntry } from './entryActions';
 import { transferToCurrentLayer } from './transferActions';

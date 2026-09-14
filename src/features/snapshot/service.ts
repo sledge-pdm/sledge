@@ -1,8 +1,10 @@
-import { getProjectAdapter, gzipDeflate, ProjectSnapshot, Size2D } from '@sledge-pdm/core';
+import { getProjectAdapter, gzipDeflate, ProjectBase, ProjectSnapshot, Size2D } from '@sledge-pdm/core';
 import { batch, createUniqueId } from 'solid-js';
+import { finalizePendingInput, runExclusive, type BusyMode } from '~/features/busy';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
-import { logSystemError, logUserError } from '~/features/log/service';
-import { ioStore, setIOStore } from '~/stores/EditorStores';
+import { logSystemError, logSystemWarn, logUserError } from '~/features/log/service';
+import { markProjectSaved } from '~/features/project';
+import { ioStore } from '~/stores/EditorStores';
 import { getProjectFromRuntime } from '~/stores/RuntimeProject';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { normalizeJoin } from '~/utils/FileUtils';
@@ -13,9 +15,59 @@ import { updateFrascoCanvas } from '~/webgl/service';
 import { ProjectLoader } from '../io/project/ProjectLoader';
 import { RuntimeProjectSnapshot } from './types';
 
+const SNAPSHOT_LOG_LABEL = 'Snapshot';
+
+/**
+ * @description read + unpack the saved project file and collect snapshot bodies as id -> project.
+ *   both are heavy operations against the whole project, so callers must share a single result
+ *   instead of doing this per snapshot.
+ *
+ *   a file that cannot be read or unpacked throws rather than coming back empty: the only copy of every
+ *   snapshot body is in that file, and a caller that is about to overwrite it must not treat "read failed"
+ *   as "there were none". callers that are not writing anything catch this themselves.
+ */
+async function loadStoredSnapshotProjects(): Promise<Map<string, ProjectBase> | undefined> {
+  const projectLoc = ioStore.savedLocation;
+  if (!projectLoc || !projectLoc.path || !projectLoc.name) return undefined;
+
+  const rootProject = await unpackFromPath(normalizeJoin(projectLoc.path, projectLoc.name));
+  if (!rootProject) return undefined;
+  const adapter = getProjectAdapter(rootProject);
+  if (!adapter) return undefined;
+  const snapshots = await adapter.getSnapshots();
+  const stored = new Map<string, ProjectBase>();
+  snapshots?.forEach((s) => {
+    if (s.project) stored.set(s.id, s.project);
+  });
+  return stored;
+}
+
 export async function getAllFullSnapshots(): Promise<ProjectSnapshot[]> {
-  const fullSnapshots = await Promise.all(projectStore.snapshots.map(async (s) => await loadFullSnapshot(s)));
-  return fullSnapshots.filter((item): item is Exclude<typeof item, undefined> => item !== undefined);
+  const snapshots = projectStore.snapshots;
+  if (snapshots.length === 0) return [];
+
+  // snapshots without a body have to be restored from the saved file. read it once, not once per snapshot.
+  const stored = snapshots.some((s) => !s.project) ? await loadStoredSnapshotProjects() : undefined;
+
+  const fullSnapshots: ProjectSnapshot[] = [];
+  for (const snapshot of snapshots) {
+    if (snapshot.project) {
+      fullSnapshots.push(snapshot as ProjectSnapshot);
+      continue;
+    }
+    const project = stored?.get(snapshot.id);
+    // a single unrestorable snapshot must not fail the whole save.
+    if (!project) {
+      logSystemWarn(`Snapshot "${snapshot.name}" could not be restored and is excluded from this save.`, {
+        label: SNAPSHOT_LOG_LABEL,
+        details: [snapshot.id],
+      });
+      continue;
+    }
+    fullSnapshots.push({ ...snapshot, project });
+  }
+
+  return fullSnapshots;
 }
 
 export function makeSnapshotsAllRuntime() {
@@ -29,19 +81,21 @@ export function makeSnapshotsAllRuntime() {
 export async function loadFullSnapshot(snapshot: ProjectSnapshot | RuntimeProjectSnapshot): Promise<ProjectSnapshot | undefined> {
   if (snapshot.project) return snapshot;
 
-  const projectLoc = ioStore.savedLocation;
-  if (!projectLoc || !projectLoc.path || !projectLoc.name) return undefined;
-  const rootProject = await unpackFromPath(normalizeJoin(projectLoc.path, projectLoc.name));
-  if (!rootProject) return undefined;
-  const adapter = getProjectAdapter(rootProject);
-  if (!adapter) return undefined;
-  const snapshots = await adapter.getSnapshots();
-  const matched: ProjectSnapshot | undefined = snapshots?.find((s) => s.id === snapshot.id);
-  if (!matched) return undefined;
+  // restoring one snapshot for the user writes nothing, and the caller reports the failure, so a file that
+  // cannot be read is answered with "not restorable" rather than thrown at them.
+  let stored: Map<string, ProjectBase> | undefined;
+  try {
+    stored = await loadStoredSnapshotProjects();
+  } catch (error) {
+    logSystemError('Failed to read snapshots from saved project.', { label: SNAPSHOT_LOG_LABEL, details: [error] });
+    return undefined;
+  }
+  const project = stored?.get(snapshot.id);
+  if (!project) return undefined;
 
   return {
     ...snapshot,
-    project: matched.project,
+    project,
   };
 }
 
@@ -52,7 +106,8 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
     const thumbnailImageData = canvasThumbnailGenerator.generateCanvasThumbnail(thumbSize.width, thumbSize.height);
 
     const now = new Date();
-    const currentProject = await getProjectFromRuntime();
+    // snapshots are dropped right below, so don't pay for restoring them in the first place.
+    const currentProject = await getProjectFromRuntime({ includeSnapshots: false });
     currentProject.snapshots = []; // for memory optimization
     const snapshot: ProjectSnapshot = {
       createdAt: Date.now(),
@@ -75,12 +130,29 @@ export async function createCurrentProjectSnapshot(name?: string): Promise<Proje
   }
 }
 
-export async function registerCurrentProjectSnapshot(name?: string): Promise<ProjectSnapshot | RuntimeProjectSnapshot> {
-  const snapshot = await createCurrentProjectSnapshot(name);
-  if (snapshot) {
-    setProjectStore('snapshots', [...projectStore.snapshots, snapshot]);
-  }
-  return snapshot;
+/**
+ * @description take a snapshot of the project as it stands and keep it.
+ *
+ *   assembling the project reads every layer back, so the editor is held still for it the same way a save
+ *   is. `busy: 'inherit'` is for the backup a snapshot restore takes first: that is one step of the restore,
+ *   not an operation of its own.
+ */
+export async function registerCurrentProjectSnapshot(
+  name?: string,
+  options?: { busy?: BusyMode }
+): Promise<ProjectSnapshot | RuntimeProjectSnapshot | undefined> {
+  return await runExclusive(
+    'snapshotCreate',
+    async () => {
+      finalizePendingInput();
+      const snapshot = await createCurrentProjectSnapshot(name);
+      if (snapshot) {
+        setProjectStore('snapshots', [...projectStore.snapshots, snapshot]);
+      }
+      return snapshot;
+    },
+    { mode: options?.busy ?? 'acquire' }
+  );
 }
 
 export function addSnapshot(snapshot: ProjectSnapshot | RuntimeProjectSnapshot) {
@@ -97,19 +169,28 @@ export function overwriteSnapshotWithName(name: string, snapshot: ProjectSnapsho
 }
 
 export async function deleteSnapshot(snapshot: ProjectSnapshot | RuntimeProjectSnapshot) {
-  const confirmResult = await dialog.confirm(`Sure to delete snapshot "${snapshot.name}"?`, {
-    cancelLabel: 'Cancel',
-    okLabel: 'Delete',
-    kind: 'info',
-    title: 'Delete Snapshot',
-  });
+  // the confirmation is part of the operation: the snapshot list must be the one the user was shown when
+  // the answer comes back, so nothing may edit it while the prompt is up. no modal is raised at any point -
+  // the prompt is modal to this window already, and the removal that answers it is one synchronous step.
+  await runExclusive(
+    'snapshotDelete',
+    async () => {
+      const confirmResult = await dialog.confirm(`Sure to delete snapshot "${snapshot.name}"?`, {
+        cancelLabel: 'Cancel',
+        okLabel: 'Delete',
+        kind: 'info',
+        title: 'Delete Snapshot',
+      });
 
-  if (!confirmResult) return;
+      if (!confirmResult) return;
 
-  setProjectStore('snapshots', (snapshots: (ProjectSnapshot | RuntimeProjectSnapshot)[]) =>
-    snapshots.filter((s) => {
-      return s.id !== snapshot.id;
-    })
+      setProjectStore('snapshots', (snapshots: (ProjectSnapshot | RuntimeProjectSnapshot)[]) =>
+        snapshots.filter((s) => {
+          return s.id !== snapshot.id;
+        })
+      );
+    },
+    { deferDialog: true }
   );
 }
 
@@ -119,37 +200,53 @@ export async function loadSnapshot(
     backup?: boolean;
   }
 ) {
-  if (option?.backup) {
-    // backup current state
-    const created = await registerCurrentProjectSnapshot('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString());
-    if (!created) return;
-  } else {
-    const confirmResult = await dialog.confirm(
-      `Sure to load snapshot "${snapshot.name}"?
+  // the backup, the read from the file and the load that replaces the runtime are one operation. releasing
+  // between them would leave a window where the project has been backed up but not yet replaced.
+  await runExclusive(
+    'snapshotLoad',
+    async (handle) => {
+      finalizePendingInput();
+
+      if (option?.backup) {
+        // nothing is asked on this path, and the backup below already assembles the whole project
+        handle.presentDialog();
+        // backup current state
+        const created = await registerCurrentProjectSnapshot('backup: ' + new Date().toLocaleDateString() + '-' + new Date().toLocaleTimeString(), {
+          busy: 'inherit',
+        });
+        if (!created) return;
+      } else {
+        const confirmResult = await dialog.confirm(
+          `Sure to load snapshot "${snapshot.name}"?
 This will NOT backup your current state (unless you did manually backup.)`,
-      {
-        cancelLabel: 'Cancel',
-        okLabel: 'Discard and Load',
-        kind: 'info',
-        title: 'Load Snapshot',
+          {
+            cancelLabel: 'Cancel',
+            okLabel: 'Discard and Load',
+            kind: 'info',
+            title: 'Load Snapshot',
+          }
+        );
+
+        if (!confirmResult) return;
+        handle.presentDialog();
       }
-    );
 
-    if (!confirmResult) return;
-  }
+      const savedSnapshotStore = [...projectStore.snapshots];
 
-  const savedSnapshotStore = [...projectStore.snapshots];
+      const fullSnapshot = await loadFullSnapshot(snapshot);
+      if (!fullSnapshot) {
+        logUserError(`Failed to load project (failed to load full snapshot from file.)`);
+        return;
+      }
+      // load snapshot
+      await ProjectLoader.fromProjectObj({ project: fullSnapshot.project, locationOverride: { ...ioStore.savedLocation } }).load({ busy: 'inherit' });
 
-  const fullSnapshot = await loadFullSnapshot(snapshot);
-  if (!fullSnapshot) {
-    logUserError(`Failed to load project (failed to load full snapshot from file.)`);
-    return;
-  }
-  // load snapshot
-  await ProjectLoader.fromProjectObj({ project: fullSnapshot.project, locationOverride: { ...ioStore.savedLocation } }).load();
+      markProjectSaved();
 
-  setIOStore('isProjectChangedAfterSave', false);
-
-  setProjectStore('snapshots', savedSnapshotStore);
-  updateFrascoCanvas('snapshot loaded');
+      setProjectStore('snapshots', savedSnapshotStore);
+      updateFrascoCanvas('snapshot loaded');
+    },
+    // the confirmation on the other path is modal to this window already; a declined restore shows no modal.
+    { deferDialog: true }
+  );
 }

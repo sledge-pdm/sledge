@@ -1,12 +1,11 @@
 import { css } from '@acab/ecsstatic';
 import { color, Icon, MenuList, MenuListOption } from '@sledge-pdm/ui';
-import { makeTimer } from '@solid-primitives/timer';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { saveProject } from '~/features/io/project/save';
+import { busyStore } from '~/features/busy';
+import { saveProject } from '~/features/io/project/ProjectSave';
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { ioStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { eventBus } from '~/utils/EventBus';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { useTimeAgoText } from '~/utils/TimeUtils';
@@ -33,11 +32,6 @@ const saveTimeTextStyle = css`
   font-family: ZFB03;
 `;
 
-const saveLogTextStyle = css`
-  white-space: nowrap;
-  opacity: 0.8;
-`;
-
 const saveButtonRoot = css`
   box-sizing: border-box;
   display: flex;
@@ -62,6 +56,10 @@ const saveButtonMainButton = css`
   &:hover {
     background-color: var(--color-button-hover);
   }
+  &:disabled {
+    cursor: default;
+    background-color: transparent;
+  }
 `;
 
 const saveButtonSide = css`
@@ -80,20 +78,21 @@ const saveButtonSide = css`
 
 const SaveSection: Component = () => {
   const [isSaveMenuShown, setIsSaveMenuShown] = createSignal(false);
-  const [saveLog, setSaveLog] = createSignal<
-    | {
-        text: string;
-        color: string;
-      }
-    | undefined
-  >(undefined);
   const isOWPossible = () => ioStore.savedLocation.name !== undefined && ioStore.savedLocation.path !== undefined && ioStore.openAs === 'project';
 
-  const [saveLoading, setSaveLoading] = createSignal<boolean>(false);
+  /**
+   * whether an operation holds the window, read from the one place that knows. a save started anywhere -
+   * Ctrl+S, the context menu, the close prompt - shows here, and so does an operation that is not a save:
+   * there is no saving over an image import either. inferring this from the progress stream instead would
+   * miss the stretches that report no progress, above all the file dialog a "save as" opens first.
+   */
+  const isOperationRunning = () => busyStore.operation !== undefined;
+  /** whether the operation running is this button's own. what it is doing is reported by the bottom bar. */
+  const isSaving = () => busyStore.operation === 'save' || busyStore.operation === 'quit';
+
   const save = async () => {
-    setSaveLoading(true);
+    if (isOperationRunning()) return;
     await saveProject(ioStore.savedLocation.name, ioStore.savedLocation.path);
-    setSaveLoading(false);
   };
 
   const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(projectStore.project.lastSavedAt?.getTime());
@@ -102,38 +101,6 @@ const SaveSection: Component = () => {
     updatePastTimeStamp(projectStore.project.lastSavedAt?.getTime());
   });
 
-  const setTimeredSaveLog = (text: { text: string; color: string }) => {
-    setSaveLog(text);
-    makeTimer(
-      () => {
-        setSaveLog(undefined);
-      },
-      2000,
-      setTimeout
-    );
-  };
-
-  const handleSaved = () => {
-    setTimeredSaveLog({
-      text: 'saved!',
-      color: color.enabled,
-    });
-  };
-
-  const handleSaveFailed = () => {
-    setTimeredSaveLog({
-      text: 'save failed.',
-      color: color.error,
-    });
-  };
-
-  const handleSaveCancelled = () => {
-    setTimeredSaveLog({
-      text: 'save cancelled.',
-      color: color.muted,
-    });
-  };
-
   const [patternOffset, setPatternOffset] = createSignal(0);
   const updatePatternOffset = () => {
     setPatternOffset((prev) => (prev + 0.3) % 16);
@@ -141,15 +108,9 @@ const SaveSection: Component = () => {
   let updatePatternInterval: ReturnType<typeof setInterval> | undefined;
 
   onMount(() => {
-    eventBus.on('project:saved', handleSaved);
-    eventBus.on('project:saveFailed', handleSaveFailed);
-    eventBus.on('project:saveCancelled', handleSaveCancelled);
     updatePatternInterval = setInterval(updatePatternOffset, 30);
   });
   onCleanup(() => {
-    eventBus.off('project:saved', handleSaved);
-    eventBus.off('project:saveFailed', handleSaveFailed);
-    eventBus.off('project:saveCancelled', handleSaveCancelled);
     if (updatePatternInterval) clearInterval(updatePatternInterval);
   });
 
@@ -158,10 +119,10 @@ const SaveSection: Component = () => {
       type: 'item',
       label: 'Save As...',
       onSelect: async () => {
-        setSaveLoading(true);
+        if (isOperationRunning()) return;
         await saveProject(ioStore.savedLocation.name);
-        setSaveLoading(false);
       },
+      disabled: isOperationRunning(),
       color: color.onBackground,
     },
     {
@@ -179,22 +140,18 @@ const SaveSection: Component = () => {
   return (
     <>
       <div class={saveSectionContainer} data-tauri-drag-region-exclude>
-        <Show when={saveLog()} fallback={<p class={saveTimeTextStyle}>{saveTimeText()}</p>}>
-          <p class={saveLogTextStyle} style={{ color: saveLog()?.color }}>
-            {saveLog()?.text}
-          </p>
-        </Show>
+        <p class={saveTimeTextStyle}>{saveTimeText()}</p>
         <div class={saveButtonRoot} data-tauri-drag-region-exclude>
-          <button class={saveButtonMainButton} onClick={async () => await save()}>
+          <button class={saveButtonMainButton} disabled={isOperationRunning()} onClick={async () => await save()}>
             <p
               style={{
-                color: saveLoading() ? color.muted : color.accent,
+                color: isOperationRunning() ? color.muted : color.accent,
                 'white-space': 'nowrap',
               }}
             >
-              {saveLoading() ? 'saving...' : isOWPossible() ? 'save' : 'save (new)'}
+              {isSaving() ? 'saving...' : isOWPossible() ? 'save' : 'save (new)'}
             </p>
-            <Show when={saveLoading()}>
+            <Show when={isSaving()}>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 style={{

@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { MenuList, MenuListOption } from '@sledge-pdm/ui';
-import { Component, createSignal, JSX, Show } from 'solid-js';
+import { Component, createEffect, createSignal, JSX, Show } from 'solid-js';
 
 const menuItem = css`
   display: flex;
@@ -42,17 +42,29 @@ export interface TopMenuBarItemProps {
   title?: string;
   action: ((e: MouseEvent) => void) | ((e: MouseEvent) => Promise<void>);
   menu?: () => MenuListOption[];
+  disabled?: boolean;
 }
 
 export const TopMenuBarItem: Component<TopMenuBarItemProps> = (props) => {
   const [menuOpen, setMenuOpen] = createSignal(false);
 
+  // 排他中に開きっぱなしのメニューが残ると、そこから操作できてしまう
+  createEffect(() => {
+    if (props.disabled) setMenuOpen(false);
+  });
+
   return (
     <div class={menuItem}>
       <a
         class={menuItemText}
-        style={props.labelStyleOverride ?? {}}
+        style={{
+          ...(props.labelStyleOverride ?? {}),
+          cursor: props.disabled ? 'auto' : 'pointer',
+          'pointer-events': props.disabled ? 'none' : undefined,
+          opacity: props.disabled ? 0.5 : undefined,
+        }}
         onClick={async (e) => {
+          if (props.disabled) return;
           await props.action(e);
           if (props.menu) setMenuOpen(true);
         }}
@@ -61,7 +73,7 @@ export const TopMenuBarItem: Component<TopMenuBarItemProps> = (props) => {
         {props.label}
       </a>
       <div class={menuItemBackground} />
-      <Show when={props.menu?.() && menuOpen()}>
+      <Show when={props.menu?.() && menuOpen() && !props.disabled}>
         <MenuList
           options={props.menu?.()!}
           onClose={() => setMenuOpen(false)}

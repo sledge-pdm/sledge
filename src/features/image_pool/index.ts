@@ -3,6 +3,7 @@ export {
   addImagesFromLocal,
   addImagesFromRawBuffer,
   hideEntry,
+  importImagesFromDialog,
   insertEntry,
   registerEntryUpdate,
   removeEntry,

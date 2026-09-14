@@ -4,6 +4,7 @@ import { Component, createMemo, createSignal, onMount, Show } from 'solid-js';
 import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import { TopMenuBarItem, TopMenuBarItemProps } from '~/components/global/title_bar/TopMenuBarItem';
 import { SECTION_TAB_CONTROLS } from '~/config/SectionTabConfig';
+import { isBusy } from '~/features/busy';
 import { adjustZoomToFit } from '~/features/canvas';
 import { isTabControlVisible, toggleTabControlVisibility } from '~/features/config/TabControlController';
 import { clipboardCopy, clipboardCut, clipboardPaste } from '~/features/io/clipboard/ClipboardActions';
@@ -110,6 +111,8 @@ const TopMenuBar: Component = () => {
     return [];
   });
 
+  // 20260913 myabe should make items into component (not array structure item) to make it simpler and easier to disable them??
+  // from now on these menu are meant to be always shown and not be modify its state, So we should consider how to disable/enable them
   const FilesMenuItem = createMemo<TopMenuBarItemProps>(() => {
     return {
       label: 'Files.',
@@ -311,10 +314,11 @@ Unsaved changes will be discarded!`);
   return (
     <div class={topMenuBarRoot}>
       <div class={menuListLeft}>
-        <TopMenuBarItem {...FilesMenuItem()} menuStyleOverride={{ 'max-width': '400px' }} />
-        <TopMenuBarItem {...ViewMenuItem()} />
+        {/* エディター領域の外なので modal の inert が届かない。ここで自前に落とす */}
+        <TopMenuBarItem {...FilesMenuItem()} menuStyleOverride={{ 'max-width': '400px' }} disabled={isBusy()} />
+        <TopMenuBarItem {...ViewMenuItem()} disabled={isBusy()} />
         <Show when={!ioStore.isInInitialLoading}>
-          <TopMenuBarItem {...EditMenuItem()} />
+          <TopMenuBarItem {...EditMenuItem()} disabled={isBusy()} />
         </Show>
       </div>
 
@@ -334,7 +338,7 @@ Unsaved changes will be discarded!`);
 
       <div class={menuListRight}>
         <div class={itemsContainer}>
-          <TopMenuBarItem {...settingMenuItem} />
+          <TopMenuBarItem {...settingMenuItem} disabled={isBusy()} />
         </div>
       </div>
     </div>

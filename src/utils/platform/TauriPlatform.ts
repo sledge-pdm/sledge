@@ -8,7 +8,7 @@ import { getAllWebviewWindows } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { readImage, readText, writeImage, writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { confirm, message, open, save } from '@tauri-apps/plugin-dialog';
-import { BaseDirectory, exists, mkdir, readDir, readFile, readTextFile, remove, stat, writeFile, writeTextFile } from '@tauri-apps/plugin-fs';
+import { BaseDirectory, exists, mkdir, readDir, readFile, readTextFile, remove, rename, stat, writeFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import { error, info, warn } from '@tauri-apps/plugin-log';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { platform as osPlatform } from '@tauri-apps/plugin-os';
@@ -42,6 +42,7 @@ export const createTauriPlatform = (): Platform => ({
     writeTextFile,
     readDir: (p) => readDir(p) as unknown as Promise<DirEntry[]>,
     remove,
+    rename,
     stat: (p) => stat(p) as unknown as Promise<FileInfo>,
   },
   dialog: {

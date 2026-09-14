@@ -1,6 +1,6 @@
 import { MenuListOption } from '@sledge-pdm/ui';
 import { tryRedo, tryUndo } from '~/features/history';
-import { saveProject } from '~/features/io/project/save';
+import { saveProject } from '~/features/io/project/ProjectSave';
 import { webview } from '~/utils/platform';
 import { openDevTools } from '~/utils/WindowUtils';
 

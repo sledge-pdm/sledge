@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HistoryEntry } from '~/features/history';
 import { HistoryManager } from '~/features/history/HistoryManager';
-import { ioStore, setIOStore } from '~/stores/EditorStores';
+import { isProjectChanged, markProjectSaved } from '~/features/project';
 import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 
 class TestEntry extends HistoryEntry {
@@ -29,7 +29,7 @@ describe('HistoryManager', () => {
   const initialMax = globalConfig.editor.maxHistoryItemsCount;
 
   beforeEach(() => {
-    setIOStore('isProjectChangedAfterSave', false);
+    markProjectSaved();
     setGlobalConfig('editor', 'maxHistoryItemsCount', initialMax);
   });
 
@@ -47,7 +47,7 @@ describe('HistoryManager', () => {
     expect(manager.getUndoStack()).toHaveLength(1);
     expect(manager.getRedoStack()).toHaveLength(0);
     expect(manager.canUndo()).toBe(true);
-    expect(ioStore.isProjectChangedAfterSave).toBe(true);
+    expect(isProjectChanged()).toBe(true);
     expect(listener).toHaveBeenCalledWith({ canUndo: true, canRedo: false });
   });
 
@@ -85,12 +85,12 @@ describe('HistoryManager', () => {
 
   it('setStacks can skip dirty flag when markDirty is false', () => {
     const manager = new HistoryManager();
-    setIOStore('isProjectChangedAfterSave', false);
+    markProjectSaved();
 
     manager.setStacks([new TestEntry('a', [])], [], { emit: true, markDirty: false });
 
     expect(manager.canUndo()).toBe(true);
-    expect(ioStore.isProjectChangedAfterSave).toBe(false);
+    expect(isProjectChanged()).toBe(false);
   });
 
   it('clearHistory resets both stacks', () => {

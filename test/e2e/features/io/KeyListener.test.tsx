@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   saveProject: vi.fn(),
 }));
 
-vi.mock('~/features/io/project/save', () => ({
+vi.mock('~/features/io/project/ProjectSave', () => ({
   saveProject: mocks.saveProject,
 }));
 

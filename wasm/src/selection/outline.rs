@@ -177,9 +177,9 @@ fn merge_line(list: &mut [Segment], is_horizontal: bool) -> Vec<Segment> {
 
     // ソート
     if is_horizontal {
-        list.sort_by(|a, b| a.p1.x.cmp(&b.p1.x));
+        list.sort_by_key(|a| a.p1.x);
     } else {
-        list.sort_by(|a, b| a.p1.y.cmp(&b.p1.y));
+        list.sort_by_key(|a| a.p1.y);
     }
 
     let mut result = Vec::new();

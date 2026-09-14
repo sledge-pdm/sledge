@@ -25,7 +25,9 @@ pub fn fill_lasso_selection(
 
     // ポリゴンの点を構築
     let polygon: Vec<(f32, f32)> = points
-        .chunks_exact(2)
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|chunk| (chunk[0], chunk[1]))
         .collect();
 
@@ -130,7 +132,7 @@ fn fill_scanline_mask(
     end_x: usize,
 ) {
     // 交点をペアにして塗りつぶし
-    for chunk in intersections.chunks_exact(2) {
+    for chunk in intersections.as_chunks::<2>().0 {
         let left = (chunk[0].floor() as usize).max(start_x).min(width);
         let right = (chunk[1].ceil() as usize)
             .max(start_x)

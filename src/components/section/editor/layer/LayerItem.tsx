@@ -11,7 +11,7 @@ import {
   clearLayersFromUser,
   deselectLayer,
   duplicateLayers,
-  flipLayer,
+  flipLayers,
   getSelectedLayers,
   removeLayersFromUser,
   selectLayer,
@@ -290,7 +290,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                   label: 'flip horizontally.',
                   icon: '/assets/icons/context_menu/flip_horizontal.png',
                   onSelect: () => {
-                    flipLayer(projectStore.layers.state.activeLayerId, { flipX: true });
+                    flipLayers(targetLayers, { flipX: true });
                   },
                 },
                 {
@@ -298,7 +298,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
                   label: 'flip vertically.',
                   icon: '/assets/icons/context_menu/flip_vertical.png',
                   onSelect: () => {
-                    flipLayer(projectStore.layers.state.activeLayerId, { flipY: true });
+                    flipLayers(targetLayers, { flipY: true });
                   },
                 },
               ],

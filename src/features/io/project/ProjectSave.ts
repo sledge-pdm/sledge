@@ -1,7 +1,7 @@
-import { finalizePendingInput, isBusy, runExclusive, setBusyProgress, type BusyHandle, type BusyMode } from '~/features/busy';
+import { finalizePendingInput, formatProgress, isBusy, runExclusive, setBusyProgress, type BusyHandle, type BusyMode } from '~/features/busy';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
-import { logSystemError, logSystemWarn, logUserError, logUserInfo, logUserSuccess, logUserWarn } from '~/features/log/service';
+import { logSystemError, logSystemInfo, logSystemWarn, logUserError, logUserInfo, logUserSuccess, logUserWarn } from '~/features/log/service';
 import { markProjectSaved } from '~/features/project';
 import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
 import { makeSnapshotsAllRuntime } from '~/features/snapshot';
@@ -29,21 +29,20 @@ const LOG_LABEL = 'ProjectSave';
 type SaveProgressReporter = (phase: SaveProgressPhase, done: number, total: number) => void;
 
 /**
- * @description report a save's progress to the event stream, the busy state and the bottom bar. a one-step
- *   phase reports start and finish as the same line, so consecutive identical lines are skipped.
+ * @description report a save's progress. the bottom bar replaces its line, so it takes every tick; the log
+ *   file appends, so it takes the phase entry only - the call every phase opens with, carrying `done` 0.
  */
-function createProgressReporter(): SaveProgressReporter {
-  let lastLine: string | undefined;
-  return (phase, done, total) => {
-    const line = `saving project... [${total > 1 ? `${phase} ${done}/${total}` : phase}]`;
-    if (line !== lastLine) {
-      lastLine = line;
-      logUserInfo(line, { label: LOG_LABEL, persistent: true });
-    }
-    // the modal reads the busy state rather than this event stream, so it has to be told here too.
-    setBusyProgress({ phase, done, total });
-    eventBus.emit('project:saveProgress', { phase, done, total });
-  };
+function reportSaveProgress(phase: SaveProgressPhase, done: number, total: number): void {
+  logUserInfo(`saving project... [${formatProgress({ phase, done, total })}]`, {
+    label: LOG_LABEL,
+    channels: ['bottomBar'],
+    persistent: true,
+  });
+  if (done === 0) logSystemInfo(`save phase: ${phase} (${total})`, { label: LOG_LABEL });
+
+  // the modal reads the busy state rather than this event stream, so it has to be told here too.
+  setBusyProgress({ phase, done, total });
+  eventBus.emit('project:saveProgress', { phase, done, total });
 }
 
 /**
@@ -273,8 +272,6 @@ function reportSaveDeclined(): SaveResult {
  *   this directly would read the project without the exclusion and in-flight bookkeeping it depends on.
  */
 async function saveProjectExclusive(name?: string, existingPath?: string, signal?: AbortSignal, handle?: BusyHandle): Promise<SaveResult> {
-  const report = createProgressReporter();
-
   if (!core.isTauri()) {
     // a browser save has no destination to ask for - the download is named and taken at the end - so there
     // is nothing to wait behind and the modal goes up straight away.
@@ -287,15 +284,15 @@ async function saveProjectExclusive(name?: string, existingPath?: string, signal
       // read up front so the abort check below is the last yield in this path: what it guards has to run in
       // one tick, or a project loaded in between would be handed this save's state.
       const sledgeVersion = await getCurrentVersion();
-      const bytes = await getPackedCurrentProject({ signal, onProgress: report });
+      const bytes = await getPackedCurrentProject({ signal, onProgress: reportSaveProgress });
       // the download is handed to the browser below and cannot be taken back, so a cancel is refused from
       // here on for the same reason as the tauri path.
       writeStarted = true;
-      report('write', 0, 1);
+      reportSaveProgress('write', 0, 1);
       downloadProjectFile(fileName, bytes);
       // same as the tauri path: the download is out, but the runtime this save describes may already be gone.
       signal?.throwIfAborted();
-      report('write', 1, 1);
+      reportSaveProgress('write', 1, 1);
 
       setIOStore('savedLocation', {
         path: undefined,
@@ -331,16 +328,16 @@ async function saveProjectExclusive(name?: string, existingPath?: string, signal
     // read up front so the abort check below is the last yield in this path: what it guards has to run in
     // one tick, or a project loaded in between would be handed this save's state.
     const sledgeVersion = await getCurrentVersion();
-    const data = await getPackedCurrentProject({ signal, onProgress: report });
+    const data = await getPackedCurrentProject({ signal, onProgress: reportSaveProgress });
     // the bytes are complete and the write goes through a temp file, so a cancel arriving now cannot leave
     // a partial project behind. it is refused from here on - see `isSaveCancellable`.
     writeStarted = true;
-    report('write', 0, 1);
+    reportSaveProgress('write', 0, 1);
     await writeProjectFile(selectedPath, data);
     // the bytes are on disk, but a project loaded during the write has already replaced the runtime this
     // save describes - applying the state below would point that project at this file and drop its snapshots.
     signal?.throwIfAborted();
-    report('write', 1, 1);
+    reportSaveProgress('write', 1, 1);
 
     addRecentFile(pathToFileLocation(selectedPath));
     setSavedLocation(selectedPath);

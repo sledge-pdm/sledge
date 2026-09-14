@@ -26,6 +26,11 @@ export interface BusyProgress {
   total: number;
 }
 
+/** @description how a progress reading is written out, in the modal and in the bottom bar alike. */
+export function formatProgress(progress: BusyProgress): string {
+  return progress.total > 1 ? `${progress.phase} ${progress.done}/${progress.total}` : progress.phase;
+}
+
 export interface BusyState {
   /** @description the operation holding the window, or undefined when nothing is. */
   operation: BusyOperationId | undefined;

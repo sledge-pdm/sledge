@@ -123,7 +123,10 @@ export interface GetProjectFromRuntimeOptions {
   includeSnapshots?: boolean;
   /** @description abort the assembly. checked between layers and between history stacks. */
   signal?: AbortSignal;
-  /** @description progress within each phase. left out by callers that are not user-visible work. */
+  /**
+   * @description progress within each phase. every phase opens with `done` 0, which is what marks a phase
+   *   entry to the reporter. left out by callers that are not user-visible work.
+   */
   onProgress?: (phase: ProjectAssemblyPhase, done: number, total: number) => void;
 }
 

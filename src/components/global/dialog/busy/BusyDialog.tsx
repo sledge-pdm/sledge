@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { LoadingBar, ModalDialog } from '@sledge-pdm/ui';
 import { Component, createMemo, Show } from 'solid-js';
-import { busyStore } from '~/features/busy';
+import { busyStore, formatProgress } from '~/features/busy';
 
 const dialogBox = css`
   max-width: min(320px, 80vw);
@@ -41,8 +41,7 @@ const BusyDialog: Component = () => {
   /** @description a save names the stretch it is in; a count is only worth showing when there is one. */
   const detail = createMemo(() => {
     const current = progress();
-    if (!current) return undefined;
-    return current.total > 1 ? `${current.phase} ${current.done}/${current.total}` : current.phase;
+    return current ? formatProgress(current) : undefined;
   });
 
   const ratio = createMemo(() => {

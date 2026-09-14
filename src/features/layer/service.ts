@@ -262,16 +262,23 @@ export function getSelectedLayers(noFallbackToActive: boolean = false): string[]
   return getOperationTargetLayerIds(undefined, { fallbackToActive: !noFallbackToActive });
 }
 
-export const flipLayer = (
-  layerId: string,
+export const flipLayers = (
+  layerIds?: string[],
   options?: {
     flipX?: boolean;
     flipY?: boolean;
   }
 ) => {
-  const layer = getLayer(layerId);
-  if (!layer) return;
-  FlipEffect.apply(layer, { ...options, context: { tool: 'fx', fxName: 'flip' } });
+  const targets = getOperationTargetLayerIds(layerIds);
+  if (targets.length === 0) {
+    logUserWarn('No layer selected for flip.', { label: LOG_LABEL });
+    return;
+  }
+
+  targets.forEach((id) => {
+    const layer = getLayer(id);
+    if (layer) FlipEffect.apply(layer, { ...options, context: { tool: 'fx', fxName: 'flip' } });
+  });
   updateFrascoCanvas();
 };
 

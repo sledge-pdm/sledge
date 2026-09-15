@@ -1,7 +1,8 @@
 import { Component, JSX, Show } from 'solid-js';
-import { isBusy, registerInputFinalizer } from '~/features/busy';
+import { isBusy } from '~/features/busy';
 import { normalizeRotation } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
+import { beginEditSession } from '~/features/edit_session';
 import { interactStore } from '~/stores/EditorStores';
 import { WindowPos } from '~/types/CoordinateTypes';
 
@@ -106,6 +107,9 @@ export interface OnCanvasFrameInteractOptions {
   // Even if allowInvert is true, minSize restrictions should always work. ( (width or height) < |minSize| case should always be ignored and stop changes to that direction)
   allowInvert: boolean;
 
+  /** @description what this frame's edit session is called in refusals and logs. */
+  sessionLabel?: string;
+
   onStart?: (start: FrameRect) => void;
   onChange?: (changed: FrameRect, start: FrameRect) => void;
   onCommit?: (start: FrameRect, end: FrameRect, e: PointerEvent) => void;
@@ -126,7 +130,8 @@ export class OnCanvasFrameInteract {
   private capturedHandlePos: ResizePos | undefined;
   /** the pointer this element captured, so a gesture ended without an event of its own can release it. */
   private capturedPointerId: number | undefined;
-  private unregisterFinalizer: (() => void) | undefined;
+  /** closes the edit session the gesture under the pointer holds; undefined while none is. */
+  private endSession: (() => void) | undefined;
 
   private startRect: FrameRect | undefined;
   private startPointerCanvasX = 0;
@@ -189,6 +194,18 @@ export class OnCanvasFrameInteract {
     this.pointerActive = true;
     this.capturedPointerId = e.pointerId;
     this.frameRoot.setPointerCapture(e.pointerId);
+
+    // `startRect` is the state the eventual commit is computed against, so from here until the gesture
+    // comes to rest nothing else may edit what it describes. the frame itself can be a long-lived mode -
+    // the canvas size frame is turned on and off from the side panel - but only the stretches under the
+    // pointer hold anything, which is why the session is opened here rather than with the listeners.
+    this.endSession?.();
+    this.endSession = beginEditSession({
+      label: this.options.sessionLabel ?? 'frame',
+      isExclusive: () => this.pointerActive && this.startRect !== undefined,
+      interrupt: this.finalizeInteraction,
+      finalize: this.finalizeInteraction,
+    });
   };
 
   private handlePointerMove = (e: PointerEvent) => {
@@ -225,6 +242,10 @@ export class OnCanvasFrameInteract {
   }
 
   private resetState() {
+    // every exit from a gesture lands here, so this is where its session is let go of - after the commit
+    // above has had its chance to run.
+    this.endSession?.();
+    this.endSession = undefined;
     this.mode = undefined;
     this.capturedHandlePos = undefined;
     this.capturedPointerId = undefined;
@@ -392,8 +413,6 @@ export class OnCanvasFrameInteract {
 
   public setInteractListeners() {
     this.removeInteractListeners();
-    this.unregisterFinalizer?.();
-    this.unregisterFinalizer = registerInputFinalizer(this.finalizeInteraction);
     this.frameRoot.addEventListener('pointerdown', this.handlePointerDown as EventListener);
     this.frameRoot.addEventListener('pointermove', this.handlePointerMove as EventListener);
     this.frameRoot.addEventListener('pointerup', this.handlePointerUp as EventListener);
@@ -401,8 +420,10 @@ export class OnCanvasFrameInteract {
   }
 
   public removeInteractListeners() {
-    this.unregisterFinalizer?.();
-    this.unregisterFinalizer = undefined;
+    // a gesture still under the pointer when the listeners go is one nothing can end any more, so its
+    // session must not be left open on its behalf.
+    this.endSession?.();
+    this.endSession = undefined;
     this.frameRoot.removeEventListener('pointerdown', this.handlePointerDown as EventListener);
     this.frameRoot.removeEventListener('pointermove', this.handlePointerMove as EventListener);
     this.frameRoot.removeEventListener('pointerup', this.handlePointerUp as EventListener);

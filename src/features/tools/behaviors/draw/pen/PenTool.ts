@@ -31,6 +31,8 @@ export class PenTool implements ToolBehavior {
 
   private activeLayerId: string | undefined;
   private hasStroke = false;
+  /** the last point actually stamped, so a stroke cut short can be ended where it really got to. */
+  private lastPoint: GripPoint | undefined = undefined;
   private startPosition: Vec2 | undefined = undefined;
   private startPositionRaw: Vec2 | undefined = undefined;
 
@@ -63,6 +65,7 @@ export class PenTool implements ToolBehavior {
     const { kernel, instrument } = this.resolveShape(preset);
     const point = this.buildPoint(args, args.rawPosition, args.color);
     this.grip.start(layer, kernel, point, instrument, { context: { tool: this.categoryId } });
+    this.lastPoint = point;
     this.hasStroke = true;
 
     return { shouldUpdate: true };
@@ -90,6 +93,7 @@ export class PenTool implements ToolBehavior {
     const point = this.buildPoint(args, position, args.color);
     try {
       this.grip.addPoint(point);
+      this.lastPoint = point;
       this.hasStroke = true;
       return { shouldUpdate: true };
     } catch {
@@ -138,12 +142,32 @@ export class PenTool implements ToolBehavior {
     };
   }
 
+  /**
+   * @description the stroke is being cut short - a pointercancel, or the window losing focus partway
+   *   through a line.
+   *
+   *   it is ended rather than dropped. `Grip.cancel` only forgets the stroke: the pixels it has already
+   *   merged into the layer stay there, and because the history entry is registered by `end`, they would
+   *   stay there with nothing in history able to take them back. ending at the last point that was
+   *   actually stamped keeps the line the user drew and gives undo something to walk back through.
+   *
+   *   (the alternative - putting the pre-stroke pixels back - has to happen in frasco, where the base
+   *   texture lives. `MaskStrokeInstrument` has no cancel of its own yet.)
+   */
   onCancel(_args: ToolArgs): ToolResult {
-    this.grip.cancel();
+    if (this.grip.isInStroke() && this.lastPoint) {
+      try {
+        this.grip.end(this.lastPoint);
+      } catch {
+        this.grip.cancel();
+      }
+    } else {
+      this.grip.cancel();
+    }
     this.resetStrokeState();
 
     return {
-      shouldUpdate: false,
+      shouldUpdate: true,
     };
   }
 
@@ -193,6 +217,7 @@ export class PenTool implements ToolBehavior {
     this.startPosition = undefined;
     this.activeLayerId = undefined;
     this.hasStroke = false;
+    this.lastPoint = undefined;
     this.manualEraserMode = false;
   }
 }

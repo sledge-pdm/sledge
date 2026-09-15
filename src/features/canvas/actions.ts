@@ -1,4 +1,5 @@
 import { HistoryContext, Size2D, Vec2 } from '@sledge-pdm/core';
+import { refuseIfExclusiveEditSession } from '~/features/edit_session';
 import { registerCommandsHistory } from '~/features/history';
 import { CanvasSizeCommand } from '~/features/history/commands';
 import { allLayers } from '~/features/layer';
@@ -18,6 +19,9 @@ export interface ChangeCanvasSizeOptions {
 export function changeCanvasSize(newSize: Size2D, options: ChangeCanvasSizeOptions): boolean {
   const { register = true, srcOrigin: src = { x: 0, y: 0 }, destOrigin: dest = { x: 0, y: 0 } } = options;
   if (!isValidCanvasSize(newSize)) return false;
+  // an open edit measured itself against the size the canvas had when it started, so resizing underneath
+  // it leaves it writing back against dimensions that no longer exist.
+  if (refuseIfExclusiveEditSession('resizing the canvas')) return false;
   const oldSize = { width: projectStore.canvas.size.width, height: projectStore.canvas.size.height };
   if (oldSize.width === newSize.width && oldSize.height === newSize.height && src.x === 0 && src.y === 0 && dest.x === 0 && dest.y === 0)
     return false;

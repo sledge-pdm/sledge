@@ -1,6 +1,7 @@
-import { finalizePendingInput, formatProgress, isBusy, runExclusive, setBusyProgress, type BusyHandle, type BusyMode } from '~/features/busy';
+import { formatProgress, isBusy, runExclusive, setBusyProgress, type BusyHandle, type BusyMode } from '~/features/busy';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
+import { finalizeEditSessions } from '~/features/edit_session';
 import { logSystemError, logSystemInfo, logSystemWarn, logUserError, logUserInfo, logUserSuccess, logUserWarn } from '~/features/log/service';
 import { markProjectSaved } from '~/features/project';
 import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
@@ -148,7 +149,7 @@ export async function saveProject(name?: string, existingPath?: string, options?
     async (handle) => {
       // open gestures and pending history entries are committed first, so the assembled bytes match the
       // canvas and the undo stack. runs before the first await below, so no input can arrive in between.
-      finalizePendingInput();
+      finalizeEditSessions();
       return await saveProjectExclusive(name, existingPath, controller.signal, handle);
     },
     {

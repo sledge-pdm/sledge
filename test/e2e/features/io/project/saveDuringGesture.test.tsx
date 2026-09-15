@@ -3,14 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { StrokeCanvas } from '~/components/canvas/canvas/StrokeCanvas';
 import { OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import LayerListPropsRow from '~/components/section/editor/layer/row/LayerListPropsRow';
-import { finalizePendingInput } from '~/features/busy';
+import { finalizeEditSessions } from '~/features/edit_session';
 import { historyManager } from '~/features/history';
 import { ProjectLoader } from '~/features/io/project/ProjectLoader';
 import { saveProject } from '~/features/io/project/ProjectSave';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
+import { selectionManager } from '~/features/selection/SelectionManager';
 import { setActiveToolCategory } from '~/features/tools/ToolController';
-import { setIOStore } from '~/stores/EditorStores';
+import { setIOStore, toolStore } from '~/stores/EditorStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { unpackFromBytes } from '~/utils/msgpackr';
 import { setPlatform } from '~/utils/platform';
@@ -170,6 +172,51 @@ describe('io/project/save started mid-gesture (e2e)', () => {
     });
   });
 
+  describe('with a move still floating', () => {
+    afterEach(() => {
+      floatingMoveManager.cancel();
+      selectionManager.clearAll();
+    });
+
+    /** @description lift the whole layer and drag it, leaving it floating the way the UI does. */
+    const startFloatingMove = () => {
+      setActiveToolCategory('move');
+      const tool = new (
+        toolStore.tools.move.behavior.constructor as new () => {
+          onStart: (args: any) => unknown;
+          onMove: (args: any) => unknown;
+        }
+      )();
+      const at = (x: number, y: number) => ({ layerId: 'a', rawPosition: { x, y }, position: { x, y }, color: [0, 0, 0, 255] });
+      tool.onStart(at(2, 2));
+      tool.onMove(at(6, 5));
+    };
+
+    it('commits it, so the file holds what the user can see', async () => {
+      const layer = layerManager.getLayer('a');
+      // something to move: without it, committing and not committing look identical
+      layer.writePixels(new Uint8ClampedArray([255, 0, 0, 255]), { bounds: { x: 1, y: 1, width: 1, height: 1 } });
+      const beforeMove = layer.readPixels();
+
+      startFloatingMove();
+      expect(floatingMoveManager.isMoving()).toBe(true);
+      // the floating pixels live in an overlay, so the layer itself has not changed yet
+      sameBytes(layerManager.getLayer('a').readPixels(), beforeMove);
+
+      expect(await saveProject('demo.sledge', 'C:/work')).toBe('saved');
+
+      // the move was applied before the bytes were assembled, rather than being left floating over a file
+      // that was written without it
+      expect(floatingMoveManager.isMoving()).toBe(false);
+      const committed = layerManager.getLayer('a').readPixels();
+      expect(Array.from(committed)).not.toEqual(Array.from(beforeMove));
+
+      const project = unpackFromBytes(written!);
+      expect(await ProjectLoader.fromProjectObj({ project }).load()).toMatchObject({ ok: true });
+      sameBytes(layerManager.getLayer('a').readPixels(), committed);
+    });
+  });
+
   describe('with a transform still under the pointer', () => {
     it('commits it and gives the pointer back', () => {
       const frameRoot = document.createElement('div');
@@ -192,7 +239,7 @@ describe('io/project/save started mid-gesture (e2e)', () => {
         frameRoot.dispatchEvent(pointer('pointermove', 24, 18));
         expect(onCommit).not.toHaveBeenCalled();
 
-        finalizePendingInput();
+        finalizeEditSessions();
 
         // committed at the position it last reached, which is where the owner registers its history entry
         expect(onCommit).toHaveBeenCalledTimes(1);

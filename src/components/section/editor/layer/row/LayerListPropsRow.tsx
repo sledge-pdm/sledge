@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { Dropdown, Slider } from '@sledge-pdm/ui';
 import { debounce } from '@solid-primitives/scheduled';
 import { Component, onCleanup } from 'solid-js';
-import { registerInputFinalizer } from '~/features/busy';
+import { beginEditSession } from '~/features/edit_session';
 import { registerCommandsHistory } from '~/features/history';
 import { LayerPropsCommand } from '~/features/history/commands';
 import { activeLayer, blendModeOptions, findLayerById, setLayerProp } from '~/features/layer';
@@ -20,6 +20,8 @@ const LayerListPropsRow: Component = () => {
   let opacityBeforeHistorySet: number | null = null;
   let opacityTargetLayerId: string | null = null;
   let pendingAction: LayerPropsCommand | null = null;
+  /** closes the edit session the waiting history entry holds; undefined while none is waiting. */
+  let endSession: (() => void) | undefined;
 
   // TODO: debounce+ペンディングはマジで頭悪い 結局マウス離したときが確定でいいので、@sledge-pdm/uiのsliderに「マウスを離してchangeが終了したとき」のリスナーを追加してそのタイミングでaddEntryする
   const setHistory = () => {
@@ -35,19 +37,36 @@ const LayerListPropsRow: Component = () => {
     opacityBeforeHistorySet = null;
     opacityTargetLayerId = null;
     pendingAction = null;
+
+    endSession?.();
+    endSession = undefined;
   };
 
   const setHistoryDebounced = debounce(setHistory, 200);
 
-  // the opacity already applied to the layer; only its history entry is waiting on that 200ms. an operation
-  // starting inside the wait would read the new opacity with nothing in history to undo it, so the entry is
-  // registered now and the timer dropped - `setHistory` clears the pending state, so it cannot run twice.
-  onCleanup(
-    registerInputFinalizer(() => {
-      setHistoryDebounced.clear();
-      setHistory();
-    })
-  );
+  // the opacity already applied to the layer; only its history entry is waiting on that 200ms. anything
+  // arriving inside the wait would find the new opacity with nothing in history to undo it, so the wait is
+  // an edit session: settling it registers the entry now and drops the timer. `setHistory` clears the
+  // pending state, so it cannot run twice.
+  const settlePendingOpacity = () => {
+    setHistoryDebounced.clear();
+    setHistory();
+  };
+
+  const openOpacitySession = () => {
+    endSession?.();
+    endSession = beginEditSession({
+      label: 'layer opacity',
+      isExclusive: () => pendingAction !== null,
+      interrupt: settlePendingOpacity,
+      finalize: settlePendingOpacity,
+    });
+  };
+
+  onCleanup(() => {
+    // the row is going away with an entry still waiting on its timer; register it rather than losing it.
+    settlePendingOpacity();
+  });
 
   return (
     <div class={layerConfigRow}>
@@ -84,6 +103,7 @@ const LayerListPropsRow: Component = () => {
               layerId: layer.id,
             });
             pendingAction.registerBefore(layer);
+            openOpacitySession();
             return true;
           }}
           onChange={(newValue) => {

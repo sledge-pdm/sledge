@@ -99,8 +99,12 @@ describe('EraserTool (e2e)', () => {
     expect(after).toBeLessThan(before);
   });
 
-  it('cancels stroke safely', () => {
-    layerManager.registerLayer('layer-1', new Uint8ClampedArray(5 * 5 * 4), 5, 5, { inputSpace: 'layer' });
+  it('ends a stroke that is cut short, rather than leaving pixels with no history', () => {
+    const filled = new Uint8ClampedArray(5 * 5 * 4);
+    filled.fill(255);
+    layerManager.registerLayer('layer-1', filled, 5, 5, { inputSpace: 'layer' });
+    historyManager.clearHistory();
+
     const ToolCtor = toolStore.tools.eraser.behavior.constructor as new () => {
       onStart: (args: any) => { shouldUpdate: boolean };
       onCancel: (args: any) => { shouldUpdate: boolean };
@@ -108,8 +112,17 @@ describe('EraserTool (e2e)', () => {
     const tool = new ToolCtor();
 
     tool.onStart(args(2, 2));
+    const erased = countOpaquePixels('layer-1', 5, 5);
     const canceled = tool.onCancel(args(2, 2));
 
-    expect(canceled).toEqual({ shouldUpdate: false });
+    // the stroke had already merged into the layer by the time the cancel arrived. dropping it there would
+    // leave those pixels in the file with nothing in history able to take them back, so it is ended
+    // instead - at the last point it actually reached, not wherever the cancel claims the pointer is.
+    expect(canceled).toEqual({ shouldUpdate: true });
+    expect(countOpaquePixels('layer-1', 5, 5)).toBe(erased);
+    expect(historyManager.canUndo()).toBe(true);
+
+    historyManager.undo();
+    expect(countOpaquePixels('layer-1', 5, 5)).toBe(5 * 5);
   });
 });

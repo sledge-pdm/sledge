@@ -1,5 +1,6 @@
 import { toUint8Array } from '@sledge-pdm/core';
 import { runExclusive } from '~/features/busy';
+import { refuseIfExclusiveEditSession } from '~/features/edit_session';
 import { doCommands } from '~/features/history';
 import { cutPasteSnippet } from '~/features/history/commands';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
@@ -23,6 +24,9 @@ export async function clipboardCopy(e?: ClipboardEvent): Promise<'layer' | 'sele
 async function copyInternal(e?: ClipboardEvent): Promise<'layer' | 'selection' | undefined> {
   const inputFocused = isInputFocused();
   if (inputFocused) return;
+  // a floating move's pixels are not in the layer yet, so a copy taken now would read the hole they left
+  // rather than what the user can see. covers the cut that runs this as its first half, too.
+  if (refuseIfExclusiveEditSession('copying')) return;
   e?.preventDefault();
 
   try {
@@ -82,6 +86,10 @@ export async function clipboardPaste(e?: ClipboardEvent) {
 async function pasteInternal(e?: ClipboardEvent) {
   const inputFocused = isInputFocused();
   if (inputFocused) return;
+  // this used to lean on `hasSelection()` below to fold away a move in flight, but a move starts by
+  // clearing the selection it lifted (see `MoveTool.startMove`), so that test never saw one and a paste
+  // went ahead with the move still floating over a layer it was about to edit.
+  if (refuseIfExclusiveEditSession('pasting')) return;
   e?.preventDefault();
 
   try {

@@ -41,6 +41,7 @@ export const CanvasResizeFrame: Component = () => {
       keepAspect: 'shift',
       snapToPixel: true,
       allowInvert: true,
+      sessionLabel: 'canvas frame',
 
       onChange: (r) => {
         // should process negative case properly

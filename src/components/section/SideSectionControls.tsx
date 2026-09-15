@@ -17,7 +17,7 @@ const controlsRoot = css`
   width: 28px;
   justify-content: start;
   align-items: center;
-  background-color: var(--color-background);
+  background-color: var(--color-controls);
 `;
 
 const controlsList = css`
@@ -64,7 +64,7 @@ const label = css`
   white-space: nowrap;
   writing-mode: vertical-lr;
   color: var(--color-on-background);
-  opacity: 0.5;
+  opacity: 0.75;
 `;
 
 const labelActive = css`
@@ -228,8 +228,12 @@ const SideSectionControls: Component<Props> = (props) => {
       id={`side-section-control-${props.side}`}
       class={controlsRoot}
       style={{
-        'border-right': props.side === 'leftSide' && !appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
-        'border-left': props.side === 'rightSide' && !appearanceStore[props.side].content ? `1px solid ${color.border}` : 'none',
+        // a plain divider, not a bevel: the top-light / bottom-shadow pair assumes a light from above
+        // and says nothing about a vertical edge. it also has to read against the canvas area when the
+        // side panel is closed, which a translucent colour composited onto this element cannot do.
+        // same token as the panel's own edge so the two lines match when the panel is open.
+        'border-right': props.side === 'leftSide' ? `1px solid ${color.borderSecondary}` : 'none',
+        'border-left': props.side === 'rightSide' ? `1px solid ${color.borderSecondary}` : 'none',
 
         'z-index': 'var(--zindex-side-section)',
       }}

@@ -11,8 +11,11 @@ const bottomInfoRoot = css`
   flex-direction: row;
   box-sizing: content-box;
   flex-wrap: wrap;
-  background-color: var(--color-background);
+  background-color: var(--color-controls);
   border-top: 1px solid var(--color-border);
+  box-shadow:
+    inset 0 1px 0 var(--color-shadow-top-light),
+    inset 0 -1px 0 var(--color-shadow-bottom-shadow);
   height: 18px;
   padding-left: 8px;
   z-index: var(--zindex-bottom-info);

@@ -16,12 +16,16 @@ import { window as platformWindow, UnlistenFn } from '~/utils/platform';
 import './title_bar_region.css';
 
 const titleBarRoot = css`
+  position: relative;
+  pointer-events: all;
+`;
+
+const titleBarContentRoot = css`
   display: flex;
   flex-direction: row;
   width: 100%;
   position: relative;
   pointer-events: all;
-  background-color: var(--color-controls);
   align-items: center;
 `;
 
@@ -181,29 +185,26 @@ export default function TitleBar() {
     }
   });
 
-  const borderWindowLabels: string[] = ['settings', 'restore'];
-  const shouldShowBorder = () => borderWindowLabels.find((l) => l === platformWindow.getCurrentWindow().label);
   const titleLessWindowLabels: string[] = ['about'];
-  const shouldShowTitle = () => !titleLessWindowLabels.find((l) => l === platformWindow.getCurrentWindow().label);
+  const isTitleLess = () => titleLessWindowLabels.some((l) => l === platformWindow.getCurrentWindow().label);
 
   return (
     <header>
       <div
+        class={titleBarRoot}
         style={{
-          'border-bottom': shouldShowBorder() ? `1px solid ${color.border}` : 'none',
-          'pointer-events': 'all',
+          'background-color': isTitleLess() ? 'transparent' : color.controls,
+          // the separator has to read against the canvas area below it, so it stays an opaque border.
+          'border-bottom': isTitleLess() ? undefined : `1px solid ${color.border}`,
+          // the bevel is drawn just inside that line and costs no layout, same as FoldBox / DialogContent.
+          // it goes away with the background: a translucent highlight over nothing is not a bevel.
+          'box-shadow': isTitleLess() ? undefined : `inset 0 1px 0 ${color.shadowTopLight}, inset 0 -1px 0 ${color.shadowBottomShadow}`,
         }}
       >
         <Show when={!windowState.decorated}>
-          <nav
-            class={titleBarRoot}
-            data-tauri-drag-region
-            style={{
-              'background-color': shouldShowTitle() ? undefined : 'transparent',
-            }}
-          >
+          <nav class={titleBarContentRoot} data-tauri-drag-region>
             <div class={titleBarTitleContainer}>
-              <Show when={shouldShowTitle()}>
+              <Show when={!isTitleLess()}>
                 <Show when={ioStore.isInInitialLoading && ioStore.loadingTargetPath}>
                   <p class={titleBarTitle}>
                     <span class={titleBarTitle} style={{ opacity: 0.5 }}>
@@ -212,8 +213,8 @@ export default function TitleBar() {
                     {ioStore.loadingTargetPath?.name}
                   </p>
                 </Show>
-                <Show when={!ioStore.isInInitialLoading}>
-                  <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowState.title}</p>}>
+                <Show when={location.pathname.startsWith('/editor')} fallback={<p class={titleBarTitle}>{windowState.title}</p>}>
+                  <Show when={!ioStore.isInInitialLoading}>
                     {/* title */}
                     <div class={flexRow}>
                       <p class={titleBarTitle}>

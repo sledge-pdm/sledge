@@ -26,12 +26,12 @@ import { openWindow } from '~/utils/WindowUtils';
 import SaveSection from './SaveSection';
 import { UpdateSection } from './UpdateSection';
 
+// no background of its own: it would paint over the title bar's inset bevel, which is drawn on the
+// parent. the parent is always --color-controls where this is mounted.
 const topMenuBarRoot = css`
   display: flex;
   flex-direction: row;
   width: 100%;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-controls);
   height: 28px;
   align-items: end;
   padding-left: 16px;

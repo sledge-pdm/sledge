@@ -58,6 +58,9 @@ export function duplicateLayers(layerIds?: string[]) {
 }
 
 export async function mergeToBelowLayer(layerId: string) {
+  // the merge composes from the layer textures, which do not hold what a move is floating above them, and
+  // then removes the upper layer - out from under a move lifted from it.
+  if (refuseIfExclusiveEditSession('merging a layer')) return;
   const originLayerIndex = getLayerIndex(layerId);
   const targetLayerIndex = originLayerIndex + 1;
   if (targetLayerIndex >= projectStore.layers.layers.length) return;

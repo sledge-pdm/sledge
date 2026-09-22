@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { applyEffect } from '~/features/effect/Effects';
 import { historyManager, tryUndo } from '~/features/history';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
-import { clearLayer } from '~/features/layer/service';
+import { clearLayer, mergeToBelowLayer } from '~/features/layer/service';
 import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import SelectionMask from '~/features/selection/SelectionMask';
@@ -130,6 +130,25 @@ describe('a move floating while something else edits (e2e)', () => {
     clearLayer('layer-1');
 
     expect(layerManager.readPixelCanvas('layer-1', 0, 0)).toEqual([255, 0, 0, 255]);
+  });
+
+  it('turns down a merge down while a move is floating', () => {
+    // the merge composes from the layer textures, so the floating pixels are not in what it writes - and it
+    // then removes the layer they were lifted from, which drops the move on the backstop in
+    // `LayerRemoveCommand`. the user's move would disappear from the merged result without a word.
+    resetStore([buildLayer('layer-1'), buildLayer('layer-2')], { width: 3, height: 2 });
+    layerManager.registerLayer('layer-1', RED_TOP_LEFT(), 3, 2, { inputSpace: 'canvas' });
+    layerManager.registerLayer('layer-2', new Uint8ClampedArray(3 * 2 * 4), 3, 2, { inputSpace: 'canvas' });
+
+    const tool = newMoveTool();
+    tool.onStart(args(0, 0));
+    tool.onMove(args(1, 1));
+    const entriesBefore = historyManager.getUndoStack().length;
+
+    mergeToBelowLayer('layer-1');
+
+    expect(historyManager.getUndoStack().length).toBe(entriesBefore);
+    expect(floatingMoveManager.isMoving()).toBe(true);
   });
 
   it('comes to rest when the layer it was lifted from is gone', () => {

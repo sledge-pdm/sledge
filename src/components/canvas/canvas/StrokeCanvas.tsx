@@ -165,9 +165,13 @@ export const StrokeCanvas: Component = () => {
     const { canvasPosition, onCanvas } = updatePointerState(e);
 
     if (!isDrawableClick(e)) {
-      // an operation taking the window gets here, and it already finalized this gesture on its way in, so
-      // there is nothing left to end - only the session to let go of.
-      closeGesture();
+      // the gesture stops being drawable for more reasons than an operation taking the window: holding the
+      // drag key does it too, and that key is the modifier undo is bound to. merely dropping the session
+      // here would let the very undo this guards against through while frasco still holds the stroke's base
+      // texture, and the pointerup that follows would find nothing open and never register the entry. so it
+      // is ended rather than let go of - at the position `updatePointerState` just recorded. an operation
+      // that finalized this gesture on its way in leaves nothing open, and this returns straight away.
+      finalizeStroke();
       logDebugWarn(`${fnName} cancelled because not drawable click`);
       return;
     }

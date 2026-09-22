@@ -72,7 +72,7 @@ describe('undo pressed mid-gesture (e2e)', () => {
     return root.querySelector('#interact-area') as HTMLDivElement;
   };
 
-  const pointer = (type: string, x: number, y: number) =>
+  const pointer = (type: string, x: number, y: number, init?: PointerEventInit) =>
     new PointerEvent(type, {
       pointerId: 1,
       pointerType: 'mouse',
@@ -83,6 +83,7 @@ describe('undo pressed mid-gesture (e2e)', () => {
       clientY: y,
       bubbles: true,
       cancelable: true,
+      ...init,
     });
 
   it('ends the stroke on the first press and steps history on the next', async () => {
@@ -126,6 +127,38 @@ describe('undo pressed mid-gesture (e2e)', () => {
     expect(historyManager.getUndoStack()).toHaveLength(1);
     expect(countOpaquePixels()).toBe(afterFirstStroke);
 
+    tryUndo();
+    await settled();
+
+    expect(historyManager.getUndoStack()).toHaveLength(0);
+    expect(countOpaquePixels()).toBe(0);
+  });
+
+  it('ends the stroke when the drag key comes down, rather than only dropping its claim', async () => {
+    // the key that makes a drag out of a stroke is the one undo is bound to, so it arrives first on the way
+    // to ctrl+z. the stroke has to be settled by it: dropping the claim alone would leave frasco holding
+    // the base texture with the undo that follows free to rewrite the layer underneath it.
+    setActiveToolCategory('pen');
+    const area = mountStrokeCanvas();
+
+    area.dispatchEvent(pointer('pointerdown', 2, 2));
+    window.dispatchEvent(pointer('pointermove', 5, 2));
+    await settled();
+    expect(historyManager.getUndoStack()).toHaveLength(0);
+    const midStroke = countOpaquePixels();
+    expect(midStroke).toBeGreaterThan(0);
+
+    // ctrl comes down while the pointer is still moving: the stroke stops being a drawable click here. the
+    // position is the one already drawn to, so what the end stamps cannot be mistaken for the stroke having
+    // carried on.
+    window.dispatchEvent(pointer('pointermove', 5, 2, { ctrlKey: true }));
+    await settled();
+
+    // the stroke is in history at the point it reached, not left in the layer unaccounted for
+    expect(historyManager.getUndoStack()).toHaveLength(1);
+    expect(countOpaquePixels()).toBe(midStroke);
+
+    // and the undo that the same keypress leads to steps history rather than being spent on the gesture
     tryUndo();
     await settled();
 

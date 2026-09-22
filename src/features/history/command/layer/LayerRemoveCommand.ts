@@ -55,8 +55,8 @@ export class LayerRemoveCommand extends HistoryCommand {
     }
 
     // a move floating over this layer is holding pixels that are about to have nowhere to go. the guards
-    // and `canStepHistory` should have settled it long before here, so this is the backstop that keeps a
-    // removal from leaving a move that can never be committed or cancelled.
+    // and `settleBeforeSteppingHistory` should have settled it long before here, so this is the backstop
+    // that keeps a removal from leaving a move that can never be committed or cancelled.
     if (floatingMoveManager.getTargetLayerId() === this.layerId) floatingMoveManager.cancel();
 
     layerManager.removeLayer(this.layerId);

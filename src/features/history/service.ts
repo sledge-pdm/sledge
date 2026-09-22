@@ -40,8 +40,12 @@ export function doCommands(commands: HistoryCommandsInput, options?: DoCommandsO
 }
 
 /**
- * @description undo and redo rewrite the very layers and stacks an operation in flight is reading, so they
- *   are refused for as long as one holds the window. the guard is here rather than at each button and
+ * @description settle whatever stands in the way of stepping history, and say whether the step itself may
+ *   go ahead. not a plain predicate: an open edit is ended here, so the press that asked is answered by
+ *   that and returns false.
+ *
+ *   undo and redo rewrite the very layers and stacks an operation in flight is reading, so they are
+ *   refused for as long as one holds the window. the guard is here rather than at each button and
  *   shortcut, so a call site added later is covered without being remembered - the on-canvas undo and redo
  *   buttons have no check of their own and depend on this one.
  *
@@ -50,7 +54,7 @@ export function doCommands(commands: HistoryCommandsInput, options?: DoCommandsO
  *   at once - cancel the move and undo whatever came before it - so this press is spent on the
  *   interruption and the next one is the undo.
  */
-function canStepHistory(): boolean {
+function settleBeforeSteppingHistory(): boolean {
   if (isBusy()) {
     logUserWarn('cannot undo or redo while an operation is running.');
     return false;
@@ -65,7 +69,7 @@ function canStepHistory(): boolean {
 }
 
 export function tryUndo() {
-  if (!canStepHistory()) return;
+  if (!settleBeforeSteppingHistory()) return;
   if (historyManager.canUndo()) {
     historyManager.undo();
   } else {
@@ -74,7 +78,7 @@ export function tryUndo() {
 }
 
 export function tryRedo() {
-  if (!canStepHistory()) return;
+  if (!settleBeforeSteppingHistory()) return;
   if (historyManager.canRedo()) {
     historyManager.redo();
   } else {

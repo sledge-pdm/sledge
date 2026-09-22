@@ -2,6 +2,7 @@ import { HistoryContext } from '@sledge-pdm/core';
 import { getPackedLayerSnapshot, inflateLayerSnapshot, PackedLayerSnapshot } from '~/features/history/snapshot';
 import { findLayerById } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { floatingMoveManager } from '~/features/selection/FloatingMoveManager';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
 import { updateFrascoCanvas } from '~/webgl/service';
 import { HistoryCommand } from '../HistoryCommand';
@@ -52,6 +53,11 @@ export class LayerRemoveCommand extends HistoryCommand {
     if (!this.preserveActive && layers[newActiveIndex]) {
       setProjectStore('layers', 'state', 'activeLayerId', layers[newActiveIndex].id);
     }
+
+    // a move floating over this layer is holding pixels that are about to have nowhere to go. the guards
+    // and `settleBeforeSteppingHistory` should have settled it long before here, so this is the backstop
+    // that keeps a removal from leaving a move that can never be committed or cancelled.
+    if (floatingMoveManager.getTargetLayerId() === this.layerId) floatingMoveManager.cancel();
 
     layerManager.removeLayer(this.layerId);
     updateFrascoCanvas(`Layer(${this.layerId}) removed`);

@@ -1,7 +1,8 @@
 import { getProjectAdapter, gzipDeflate, ProjectBase, ProjectSnapshot, Size2D } from '@sledge-pdm/core';
 import { batch, createUniqueId } from 'solid-js';
-import { finalizePendingInput, runExclusive, type BusyMode } from '~/features/busy';
+import { runExclusive, type BusyMode } from '~/features/busy';
 import { canvasThumbnailGenerator } from '~/features/canvas/CanvasThumbnailGenerator';
+import { finalizeEditSessions } from '~/features/edit_session';
 import { logSystemError, logSystemWarn, logUserError } from '~/features/log/service';
 import { markProjectSaved } from '~/features/project';
 import { ioStore } from '~/stores/EditorStores';
@@ -144,7 +145,7 @@ export async function registerCurrentProjectSnapshot(
   return await runExclusive(
     'snapshotCreate',
     async () => {
-      finalizePendingInput();
+      finalizeEditSessions();
       const snapshot = await createCurrentProjectSnapshot(name);
       if (snapshot) {
         setProjectStore('snapshots', [...projectStore.snapshots, snapshot]);
@@ -205,7 +206,7 @@ export async function loadSnapshot(
   await runExclusive(
     'snapshotLoad',
     async (handle) => {
-      finalizePendingInput();
+      finalizeEditSessions();
 
       if (option?.backup) {
         // nothing is asked on this path, and the backup below already assembles the whole project

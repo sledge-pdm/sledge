@@ -87,6 +87,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
         keepAspect: 'shift',
         snapToPixel: false,
         allowInvert: true,
+        sessionLabel: 'image transform',
         onStart: (startRect: FrameRect) => {
           entryOnDragStart = cloneEntry(entry);
         },

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { busyStore, isBusy, registerInputFinalizer, runExclusive } from '~/features/busy';
+import { busyStore, isBusy, runExclusive } from '~/features/busy';
+import { beginEditSession } from '~/features/edit_session';
 import { saveProject } from '~/features/io/project/ProjectSave';
 import { markProjectChanged, markProjectSaved } from '~/features/project';
 import { CURRENT_PROJECT_VERSION } from '~/features/project/Consts';
@@ -201,7 +202,16 @@ describe('io/project/save exclusion (e2e)', () => {
 
   it('settles what is still under the pointer before it reads anything', async () => {
     const order: string[] = [];
-    const unregister = registerInputFinalizer(() => order.push('finalize'));
+    let open = true;
+    const unregister = beginEditSession({
+      label: 'stroke',
+      isExclusive: () => open,
+      interrupt: () => {},
+      finalize: () => {
+        order.push('finalize');
+        open = false;
+      },
+    });
     platform.fs.writeFile = vi.fn(async () => {
       order.push('write');
     }) as any;

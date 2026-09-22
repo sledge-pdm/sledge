@@ -3,9 +3,10 @@ import { Vec2 } from '@sledge-pdm/core';
 import { batch, Component, createSignal, onMount } from 'solid-js';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
 import { VERBOSE_LOG_ENABLED } from '~/Consts';
-import { isBusy, registerInputFinalizer } from '~/features/busy';
+import { isBusy } from '~/features/busy';
 import CanvasToolOperator, { DrawState } from '~/features/canvas/CanvasToolOperator';
 import { getCanvasMousePosition, getWindowMousePosition } from '~/features/canvas/transform/CanvasPositionCalculator';
+import { beginEditSession } from '~/features/edit_session';
 import { clipboardCopy, clipboardCut } from '~/features/io/clipboard/ClipboardActions';
 import { activeLayer } from '~/features/layer';
 import { logSystemInfo, logSystemWarn, logUserError } from '~/features/log/service';
@@ -50,6 +51,33 @@ export const StrokeCanvas: Component = () => {
 
   const [isInStroke, setIsInStroke] = createSignal<boolean>(false);
   const handledPointerDown = new WeakSet<PointerEvent>();
+
+  /** closes the edit session the open gesture holds; undefined while no gesture is open. */
+  let endGestureSession: (() => void) | undefined;
+
+  /**
+   * @description the tool has taken the pointer. from here until the gesture ends it is holding the pixels
+   *   it read at the start, so nothing else may edit them - see `~/features/edit_session`.
+   */
+  function openGesture() {
+    setIsInStroke(true);
+    endGestureSession?.();
+    endGestureSession = beginEditSession({
+      label: 'stroke',
+      isExclusive: () => isInStroke(),
+      // the pointer is still down and the user is partway through a line. ending it where it is keeps what
+      // they drew and gives it a history entry; dropping it would lose a stroke they had already made.
+      interrupt: finalizeStroke,
+      finalize: finalizeStroke,
+    });
+  }
+
+  /** @description the gesture is over - by a pointerup, a cancel, or having been finalized from outside. */
+  function closeGesture() {
+    setIsInStroke(false);
+    endGestureSession?.();
+    endGestureSession = undefined;
+  }
 
   function isDrawableClick(e: PointerEvent): boolean {
     // an operation holding the window is reading these layers. it also finalized any stroke that was open
@@ -114,7 +142,8 @@ export const StrokeCanvas: Component = () => {
 
     const { canvasPosition } = updatePointerState(e);
     const started = operator.handleDraw(DrawState.start, e, getActiveToolCategory(), canvasPosition);
-    setIsInStroke(!!started);
+    if (started) openGesture();
+    else closeGesture();
     const end = new Date().getTime();
     logDebug(`handlePointerDown executed in ${end - start} ms`);
   }
@@ -136,7 +165,13 @@ export const StrokeCanvas: Component = () => {
     const { canvasPosition, onCanvas } = updatePointerState(e);
 
     if (!isDrawableClick(e)) {
-      setIsInStroke(false);
+      // the gesture stops being drawable for more reasons than an operation taking the window: holding the
+      // drag key does it too, and that key is the modifier undo is bound to. merely dropping the session
+      // here would let the very undo this guards against through while frasco still holds the stroke's base
+      // texture, and the pointerup that follows would find nothing open and never register the entry. so it
+      // is ended rather than let go of - at the position `updatePointerState` just recorded. an operation
+      // that finalized this gesture on its way in leaves nothing open, and this returns straight away.
+      finalizeStroke();
       logDebugWarn(`${fnName} cancelled because not drawable click`);
       return;
     }
@@ -162,14 +197,14 @@ export const StrokeCanvas: Component = () => {
     if (!isInStroke()) return;
     const { canvasPosition } = updatePointerState(e);
     operator.handleDraw(DrawState.end, e, getActiveToolCategory(), canvasPosition);
-    setIsInStroke(false);
+    closeGesture();
   }
 
   function handlePointerCancel(e: PointerEvent) {
     if (!isInStroke()) return;
     const { canvasPosition } = updatePointerState(e);
     operator.handleDraw(DrawState.cancel, e, getActiveToolCategory(), canvasPosition);
-    setIsInStroke(false);
+    closeGesture();
   }
 
   /**
@@ -183,7 +218,7 @@ export const StrokeCanvas: Component = () => {
   function finalizeStroke() {
     if (!isInStroke()) return;
     operator.handleDraw(DrawState.end, new PointerEvent('pointerup'), getActiveToolCategory(), interactStore.lastPointerOnCanvas);
-    setIsInStroke(false);
+    closeGesture();
   }
 
   function isOnCanvas(canvasPosition: Vec2): boolean {
@@ -208,8 +243,6 @@ export const StrokeCanvas: Component = () => {
   onMount(() => {
     outerArea = document.getElementById('outer-stroke-detect-area') as HTMLDivElement | null;
 
-    const unregisterFinalizer = registerInputFinalizer(finalizeStroke);
-
     innerArea!.addEventListener('pointerdown', handlePointerDown);
     outerArea!.addEventListener('pointerdown', handlePointerDown);
 
@@ -227,6 +260,7 @@ export const StrokeCanvas: Component = () => {
         if (isBusy()) return;
         if (!focused) {
           operator.handleDraw(DrawState.cancel, new PointerEvent('pointercancel'), getActiveToolCategory(), { x: -1, y: -1 });
+          closeGesture();
         } else {
           // pipetteのみ復帰時も戻す
           if (toolStore.activeToolCategory === 'pipette')
@@ -238,7 +272,9 @@ export const StrokeCanvas: Component = () => {
       });
 
     return () => {
-      unregisterFinalizer();
+      // the component is going away with a gesture still open; let go of its session so nothing stays
+      // exclusive on behalf of a listener that no longer exists.
+      closeGesture();
       innerArea!.removeEventListener('pointerdown', handlePointerDown);
       outerArea!.removeEventListener('pointerdown', handlePointerDown);
 

@@ -3,6 +3,7 @@
 import { BaseLayerColorMode, HistoryContext, Layer, LayerType } from '@sledge-pdm/core';
 import { BlendMode, FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
 import { adjustZoomToFit } from '~/features/canvas';
+import { refuseIfExclusiveEditSession } from '~/features/edit_session';
 import { doCommands, registerCommandsHistory } from '~/features/history';
 import { CanvasSizeCommand, layerMergeSnippet } from '~/features/history/commands';
 import { getLayer, layerManager } from '~/features/layer/frasco/LayerManager';
@@ -49,12 +50,17 @@ export function duplicateLayer(layerId: string) {
 }
 
 export function duplicateLayers(layerIds?: string[]) {
+  // the floating pixels are not in the layer yet, so a copy taken now would not contain them.
+  if (refuseIfExclusiveEditSession('duplicating a layer')) return;
   const targets = getOperationTargetLayerIds(layerIds);
   targets.forEach((id) => duplicateLayer(id));
   if (targets.length > 0) resetSelectionState();
 }
 
 export async function mergeToBelowLayer(layerId: string) {
+  // the merge composes from the layer textures, which do not hold what a move is floating above them, and
+  // then removes the upper layer - out from under a move lifted from it.
+  if (refuseIfExclusiveEditSession('merging a layer')) return;
   const originLayerIndex = getLayerIndex(layerId);
   const targetLayerIndex = originLayerIndex + 1;
   if (targetLayerIndex >= projectStore.layers.layers.length) return;
@@ -146,6 +152,7 @@ export function resetSelectionState() {
 }
 
 export const resetAllLayers = () => {
+  if (refuseIfExclusiveEditSession('resetting the layers')) return;
   projectStore.layers.layers.forEach((l) => {
     const layer = layerManager.getLayerOptional(l.id);
     if (layer) {
@@ -161,6 +168,8 @@ export const removeLayerFromUser = async (layerId: string, options?: RemoveLayer
   await removeLayersFromUser([layerId], options);
 };
 export const removeLayersFromUser = async (layerIds?: string[], options?: RemoveLayerOptions) => {
+  // removing the layer an edit is floating over leaves that edit with nowhere to be written back to.
+  if (refuseIfExclusiveEditSession('removing a layer')) return;
   const targets = getOperationTargetLayerIds(layerIds, { order: 'desc' });
   if (targets.length === 0) {
     logUserWarn('No layer selected for removal.', { label: LOG_LABEL });
@@ -189,6 +198,7 @@ export const removeLayersFromUser = async (layerIds?: string[], options?: Remove
 };
 
 export const clearLayersFromUser = async (layerIds?: string[]) => {
+  if (refuseIfExclusiveEditSession('clearing a layer')) return;
   const targets = getOperationTargetLayerIds(layerIds);
   if (targets.length === 0) {
     logUserWarn('No layer selected for clear.', { label: LOG_LABEL });
@@ -216,6 +226,9 @@ export const clearLayerFromUser = async (layerId: string) => {
 };
 
 export function clearLayer(layerId: string) {
+  // guarded at the mutation itself as well as at `clearLayersFromUser`, so a caller added later cannot
+  // wipe a layer a move is floating over - the move's commit would put the cleared pixels straight back.
+  if (refuseIfExclusiveEditSession('clearing a layer')) return;
   const layer = getLayer(layerId);
   layer.commitHistory(undefined, { context: { tool: 'clear' } });
   layer.clear([0, 0, 0, 0]);
@@ -269,6 +282,7 @@ export const flipLayers = (
     flipY?: boolean;
   }
 ) => {
+  if (refuseIfExclusiveEditSession('flipping a layer')) return;
   const targets = getOperationTargetLayerIds(layerIds);
   if (targets.length === 0) {
     logUserWarn('No layer selected for flip.', { label: LOG_LABEL });
@@ -283,6 +297,7 @@ export const flipLayers = (
 };
 
 export const flipAllLayer = (options?: { flipX?: boolean; flipY?: boolean }) => {
+  if (refuseIfExclusiveEditSession('flipping the canvas')) return;
   allLayers().forEach((layer) => {
     const frascoLayer = getLayer(layer.id);
     if (frascoLayer) FlipEffect.apply(frascoLayer, { ...options, context: { tool: 'fx', fxName: 'flip' } });
@@ -294,6 +309,7 @@ export const flipAllLayer = (options?: { flipX?: boolean; flipY?: boolean }) => 
  * @params layerDirection - direction in Layer coordinate. (Use opposite direction if meaning canvas coordinate)
  */
 export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
+  if (refuseIfExclusiveEditSession('rotating the canvas')) return;
   const beforeSize = { width: projectStore.canvas.size.width, height: projectStore.canvas.size.height };
   const afterSize = { width: beforeSize.height, height: beforeSize.width };
   const layerIds = allLayers().map((l) => l.id);

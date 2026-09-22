@@ -199,10 +199,15 @@ export class OnCanvasFrameInteract {
     // comes to rest nothing else may edit what it describes. the frame itself can be a long-lived mode -
     // the canvas size frame is turned on and off from the side panel - but only the stretches under the
     // pointer hold anything, which is why the session is opened here rather than with the listeners.
+    //
+    // what is held is `startRect`, so that is what the claim reads. `pointerActive` goes down before
+    // `onCommit` runs - in `handlePointerUp` and in `finalizeInteraction` alike - and a claim resting on it
+    // would be given up with the write-back still to come. `resetState` clears `startRect` and closes this
+    // session in the same breath, after the commit.
     this.endSession?.();
     this.endSession = beginEditSession({
       label: this.options.sessionLabel ?? 'frame',
-      isExclusive: () => this.pointerActive && this.startRect !== undefined,
+      isExclusive: () => this.startRect !== undefined,
       interrupt: this.finalizeInteraction,
       finalize: this.finalizeInteraction,
     });

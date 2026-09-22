@@ -53,8 +53,12 @@ const LayerListPropsRow: Component = () => {
     setHistory();
   };
 
+  // opened from `onChange` rather than from the pointer coming down, because what the session stands for is
+  // the entry waiting on the timer, and only a change starts that timer. a press that ends without one -
+  // the slider's own pointercancel path does exactly that - would otherwise leave a session open with
+  // nothing left to settle it, and every guarded edit would be turned down from then on.
   const openOpacitySession = () => {
-    endSession?.();
+    if (endSession) return;
     endSession = beginEditSession({
       label: 'layer opacity',
       isExclusive: () => pendingAction !== null,
@@ -103,7 +107,6 @@ const LayerListPropsRow: Component = () => {
               layerId: layer.id,
             });
             pendingAction.registerBefore(layer);
-            openOpacitySession();
             return true;
           }}
           onChange={(newValue) => {
@@ -114,6 +117,7 @@ const LayerListPropsRow: Component = () => {
               // 更新後の値を記録
               pendingAction?.registerAfter();
               setHistoryDebounced();
+              openOpacitySession();
             }
           }}
         />

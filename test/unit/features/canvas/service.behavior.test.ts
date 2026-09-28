@@ -34,7 +34,15 @@ vi.mock('~/features/canvas/transform/CanvasPositionCalculator', () => ({
   },
 }));
 
-import { adjustZoomToFit, centeringCanvas, isValidCanvasSize, setOffset, setRotation, setZoom } from '~/features/canvas/service';
+import {
+  adjustZoomToFit,
+  centeringCanvas,
+  centeringCanvasOffset,
+  isValidCanvasSize,
+  setOffset,
+  setRotation,
+  setZoom,
+} from '~/features/canvas/service';
 
 describe('features/canvas/service behavior', () => {
   const originalDocument = (globalThis as any).document;
@@ -115,6 +123,20 @@ describe('features/canvas/service behavior', () => {
     expect(interactStore.offsetOrigin.x).toBeCloseTo(90, 6);
     expect(interactStore.offsetOrigin.y).toBeCloseTo(115, 6);
     expect(interactStore.rotation).toBe(0);
+  });
+
+  it('centeringCanvasOffset centers the canvas without touching the rotation', () => {
+    elements['sections-between-area'] = {
+      getBoundingClientRect: () => ({ x: 10, y: 20, width: 500, height: 400 }),
+    };
+    elements['side-section-control-leftSide'] = { scrollWidth: 40 };
+    elements['bottom-bar'] = { scrollHeight: 12 };
+
+    expect(centeringCanvasOffset()).toBe(true);
+
+    expect(interactStore.offset).toEqual({ x: -40, y: 12 });
+    expect(interactStore.offsetOrigin).toEqual({ x: 210, y: 175 });
+    expect(interactStore.rotation).toBe(10);
   });
 
   it('centeringCanvas is no-op when target area is missing', () => {

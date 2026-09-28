@@ -4,7 +4,7 @@ import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './hud/CanvasControls';
 
 import { css } from '@acab/ecsstatic';
-import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
+import { adjustZoomToFit, centeringCanvas, centeringCanvasOffset } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { logSystemWarn } from '~/features/log/service';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
@@ -163,7 +163,8 @@ const CanvasArea: Component = () => {
   const onSideSectionSideChanged = (e: Events['window:sideSectionSideChanged']) => {
     // 座標変換キャッシュをクリア
     coordinateTransform.clearCache();
-    centeringCanvas();
+    // resizing a panel only moves the canvas back to the middle. the view rotation is the user's and stays.
+    centeringCanvasOffset();
   };
 
   onMount(() => {

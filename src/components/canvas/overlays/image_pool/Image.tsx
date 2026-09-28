@@ -84,7 +84,7 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
         };
       },
       {
-        keepAspect: 'shift',
+        keepAspect: projectStore.imagePool.state.preserveAspectRatio ? 'always' : 'shift',
         snapToPixel: false,
         allowInvert: true,
         sessionLabel: 'image transform',

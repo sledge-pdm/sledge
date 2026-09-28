@@ -105,6 +105,114 @@ describe('on-canvas frame interactions (browser)', () => {
     expect(hasExclusiveEditSession()).toBe(false);
   });
 
+  for (const orientation of [
+    { imageRotation: 0, rotation: 0, horizontalFlipped: false, verticalFlipped: false, zoom: 0.5 },
+    { imageRotation: 90, rotation: 0, horizontalFlipped: false, verticalFlipped: false, zoom: 1 },
+    { imageRotation: 30, rotation: 35, horizontalFlipped: true, verticalFlipped: false, zoom: 2 },
+    { imageRotation: -25, rotation: -70, horizontalFlipped: false, verticalFlipped: true, zoom: 0.75 },
+  ]) {
+    it.each(Object.keys(opposite))(`resizes %s with fixed opposite handle (${JSON.stringify(orientation)})`, (pos) => {
+      setInteractStore(orientation);
+      mountImage(orientation.imageRotation);
+      const start = center(handle(pos));
+      const fixed = center(handle(opposite[pos]));
+      const dx = pos.includes('e') ? 24 : pos.includes('w') ? -24 : 0;
+      const dy = pos.includes('s') ? 16 : pos.includes('n') ? -16 : 0;
+      const delta = frameDelta(dx, dy);
+      const end = { x: start.x + delta.x, y: start.y + delta.y };
+      pointer(handle(pos), 'pointerdown', start);
+      pointer(svg, 'pointermove', end);
+      pointer(svg, 'pointerup', end);
+      expectPoint(center(handle(pos)), end);
+      expectPoint(center(handle(opposite[pos])), fixed);
+      expect(entry().transform.scaleX * 120).toBeCloseTo(dx ? 144 : 120, 3);
+      expect(entry().transform.scaleY * 80).toBeCloseTo(dy ? 96 : 80, 3);
+      expect(historyManager.getUndoStack()).toHaveLength(1);
+      historyManager.undo();
+      expectPoint(center(handle(pos)), start);
+      historyManager.redo();
+      expectPoint(center(handle(pos)), end);
+    });
+  }
+
+  it('keeps a rotated corner anchored across inversion and back', () => {
+    setInteractStore({ rotation: 35, horizontalFlipped: true, zoom: 2 });
+    mountImage(30);
+    const start = center(handle('se')),
+      fixed = center(handle('nw'));
+    const delta = frameDelta(-160, 0);
+    const end = { x: start.x + delta.x, y: start.y + delta.y };
+    pointer(handle('se'), 'pointerdown', start);
+    pointer(svg, 'pointermove', end);
+    expect(entry().transform.flipX).toBe(true);
+    expect(entry().transform.flipY).toBe(false);
+    expectPoint(center(handle('sw')), end);
+    expectPoint(center(handle('ne')), fixed);
+    pointer(svg, 'pointermove', start);
+    pointer(svg, 'pointerup', start);
+    expect(entry().transform.flipX).toBe(false);
+    expectPoint(center(handle('se')), start);
+    expectPoint(center(handle('nw')), fixed);
+  });
+
+  it.each(['e', 'nw'])('preserves aspect and the opposite anchor while resizing %s with Shift', (pos) => {
+    mountImage(30);
+    const start = center(handle(pos)),
+      fixed = center(handle(opposite[pos]));
+    const delta = frameDelta(pos === 'e' ? 30 : -30, pos === 'e' ? 0 : -20);
+    const end = { x: start.x + delta.x, y: start.y + delta.y };
+    pointer(handle(pos), 'pointerdown', start);
+    pointer(svg, 'pointermove', end, { shiftKey: true });
+    pointer(svg, 'pointerup', end, { shiftKey: true });
+    expectPoint(center(handle(pos)), end);
+    expectPoint(center(handle(opposite[pos])), fixed);
+    expect(entry().transform.scaleX).toBeCloseTo(entry().transform.scaleY, 5);
+  });
+
+  it('applies the saved aspect setting on mount and flips only the dragged edge axis', () => {
+    mountImage(30, true);
+    const start = center(handle('e'));
+    const fixed = center(handle('w'));
+    const delta = frameDelta(-160, 0);
+    const end = { x: start.x + delta.x, y: start.y + delta.y };
+    pointer(handle('e'), 'pointerdown', start);
+    pointer(svg, 'pointermove', end);
+    pointer(svg, 'pointerup', end);
+    expect(entry().transform.flipX).toBe(true);
+    expect(entry().transform.flipY).toBe(false);
+    expect(entry().transform.scaleX).toBeCloseTo(entry().transform.scaleY, 5);
+    expectPoint(center(handle('w')), end);
+    expectPoint(center(handle('e')), fixed);
+  });
+
+  it('preserves the opposite corner when both dimensions invert', () => {
+    mountImage(30);
+    const start = center(handle('se'));
+    const fixed = center(handle('nw'));
+    const delta = frameDelta(-160, -100);
+    const end = { x: start.x + delta.x, y: start.y + delta.y };
+    pointer(handle('se'), 'pointerdown', start);
+    pointer(svg, 'pointermove', end);
+    pointer(svg, 'pointerup', end);
+    expect(entry().transform.flipX).toBe(true);
+    expect(entry().transform.flipY).toBe(true);
+    expectPoint(center(handle('nw')), end);
+    expectPoint(center(handle('se')), fixed);
+  });
+
+  it('keeps the opposite edge fixed when width reaches the minimum', () => {
+    mountImage(30);
+    const start = center(handle('w'));
+    const fixed = center(handle('e'));
+    const delta = frameDelta(119.8, 0);
+    const end = { x: start.x + delta.x, y: start.y + delta.y };
+    pointer(handle('w'), 'pointerdown', start);
+    pointer(svg, 'pointermove', end);
+    pointer(svg, 'pointerup', end);
+    expect(entry().transform.scaleX * 120).toBeCloseTo(1, 5);
+    expectPoint(center(handle('e')), fixed);
+  });
+
   it('commits capture loss once and ignores later hover or pointerup', () => {
     mountImage(30);
     const body = svg.querySelector('.drag-surface')!,

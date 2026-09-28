@@ -76,11 +76,13 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
    * 逆変換行列を取得
    */
   private computeInverseMatrix(): DOMMatrix {
+    // Validate the forward matrix first: it invalidates the inverse when any input changes.
+    const matrix = this.computeTransformMatrix();
     if (this.cachedInverse) {
       return this.cachedInverse;
     }
 
-    this.cachedInverse = this.computeTransformMatrix().inverse();
+    this.cachedInverse = matrix.inverse();
     return this.cachedInverse;
   }
 
@@ -142,11 +144,12 @@ export class UnifiedCoordinateTransform implements CoordinateTransform {
   }
 
   private computeNoZoomInverseMatrix(): DOMMatrix {
+    const matrix = this.computeNoZoomMatrix();
     if (this.cachedNoZoomInverse) {
       return this.cachedNoZoomInverse;
     }
 
-    this.cachedNoZoomInverse = this.computeNoZoomMatrix().inverse();
+    this.cachedNoZoomInverse = matrix.inverse();
     return this.cachedNoZoomInverse;
   }
   private applyMatrix(matrix: DOMMatrix, pos: { x: number; y: number }): { x: number; y: number } {

@@ -5,6 +5,7 @@ import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordina
 import { beginEditSession } from '~/features/edit_session';
 import { interactStore } from '~/stores/EditorStores';
 import { WindowPos } from '~/types/CoordinateTypes';
+import CanvasAreaInteract from '../CanvasAreaInteract';
 
 export interface HandleProps {
   x: string;
@@ -136,8 +137,6 @@ export class OnCanvasFrameInteract {
   private startRect: FrameRect | undefined;
   private startPointerCanvasX = 0;
   private startPointerCanvasY = 0;
-  private startPointerClientX = 0;
-  private startPointerClientY = 0;
   private readonly minSize = 1;
 
   private options: OnCanvasFrameInteractOptions;
@@ -157,23 +156,22 @@ export class OnCanvasFrameInteract {
   private handlePointerDown = (e: PointerEvent) => {
     // an operation holding the window has already committed whatever transform was under the pointer; a new
     // one must not start against the state it is reading.
-    if (isBusy()) return;
+    if (isBusy() || this.pointerActive) return;
     // 左クリック(通常: button===0) 以外は無視
-    if (e.button !== 0) return;
+    if (e.button !== 0 || e.pointerType === 'touch' || CanvasAreaInteract.isDraggable(e)) return;
     const target = e.target as HTMLElement;
     const handle = target.closest?.('.resize-handle') as HTMLElement | null;
     const dragSurface = target.closest?.('.drag-surface');
+    if (!handle && !dragSurface) return;
 
     const rect = this.getRect();
     if (!rect) return;
 
-    this.startPointerClientX = e.clientX;
-    this.startPointerClientY = e.clientY;
-    const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.from(e));
+    const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.create(e.clientX, e.clientY));
     this.startPointerCanvasX = cx;
     this.startPointerCanvasY = cy;
 
-    this.startRect = this.snapRectIfEnabled(rect);
+    this.startRect = this.snapRectIfEnabled({ ...rect });
     this.options.onStart?.(this.startRect);
 
     if (handle) {
@@ -214,11 +212,16 @@ export class OnCanvasFrameInteract {
   };
 
   private handlePointerMove = (e: PointerEvent) => {
+    if (!this.pointerActive || e.pointerId !== this.capturedPointerId) return;
+    if (e.buttons === 0) {
+      this.finalizeInteraction();
+      return;
+    }
     this.emitChangeByPointerEvent(e);
   };
 
   private handlePointerUp = (e: PointerEvent) => {
-    if (!this.pointerActive) return;
+    if (!this.pointerActive || e.pointerId !== this.capturedPointerId) return;
     this.emitChangeByPointerEvent(e);
     this.releasePointer(e);
     if (this.startRect) {
@@ -229,6 +232,7 @@ export class OnCanvasFrameInteract {
   };
 
   private handlePointerCancel = (e: PointerEvent) => {
+    if (!this.pointerActive || e.pointerId !== this.capturedPointerId) return;
     this.releasePointer(e);
     if (this.startRect) {
       // request revert to startRect on cancel
@@ -236,6 +240,12 @@ export class OnCanvasFrameInteract {
       this.options.onCancel?.(this.startRect, e);
     }
     this.resetState();
+  };
+
+  private handleLostPointerCapture = (e: PointerEvent) => {
+    if (this.pointerActive && e.pointerId === this.capturedPointerId) {
+      this.finalizeInteraction();
+    }
   };
 
   private releasePointer(e: PointerEvent) {
@@ -257,8 +267,6 @@ export class OnCanvasFrameInteract {
     this.startRect = undefined;
     this.startPointerCanvasX = 0;
     this.startPointerCanvasY = 0;
-    this.startPointerClientX = 0;
-    this.startPointerClientY = 0;
   }
 
   private emitChangeByPointerEvent = (e: PointerEvent) => {
@@ -267,7 +275,7 @@ export class OnCanvasFrameInteract {
       this.resetState();
       return;
     }
-    const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.from(e));
+    const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.create(e.clientX, e.clientY));
     const dx = cx - this.startPointerCanvasX;
     const dy = cy - this.startPointerCanvasY;
 
@@ -283,84 +291,58 @@ export class OnCanvasFrameInteract {
     }
 
     if (this.mode === 'resize') {
-      let { x, y, width, height } = this.startRect;
-      switch (this.capturedHandlePos) {
-        case 'e':
-          width = this.constrainSizeValue(this.startRect.width + dx);
-          break;
-        case 'w':
-          const rawWidth = this.startRect.width - dx;
-          width = this.constrainSizeValue(rawWidth);
-          if (this.shouldUpdateOffset(rawWidth)) x = this.startRect.x + dx;
-          break;
-        case 's':
-          height = this.constrainSizeValue(this.startRect.height + dy);
-          break;
-        case 'n':
-          const rawHeight = this.startRect.height - dy;
-          height = this.constrainSizeValue(rawHeight);
-          if (this.shouldUpdateOffset(rawHeight)) y = this.startRect.y + dy;
-          break;
-        case 'se':
-          width = this.constrainSizeValue(this.startRect.width + dx);
-          height = this.constrainSizeValue(this.startRect.height + dy);
-          break;
-        case 'ne':
-          width = this.constrainSizeValue(this.startRect.width + dx);
-          const rawHeightNE = this.startRect.height - dy;
-          height = this.constrainSizeValue(rawHeightNE);
-          if (this.shouldUpdateOffset(rawHeightNE)) y = this.startRect.y + dy;
-          break;
-        case 'sw':
-          const rawWidthSW = this.startRect.width - dx;
-          width = this.constrainSizeValue(rawWidthSW);
-          if (this.shouldUpdateOffset(rawWidthSW)) x = this.startRect.x + dx;
-          height = this.constrainSizeValue(this.startRect.height + dy);
-          break;
-        case 'nw':
-          const rawWidthNW = this.startRect.width - dx;
-          const rawHeightNW = this.startRect.height - dy;
-          width = this.constrainSizeValue(rawWidthNW);
-          if (this.shouldUpdateOffset(rawWidthNW)) x = this.startRect.x + dx;
-          height = this.constrainSizeValue(rawHeightNW);
-          if (this.shouldUpdateOffset(rawHeightNW)) y = this.startRect.y + dy;
-          break;
-      }
+      const start = this.startRect;
+      const angle = (start.rotation * Math.PI) / 180;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      // Canvas deltas must be projected onto the frame's own axes before resizing.
+      const localDX = cos * dx + sin * dy;
+      const localDY = -sin * dx + cos * dy;
+      const pos = this.capturedHandlePos!;
+      const axisX = pos.includes('e') ? 1 : pos.includes('w') ? -1 : 0;
+      const axisY = pos.includes('s') ? 1 : pos.includes('n') ? -1 : 0;
+      let width = axisX ? this.constrainSizeValue(start.width + axisX * localDX) : start.width;
+      let height = axisY ? this.constrainSizeValue(start.height + axisY * localDY) : start.height;
 
       const shouldKeepAspect = this.options.keepAspect === 'always' || (this.options.keepAspect === 'shift' && e.shiftKey);
       if (shouldKeepAspect) {
-        const aspect = this.startRect.width / this.startRect.height || 1;
-        if (['n', 's'].includes(this.capturedHandlePos || '')) {
-          width = this.constrainSizeValue(height * aspect);
-        } else if (['e', 'w'].includes(this.capturedHandlePos || '')) {
-          height = this.constrainSizeValue(width / aspect);
+        const aspect = start.width / start.height || 1;
+        // Preserve each dragged axis's sign. Crossing an edge flips only that axis.
+        let magnitudeW: number;
+        if (!axisX) {
+          magnitudeW = Math.abs(height) * aspect;
+        } else if (!axisY) {
+          magnitudeW = Math.abs(width);
         } else {
-          if (Math.abs(width) / Math.abs(height) > aspect) {
-            height = this.constrainSizeValue(((width >= 0 ? width : -width) / aspect) * (height >= 0 ? 1 : -1));
-          } else {
-            width = this.constrainSizeValue((height >= 0 ? height : -height) * aspect * (width >= 0 ? 1 : -1));
-          }
+          magnitudeW = Math.max(Math.abs(width), Math.abs(height) * aspect);
         }
-        if (this.capturedHandlePos?.includes('w')) {
-          x = this.startRect.x + (this.startRect.width - width);
-        }
-        if (this.capturedHandlePos?.includes('n')) {
-          y = this.startRect.y + (this.startRect.height - height);
-        }
+        magnitudeW = Math.max(magnitudeW, this.minSize, this.minSize * aspect);
+        width = magnitudeW * Math.sign(width);
+        height = (magnitudeW / aspect) * Math.sign(height);
       }
 
-      const next: FrameRect = this.snapRectIfEnabled({ x, y, width, height, rotation: this.startRect.rotation });
+      // Keep the opposite corner (or opposite edge midpoint) fixed in canvas space.
+      // Signed sizes let owners normalize inverted frames without moving their center.
+      const shiftX = (axisX * (width - start.width)) / 2;
+      const shiftY = (axisY * (height - start.height)) / 2;
+      const centerX = start.x + start.width / 2 + cos * shiftX - sin * shiftY;
+      const centerY = start.y + start.height / 2 + sin * shiftX + cos * shiftY;
+      const next: FrameRect = this.snapRectIfEnabled({
+        x: centerX - width / 2,
+        y: centerY - height / 2,
+        width,
+        height,
+        rotation: start.rotation,
+      });
       this.options.onChange?.(next, this.startRect);
     }
 
     if (this.mode === 'rotate') {
-      const svgRect = this.frameRoot.getBoundingClientRect();
-      if (!svgRect) return;
-      const rectCenterX = (svgRect.left + svgRect.right) / 2;
-      const rectCenterY = (svgRect.top + svgRect.bottom) / 2;
+      const rectCenterX = this.startRect.x + this.startRect.width / 2;
+      const rectCenterY = this.startRect.y + this.startRect.height / 2;
 
-      const startAngle = Math.atan2(this.startPointerClientY - rectCenterY, this.startPointerClientX - rectCenterX);
-      const currentAngle = Math.atan2(e.clientY - rectCenterY, e.clientX - rectCenterX);
+      const startAngle = Math.atan2(this.startPointerCanvasY - rectCenterY, this.startPointerCanvasX - rectCenterX);
+      const currentAngle = Math.atan2(cy - rectCenterY, cx - rectCenterX);
 
       const deltaAngle = (currentAngle - startAngle) * (180 / Math.PI);
       let newRotation = this.startRect.rotation + deltaAngle;
@@ -379,13 +361,6 @@ export class OnCanvasFrameInteract {
       return size;
     } else {
       return Math.max(this.minSize, size);
-    }
-  }
-  private shouldUpdateOffset(calculatedSize: number): boolean {
-    if (this.options.allowInvert) {
-      return Math.abs(calculatedSize) >= this.minSize;
-    } else {
-      return calculatedSize >= this.minSize;
     }
   }
 
@@ -422,17 +397,16 @@ export class OnCanvasFrameInteract {
     this.frameRoot.addEventListener('pointermove', this.handlePointerMove as EventListener);
     this.frameRoot.addEventListener('pointerup', this.handlePointerUp as EventListener);
     this.frameRoot.addEventListener('pointercancel', this.handlePointerCancel as EventListener);
+    this.frameRoot.addEventListener('lostpointercapture', this.handleLostPointerCapture as EventListener);
   }
 
   public removeInteractListeners() {
-    // a gesture still under the pointer when the listeners go is one nothing can end any more, so its
-    // session must not be left open on its behalf.
-    this.endSession?.();
-    this.endSession = undefined;
+    this.finalizeInteraction();
     this.frameRoot.removeEventListener('pointerdown', this.handlePointerDown as EventListener);
     this.frameRoot.removeEventListener('pointermove', this.handlePointerMove as EventListener);
     this.frameRoot.removeEventListener('pointerup', this.handlePointerUp as EventListener);
     this.frameRoot.removeEventListener('pointercancel', this.handlePointerCancel as EventListener);
+    this.frameRoot.removeEventListener('lostpointercapture', this.handleLostPointerCapture as EventListener);
   }
 
   private snapRectIfEnabled(r: FrameRect): FrameRect {

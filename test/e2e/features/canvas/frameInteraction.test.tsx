@@ -135,6 +135,27 @@ describe('on-canvas frame interactions (browser)', () => {
     });
   }
 
+  it.each([
+    { horizontalFlipped: false, verticalFlipped: false },
+    { horizontalFlipped: true, verticalFlipped: false },
+    { horizontalFlipped: false, verticalFlipped: true },
+    { horizontalFlipped: true, verticalFlipped: true },
+  ])('rotates toward the pointer with %j', (flips) => {
+    setInteractStore({ ...flips, rotation: 35, zoom: 2 });
+    mountImage(20);
+    const start = center(handle('r'));
+    const pivot = center(svg.querySelector('.drag-surface')!);
+    const rad = Math.PI / 6;
+    const dx = start.x - pivot.x,
+      dy = start.y - pivot.y;
+    const end = { x: pivot.x + dx * Math.cos(rad) - dy * Math.sin(rad), y: pivot.y + dx * Math.sin(rad) + dy * Math.cos(rad) };
+    pointer(handle('r'), 'pointerdown', start);
+    pointer(svg, 'pointermove', end);
+    pointer(svg, 'pointerup', end);
+    expectPoint(center(handle('r')), end);
+    expect(entry().transform.rotation).toBeCloseTo(20 + (flips.horizontalFlipped !== flips.verticalFlipped ? -30 : 30), 3);
+  });
+
   it('keeps a rotated corner anchored across inversion and back', () => {
     setInteractStore({ rotation: 35, horizontalFlipped: true, zoom: 2 });
     mountImage(30);

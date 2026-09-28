@@ -137,8 +137,6 @@ export class OnCanvasFrameInteract {
   private startRect: FrameRect | undefined;
   private startPointerCanvasX = 0;
   private startPointerCanvasY = 0;
-  private startPointerClientX = 0;
-  private startPointerClientY = 0;
   private readonly minSize = 1;
 
   private options: OnCanvasFrameInteractOptions;
@@ -169,8 +167,6 @@ export class OnCanvasFrameInteract {
     const rect = this.getRect();
     if (!rect) return;
 
-    this.startPointerClientX = e.clientX;
-    this.startPointerClientY = e.clientY;
     const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.create(e.clientX, e.clientY));
     this.startPointerCanvasX = cx;
     this.startPointerCanvasY = cy;
@@ -271,8 +267,6 @@ export class OnCanvasFrameInteract {
     this.startRect = undefined;
     this.startPointerCanvasX = 0;
     this.startPointerCanvasY = 0;
-    this.startPointerClientX = 0;
-    this.startPointerClientY = 0;
   }
 
   private emitChangeByPointerEvent = (e: PointerEvent) => {
@@ -344,13 +338,11 @@ export class OnCanvasFrameInteract {
     }
 
     if (this.mode === 'rotate') {
-      const svgRect = this.frameRoot.getBoundingClientRect();
-      if (!svgRect) return;
-      const rectCenterX = (svgRect.left + svgRect.right) / 2;
-      const rectCenterY = (svgRect.top + svgRect.bottom) / 2;
+      const rectCenterX = this.startRect.x + this.startRect.width / 2;
+      const rectCenterY = this.startRect.y + this.startRect.height / 2;
 
-      const startAngle = Math.atan2(this.startPointerClientY - rectCenterY, this.startPointerClientX - rectCenterX);
-      const currentAngle = Math.atan2(e.clientY - rectCenterY, e.clientX - rectCenterX);
+      const startAngle = Math.atan2(this.startPointerCanvasY - rectCenterY, this.startPointerCanvasX - rectCenterX);
+      const currentAngle = Math.atan2(cy - rectCenterY, cx - rectCenterX);
 
       const deltaAngle = (currentAngle - startAngle) * (180 / Math.PI);
       let newRotation = this.startRect.rotation + deltaAngle;

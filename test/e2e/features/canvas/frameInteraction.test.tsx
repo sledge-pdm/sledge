@@ -3,6 +3,7 @@ import { render } from 'solid-js/web';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CanvasAreaInteract from '~/components/canvas/CanvasAreaInteract';
 import Image from '~/components/canvas/overlays/image_pool/Image';
+import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { hasExclusiveEditSession } from '~/features/edit_session';
 import { historyManager } from '~/features/history';
@@ -10,6 +11,7 @@ import { selectionManager } from '~/features/selection/SelectionManager';
 import { defaultInteractStore } from '~/stores/editor/InteractStore';
 import { interactStore, setInteractStore, setToolStore } from '~/stores/EditorStores';
 import { projectStore, setProjectStore } from '~/stores/RuntimeProjectStore';
+import { CanvasPos } from '~/types/CoordinateTypes';
 
 type Point = { x: number; y: number };
 const initialInteract = structuredClone(defaultInteractStore);
@@ -311,5 +313,28 @@ describe('on-canvas frame interactions (browser)', () => {
     dispose = undefined;
     expect(hasExclusiveEditSession()).toBe(false);
     expect(historyManager.getUndoStack()).toHaveLength(1);
+  });
+
+  it.each([
+    { rotation: 0, horizontalFlipped: true, verticalFlipped: false },
+    { rotation: 0, horizontalFlipped: false, verticalFlipped: true },
+    { rotation: 45, horizontalFlipped: true, verticalFlipped: false },
+  ])('keeps canvas resize handles on logical corners after changing orientation: %j', (orientation) => {
+    setInteractStore('zoom', 0.5);
+    dispose = render(() => <CanvasResizeFrame />, area);
+    svg = area.querySelector('svg')!;
+    captureForDispatchedEvents();
+    setInteractStore(orientation);
+    const logicalSE = coordinateTransform.canvasToWindow(CanvasPos.create(500, 400));
+    expectPoint(center(handle('se')), logicalSE);
+    const fixed = center(handle('nw'));
+    const logicalEnd = coordinateTransform.canvasToWindow(CanvasPos.create(560, 440));
+    pointer(handle('se'), 'pointerdown', logicalSE);
+    pointer(svg, 'pointermove', logicalEnd);
+    pointer(svg, 'pointerup', logicalEnd);
+    expectPoint(center(handle('se')), logicalEnd);
+    expectPoint(center(handle('nw')), fixed);
+    expect(interactStore.canvasSizeFrameSize).toEqual({ width: 560, height: 440 });
+    expect(interactStore.canvasSizeFrameOffset).toEqual({ x: 0, y: 0 });
   });
 });

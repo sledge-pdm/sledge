@@ -1,35 +1,28 @@
-import { Size2D, Vec2 } from '@sledge-pdm/core';
 import { fonts } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
-import { setInteractStore } from '~/stores/EditorStores';
+import { interactStore, setInteractStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
-import { CanvasPos } from '~/types/CoordinateTypes';
 
 export const CanvasResizeFrame: Component = () => {
   const [rect, setRect] = createSignal<FrameRect | undefined>();
-  const [start, setStart] = createSignal<Vec2 | undefined>();
-  const [size, setSize] = createSignal<Size2D | undefined>();
 
-  const screenBox = createMemo(() => {
+  const screenFrame = createMemo(() => {
     const r = rect();
     if (!r) return undefined;
-    const topLeft = coordinateTransform.canvasToWindowForOverlay(CanvasPos.create(r.x, r.y));
-    const bottomRight = coordinateTransform.canvasToWindowForOverlay(CanvasPos.create(r.x + r.width, r.y + r.height));
-
+    const zoom = interactStore.zoom;
+    // Apply the same orientation as the canvas, so handle labels keep their logical sides.
+    // Bake zoom into SVG dimensions to keep handles and strokes a constant screen size.
+    const matrix = coordinateTransform
+      .getTransformMatrix()
+      .translate(r.x, r.y)
+      .scale(1 / zoom);
     return {
-      start: { x: Math.min(topLeft.x, bottomRight.x), y: Math.min(topLeft.y, bottomRight.y) },
-      size: { width: Math.abs(bottomRight.x - topLeft.x), height: Math.abs(bottomRight.y - topLeft.y) },
+      width: r.width * zoom,
+      height: r.height * zoom,
+      transform: matrix.toString(),
     };
-  });
-
-  createEffect(() => {
-    const box = screenBox();
-    if (box) {
-      setStart(box.start);
-      setSize(box.size);
-    }
   });
 
   let svgEl: SVGSVGElement | undefined;
@@ -114,7 +107,7 @@ export const CanvasResizeFrame: Component = () => {
 
   return (
     <>
-      <Show when={start() !== undefined && size() !== undefined}>
+      <Show when={screenFrame()}>
         <svg
           ref={(el) => {
             svgEl = el as SVGSVGElement;
@@ -124,10 +117,12 @@ export const CanvasResizeFrame: Component = () => {
           xmlns='http://www.w3.org/2000/svg'
           style={{
             position: 'absolute',
-            left: `${start()!.x}px`,
-            top: `${start()!.y}px`,
-            width: `${size()!.width}px`,
-            height: `${size()!.height}px`,
+            left: '0px',
+            top: '0px',
+            width: `${screenFrame()!.width}px`,
+            height: `${screenFrame()!.height}px`,
+            transform: screenFrame()!.transform,
+            'transform-origin': '0 0',
             margin: 0,
             padding: 0,
             'image-rendering': 'pixelated',

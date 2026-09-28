@@ -151,7 +151,7 @@ export const getReferencedZoom = (length?: number) => {
   return referenceLength() / length;
 };
 
-export const adjustZoomToFit = (width?: number, height?: number) => {
+export const fitCanvasInVisibleArea = (width?: number, height?: number) => {
   width = width ?? projectStore.canvas.size.width;
   height = height ?? projectStore.canvas.size.height;
   if (!width || !height) return;

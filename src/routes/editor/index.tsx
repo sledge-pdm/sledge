@@ -9,7 +9,7 @@ import ColorSelectionDialogHost from '~/components/global/dialog/color_selection
 import OnscreenControl from '~/components/global/onscreen_control/OnscreenControl';
 import SideSectionControls from '~/components/section/SideSectionControls';
 import { isBusy } from '~/features/busy';
-import { adjustZoomToFit } from '~/features/canvas';
+import { fitCanvasInVisibleArea } from '~/features/canvas';
 import { addImagesFromFiles, addImagesFromLocal } from '~/features/image_pool';
 import ClipboardListener from '~/features/io/clipboard/ClipboardListener';
 import { loadGlobalConfig } from '~/features/io/config/load';
@@ -153,7 +153,7 @@ export default function Editor() {
     try {
       const isOK = await loadProject(editorState);
       if (isOK) {
-        adjustZoomToFit();
+        fitCanvasInVisibleArea();
       }
     } catch (e) {
       unlisten();

@@ -5,7 +5,7 @@ import CanvasControlMenu from '~/components/global/title_bar/CanvasControlMenu';
 import { TopMenuBarItem, TopMenuBarItemProps } from '~/components/global/title_bar/TopMenuBarItem';
 import { SECTION_TAB_CONTROLS } from '~/config/SectionTabConfig';
 import { isBusy } from '~/features/busy';
-import { adjustZoomToFit } from '~/features/canvas';
+import { fitCanvasInVisibleArea } from '~/features/canvas';
 import { isTabControlVisible, toggleTabControlVisibility } from '~/features/config/TabControlController';
 import { clipboardCopy, clipboardCut, clipboardPaste } from '~/features/io/clipboard/ClipboardActions';
 import { tryGetImageFromClipboard } from '~/features/io/clipboard/ClipboardUtils';
@@ -152,7 +152,7 @@ Unsaved changes will be discarded!`);
                       }
                       const result = await ProjectLoader.fromPath({ path: normalizeJoin(loc.path, loc.name) }).load();
                       if (result.ok) {
-                        adjustZoomToFit();
+                        fitCanvasInVisibleArea();
                       } else {
                         await dialog.message(`Failed to reload project. (load failed)\n${result.error ?? 'unknown error'}`);
                         return;

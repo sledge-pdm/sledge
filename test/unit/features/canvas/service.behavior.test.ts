@@ -35,9 +35,9 @@ vi.mock('~/features/canvas/transform/CanvasPositionCalculator', () => ({
 }));
 
 import {
-  adjustZoomToFit,
   centeringCanvas,
   centeringCanvasOffset,
+  fitCanvasInVisibleArea,
   isValidCanvasSize,
   setOffset,
   setRotation,
@@ -108,14 +108,14 @@ describe('features/canvas/service behavior', () => {
     expect(interactStore.rotation).toBe(-179);
   });
 
-  it('adjustZoomToFit + centeringCanvas update zoom/origin/offset from layout elements', () => {
+  it('fitCanvasInVisibleArea + centeringCanvas update zoom/origin/offset from layout elements', () => {
     elements['sections-between-area'] = {
       getBoundingClientRect: () => ({ x: 10, y: 20, width: 500, height: 400 }),
     };
     elements['side-section-control-leftSide'] = { scrollWidth: 40 };
     elements['bottom-bar'] = { scrollHeight: 12 };
 
-    adjustZoomToFit(100, 50);
+    fitCanvasInVisibleArea(100, 50);
 
     expect(interactStore.initialZoom).toBeCloseTo(3.4, 6);
     expect(interactStore.zoom).toBeCloseTo(3.4, 6);
@@ -153,9 +153,9 @@ describe('features/canvas/service behavior', () => {
     expect(interactStore.rotation).toBe(before.rotation);
   });
 
-  it('adjustZoomToFit returns early when width or height is zero', () => {
-    adjustZoomToFit(0, 100);
-    adjustZoomToFit(100, 0);
+  it('fitCanvasInVisibleArea returns early when width or height is zero', () => {
+    fitCanvasInVisibleArea(0, 100);
+    fitCanvasInVisibleArea(100, 0);
 
     expect(interactStore.initialZoom).toBe(1);
     expect(interactStore.zoom).toBe(1);

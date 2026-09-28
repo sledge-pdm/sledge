@@ -4,7 +4,7 @@ import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-d
 import { color, Slider } from '@sledge-pdm/ui';
 import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { SectionTab, SectionTabControl } from '~/config/SectionTabConfig';
-import { adjustZoomToFit, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
+import { fitCanvasInVisibleArea, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { toggleTabContent } from '~/features/config/TabContentController';
 import { moveTabControl } from '~/features/config/TabControlController';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
@@ -267,7 +267,7 @@ const SideSectionControls: Component<Props> = (props) => {
                   zoomTowardAreaCenter(v);
                 }}
                 onDoubleClick={() => {
-                  adjustZoomToFit();
+                  fitCanvasInVisibleArea();
                 }}
               />
             </div>

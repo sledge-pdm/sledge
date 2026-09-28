@@ -1,8 +1,8 @@
-﻿// Layer domain service - Stateful layer operations with external dependencies
+// Layer domain service - Stateful layer operations with external dependencies
 
 import { BaseLayerColorMode, HistoryContext, Layer, LayerType } from '@sledge-pdm/core';
 import { BlendMode, FlipEffect, Rotate90Effect } from '@sledge-pdm/frasco';
-import { adjustZoomToFit } from '~/features/canvas';
+import { fitCanvasInVisibleArea } from '~/features/canvas';
 import { refuseIfExclusiveEditSession } from '~/features/edit_session';
 import { doCommands, registerCommandsHistory } from '~/features/history';
 import { CanvasSizeCommand, layerMergeSnippet } from '~/features/history/commands';
@@ -161,7 +161,7 @@ export const resetAllLayers = () => {
   });
   updateFrascoCanvas(`Reset all layers`);
 
-  adjustZoomToFit();
+  fitCanvasInVisibleArea();
 };
 
 export const removeLayerFromUser = async (layerId: string, options?: RemoveLayerOptions) => {
@@ -334,7 +334,7 @@ export const rotateAllLayer = (layerDirection: 'cw' | 'ccw') => {
 
   setProjectStore('canvas', 'size', afterSize);
   selectionManager.resize(afterSize);
-  adjustZoomToFit();
+  fitCanvasInVisibleArea();
 
   command.registerAfter();
   const context: HistoryContext = {

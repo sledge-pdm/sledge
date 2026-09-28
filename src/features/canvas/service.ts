@@ -165,18 +165,12 @@ export const fitCanvasInVisibleArea = (width?: number, height?: number) => {
   centeringCanvas();
 };
 
-export const centeringCanvas = () => {
-  if (!centeringCanvasOffset()) return;
-  setRotation(0);
-};
-
 // moves the canvas to the middle of the area between the side sections, leaving zoom and rotation alone.
 // the view rotates around the canvas center, so the canvas stays centered at any rotation.
-// returns false when the area is not in the document.
-export const centeringCanvasOffset = (): boolean => {
+export const centeringCanvas = () => {
   const canvasSize = projectStore.canvas.size;
   const sectionBetweenArea = document.getElementById('sections-between-area');
-  if (!sectionBetweenArea) return false;
+  if (!sectionBetweenArea) return;
   const areaBound = sectionBetweenArea.getBoundingClientRect();
   const zoom = interactStore.zoom;
 
@@ -190,7 +184,6 @@ export const centeringCanvasOffset = (): boolean => {
     x: areaBound.x + areaBound.width / 2 - (canvasSize.width * zoom) / 2,
     y: areaBound.height / 2 - (canvasSize.height * zoom) / 2,
   });
-  return true;
 };
 
 export const setZoom = (zoom: number): boolean => {

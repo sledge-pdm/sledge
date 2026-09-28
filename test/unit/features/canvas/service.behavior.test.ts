@@ -34,7 +34,7 @@ vi.mock('~/features/canvas/transform/CanvasPositionCalculator', () => ({
   },
 }));
 
-import { adjustZoomToFit, centeringCanvas, isValidCanvasSize, setOffset, setRotation, setZoom } from '~/features/canvas/service';
+import { centeringCanvas, fitCanvasInVisibleArea, isValidCanvasSize, setOffset, setRotation, setZoom } from '~/features/canvas/service';
 
 describe('features/canvas/service behavior', () => {
   const originalDocument = (globalThis as any).document;
@@ -100,21 +100,50 @@ describe('features/canvas/service behavior', () => {
     expect(interactStore.rotation).toBe(-179);
   });
 
-  it('adjustZoomToFit + centeringCanvas update zoom/origin/offset from layout elements', () => {
+  it('fitCanvasInVisibleArea + centeringCanvas update zoom/origin/offset from layout elements', () => {
     elements['sections-between-area'] = {
       getBoundingClientRect: () => ({ x: 10, y: 20, width: 500, height: 400 }),
     };
     elements['side-section-control-leftSide'] = { scrollWidth: 40 };
     elements['bottom-bar'] = { scrollHeight: 12 };
+    setInteractStore('rotation', 0);
 
-    adjustZoomToFit(100, 50);
+    fitCanvasInVisibleArea(100, 50);
 
     expect(interactStore.initialZoom).toBeCloseTo(3.4, 6);
     expect(interactStore.zoom).toBeCloseTo(3.4, 6);
     expect(interactStore.offset).toEqual({ x: -40, y: 12 });
     expect(interactStore.offsetOrigin.x).toBeCloseTo(90, 6);
     expect(interactStore.offsetOrigin.y).toBeCloseTo(115, 6);
-    expect(interactStore.rotation).toBe(0);
+  });
+
+  it('fitCanvasInVisibleArea fits the rotated canvas and keeps the zoom reference and the rotation', () => {
+    elements['sections-between-area'] = {
+      getBoundingClientRect: () => ({ x: 10, y: 20, width: 500, height: 400 }),
+    };
+    setInteractStore('rotation', 45);
+
+    fitCanvasInVisibleArea(100, 50);
+
+    // at 45° the 100x50 canvas is shown as a (100 + 50) / √2 square
+    const shownLongerLength = 150 * Math.SQRT1_2;
+    expect(interactStore.initialZoom).toBeCloseTo(3.4, 6);
+    expect(interactStore.zoom).toBeCloseTo(340 / shownLongerLength, 6);
+    expect(interactStore.rotation).toBe(45);
+  });
+
+  it('centeringCanvas centers the canvas without touching the rotation', () => {
+    elements['sections-between-area'] = {
+      getBoundingClientRect: () => ({ x: 10, y: 20, width: 500, height: 400 }),
+    };
+    elements['side-section-control-leftSide'] = { scrollWidth: 40 };
+    elements['bottom-bar'] = { scrollHeight: 12 };
+
+    centeringCanvas();
+
+    expect(interactStore.offset).toEqual({ x: -40, y: 12 });
+    expect(interactStore.offsetOrigin).toEqual({ x: 210, y: 175 });
+    expect(interactStore.rotation).toBe(10);
   });
 
   it('centeringCanvas is no-op when target area is missing', () => {
@@ -131,9 +160,9 @@ describe('features/canvas/service behavior', () => {
     expect(interactStore.rotation).toBe(before.rotation);
   });
 
-  it('adjustZoomToFit returns early when width or height is zero', () => {
-    adjustZoomToFit(0, 100);
-    adjustZoomToFit(100, 0);
+  it('fitCanvasInVisibleArea returns early when width or height is zero', () => {
+    fitCanvasInVisibleArea(0, 100);
+    fitCanvasInVisibleArea(100, 0);
 
     expect(interactStore.initialZoom).toBe(1);
     expect(interactStore.zoom).toBe(1);

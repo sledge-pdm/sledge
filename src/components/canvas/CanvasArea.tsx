@@ -4,7 +4,7 @@ import CanvasAreaInteract from './CanvasAreaInteract';
 import CanvasControls from './hud/CanvasControls';
 
 import { css } from '@acab/ecsstatic';
-import { adjustZoomToFit, centeringCanvas } from '~/features/canvas';
+import { centeringCanvas, fitCanvasInVisibleArea } from '~/features/canvas';
 import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { logSystemWarn } from '~/features/log/service';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
@@ -177,13 +177,13 @@ const CanvasArea: Component = () => {
         centeringCanvas();
       }
       if (flag === 'offset_zoom') {
-        adjustZoomToFit();
+        fitCanvasInVisibleArea();
       }
     });
 
     eventBus.on('window:sideSectionSideChanged', onSideSectionSideChanged);
 
-    adjustZoomToFit();
+    fitCanvasInVisibleArea();
 
     interact = new CanvasAreaInteract(canvasStack, wrapper);
     interact.setInteractListeners();

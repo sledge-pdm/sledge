@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_TAB_CONTROLS_BY_SIDE } from '~/config/SectionTabConfig';
-import { defaultAppearanceStore, sanitizeAppearanceStore } from '~/stores/editor/AppearanceStore';
+import { defaultAppearanceStore, sanitizeAppearanceStore, SIDE_SECTION_WIDTH_LIMITS } from '~/stores/editor/AppearanceStore';
 
 describe('sanitizeAppearanceStore', () => {
   it('returns defaults when state is undefined', () => {
@@ -15,6 +15,7 @@ describe('sanitizeAppearanceStore', () => {
           explorer: true,
         },
         content: DEFAULT_TAB_CONTROLS_BY_SIDE.leftSide[0],
+        width: SIDE_SECTION_WIDTH_LIMITS.leftSide.min,
       },
       rightSide: {
         controls: DEFAULT_TAB_CONTROLS_BY_SIDE.rightSide,
@@ -24,6 +25,7 @@ describe('sanitizeAppearanceStore', () => {
           history: true,
         },
         content: DEFAULT_TAB_CONTROLS_BY_SIDE.rightSide[0],
+        width: SIDE_SECTION_WIDTH_LIMITS.rightSide.min,
       },
       ruler: defaultAppearanceStore.ruler,
       onscreenControl: defaultAppearanceStore.onscreenControl,
@@ -64,6 +66,7 @@ describe('sanitizeAppearanceStore', () => {
 
   it('accepts controls defined as visibility map object', () => {
     const sanitized = sanitizeAppearanceStore({
+      // @ts-expect-error missing width (state saved before widths were stored)
       leftSide: {
         // legacy-like object form
         controls: {
@@ -114,6 +117,27 @@ describe('sanitizeAppearanceStore', () => {
 
     expect(sanitized.leftSide.content).toBe('editor');
     expect(sanitized.rightSide.content).toBe('project');
+  });
+
+  it("keeps stored panel widths, clamped to each side's limits", () => {
+    const sanitized = sanitizeAppearanceStore({
+      leftSide: { controls: ['editor'], controlsVisibility: {}, width: 420 },
+      rightSide: { controls: ['project'], controlsVisibility: {}, width: 9999 },
+    });
+
+    expect(sanitized.leftSide.width).toBe(420);
+    expect(sanitized.rightSide.width).toBe(SIDE_SECTION_WIDTH_LIMITS.rightSide.max);
+  });
+
+  it('falls back to the default width when the stored one is missing or not a number', () => {
+    const sanitized = sanitizeAppearanceStore({
+      // @ts-expect-error missing width (state saved before widths were stored)
+      leftSide: { controls: ['editor'], controlsVisibility: {} },
+      rightSide: { controls: ['project'], controlsVisibility: {}, width: 'wide' as any },
+    });
+
+    expect(sanitized.leftSide.width).toBe(defaultAppearanceStore.leftSide.width);
+    expect(sanitized.rightSide.width).toBe(defaultAppearanceStore.rightSide.width);
   });
 
   it('treats legacy shown=false as hidden (selectedTab undefined)', () => {

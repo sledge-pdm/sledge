@@ -20,7 +20,7 @@ vi.mock('~/routes/editor/loadError', async () => {
 
 vi.mock('~/features/canvas', () => ({
   changeCanvasSize: vi.fn(),
-  adjustZoomToFit: vi.fn(),
+  fitCanvasInVisibleArea: vi.fn(),
 }));
 
 vi.mock('~/features/layer', () => ({

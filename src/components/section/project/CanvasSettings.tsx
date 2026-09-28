@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { Component, createEffect, createSignal } from 'solid-js';
-import { adjustZoomToFit, centeringCanvas, changeCanvasSize, setRotation } from '~/features/canvas';
+import { centeringCanvas, changeCanvasSize, fitCanvasInVisibleArea, setRotation } from '~/features/canvas';
 import { logSystemInfo } from '~/features/log/service';
 
 import { Button, color, Dropdown, Icon } from '@sledge-pdm/ui';
@@ -113,7 +113,7 @@ const CanvasSettings: Component = () => {
     const result = changeCanvasSize(newSize, {
       register: true,
     });
-    if (result) adjustZoomToFit();
+    if (result) fitCanvasInVisibleArea();
   };
 
   const [isChangable, setIsChangable] = createSignal(false);
@@ -189,7 +189,7 @@ const CanvasSettings: Component = () => {
               if (interactStore.isCanvasSizeFrameMode) {
                 setInteractStore('horizontalFlipped', false);
                 setInteractStore('verticalFlipped', false);
-                adjustZoomToFit();
+                fitCanvasInVisibleArea();
                 selectionManager.clearAll();
               }
             }}
@@ -270,7 +270,7 @@ const CanvasSettings: Component = () => {
         <div class={actionsContainer}>
           <Button onClick={() => centeringCanvas()}>Center Canvas.</Button>
 
-          <Button onClick={() => adjustZoomToFit()} class={adjustZoomButtonStyle}>
+          <Button onClick={() => fitCanvasInVisibleArea()} class={adjustZoomButtonStyle}>
             Adjust zoom.
           </Button>
         </div>

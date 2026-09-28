@@ -151,20 +151,32 @@ export const getReferencedZoom = (length?: number) => {
   return referenceLength() / length;
 };
 
-export const adjustZoomToFit = (width?: number, height?: number) => {
+export const fitCanvasInVisibleArea = (width?: number, height?: number) => {
   width = width ?? projectStore.canvas.size.width;
   height = height ?? projectStore.canvas.size.height;
   if (!width || !height) return;
 
+  // the zoom reference (x1.00 and the zoom limits) comes from the unrotated canvas,
+  // so it does not depend on the angle the view happens to be at when fitting.
   const longerLength = width > height ? width : height;
   const referencedZoom = getReferencedZoom(longerLength);
   if (!referencedZoom) return;
 
+  // the zoom itself fits the canvas as it is shown. off the right angles its bounding box is larger than the canvas.
+  const rad = (interactStore.rotation * Math.PI) / 180;
+  const cos = Math.abs(Math.cos(rad));
+  const sin = Math.abs(Math.sin(rad));
+  const shownWidth = width * cos + height * sin;
+  const shownHeight = width * sin + height * cos;
+  const shownLongerLength = shownWidth > shownHeight ? shownWidth : shownHeight;
+
   setInteractStore('initialZoom', referencedZoom);
-  setZoom(referencedZoom);
+  setZoom(getReferencedZoom(shownLongerLength));
   centeringCanvas();
 };
 
+// moves the canvas to the middle of the area between the side sections, leaving zoom and rotation alone.
+// the view rotates around the canvas center, so the canvas stays centered at any rotation.
 export const centeringCanvas = () => {
   const canvasSize = projectStore.canvas.size;
   const sectionBetweenArea = document.getElementById('sections-between-area');
@@ -182,7 +194,6 @@ export const centeringCanvas = () => {
     x: areaBound.x + areaBound.width / 2 - (canvasSize.width * zoom) / 2,
     y: areaBound.height / 2 - (canvasSize.height * zoom) / 2,
   });
-  setRotation(0);
 };
 
 export const setZoom = (zoom: number): boolean => {

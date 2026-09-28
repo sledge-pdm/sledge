@@ -1,5 +1,5 @@
 import { FileLocation } from '@sledge-pdm/core';
-import { adjustZoomToFit } from '~/features/canvas';
+import { fitCanvasInVisibleArea } from '~/features/canvas';
 import { IMPORTABLE_FILE_EXTENSIONS, OPENABLE_FILE_EXTENSIONS } from '~/features/io/Extensions';
 import { logUserError, logUserWarn } from '~/features/log/service';
 import { globalConfig } from '~/stores/GlobalStores';
@@ -28,7 +28,7 @@ const getLoaderFromRequest = (request: InitialLoadRequest): ProjectLoader<any> =
 const loadInCurrentTab = async (request: InitialLoadRequest): Promise<boolean> => {
   const result = await getLoaderFromRequest(request).load();
   if (result.ok) {
-    adjustZoomToFit();
+    fitCanvasInVisibleArea();
     return true;
   }
   logUserError(`load failed.\n${result.error?.detail ?? 'unknown error'}`, { label: LOG_LABEL, persistent: true });

@@ -1,5 +1,5 @@
 import { gzipDeflate, HistoryContext, Size2D } from '@sledge-pdm/core';
-import { adjustZoomToFit } from '~/features/canvas';
+import { fitCanvasInVisibleArea } from '~/features/canvas';
 import { inflateLayerSnapshot, PackedLayerSnapshot } from '~/features/history/snapshot';
 import { allLayers } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
@@ -137,7 +137,7 @@ export class CanvasSizeCommand extends HistoryCommand {
 
   private applySize(size: Size2D) {
     setProjectStore('canvas', 'size', size);
-    adjustZoomToFit();
+    fitCanvasInVisibleArea();
     selectionManager.resize(size);
   }
 

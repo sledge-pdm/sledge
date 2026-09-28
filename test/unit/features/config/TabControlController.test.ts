@@ -9,7 +9,7 @@ vi.mock('~/features/io/editor/save', () => ({
 }));
 
 import {
-  getTabControl,
+  getTabControlDefinition,
   getTabControlSide,
   isTabControlVisible,
   moveTabControl,
@@ -42,7 +42,7 @@ describe('features/config/TabControlController', () => {
   });
 
   it('resolves tab control definition and side', () => {
-    expect(getTabControl('editor')?.defaultSide).toBe('leftSide');
+    expect(getTabControlDefinition('editor')?.defaultSide).toBe('leftSide');
     expect(getTabControlSide('editor')).toBe('leftSide');
     expect(getTabControlSide('project')).toBe('rightSide');
   });
@@ -52,8 +52,8 @@ describe('features/config/TabControlController', () => {
 
     moveTabControl('editor', 'rightSide', 1);
 
-    expect(appearanceStore.leftSide.controls).toEqual(['effects', 'explorer']);
-    expect(appearanceStore.rightSide.controls).toEqual(['project', 'editor', 'export', 'history']);
+    expect(appearanceStore.leftSide.controls).toEqual(['effects', 'spacer', 'explorer']);
+    expect(appearanceStore.rightSide.controls).toEqual(['project', 'editor', 'export', 'history', 'spacer']);
     expect(appearanceStore.leftSide.content).toBeUndefined();
     expect(appearanceStore.rightSide.content).toBe('editor');
     expect(appearanceStore.leftSide.controlsVisibility.editor).toBeUndefined();
@@ -64,11 +64,29 @@ describe('features/config/TabControlController', () => {
   it('reorders controls within same side and falls back to first visible content when needed', () => {
     setAppearanceStore('leftSide', 'content', 'project' as any);
 
-    moveTabControl('editor', 'leftSide', 2);
+    moveTabControl('editor', 'leftSide', 1);
 
-    expect(appearanceStore.leftSide.controls).toEqual(['effects', 'explorer', 'editor']);
+    expect(appearanceStore.leftSide.controls).toEqual(['effects', 'editor', 'spacer', 'explorer']);
     expect(appearanceStore.leftSide.content).toBe('effects');
     expect(mocks.saveEditorStateImmediate).toHaveBeenCalledTimes(1);
+  });
+
+  it('moves controls across the spacer in both directions', () => {
+    moveTabControl('editor', 'leftSide', 3);
+    expect(appearanceStore.leftSide.controls).toEqual(['effects', 'spacer', 'explorer', 'editor']);
+
+    moveTabControl('explorer', 'leftSide', 0);
+    expect(appearanceStore.leftSide.controls).toEqual(['explorer', 'effects', 'spacer', 'editor']);
+  });
+
+  it('never falls back to the spacer as the selected content', () => {
+    setAppearanceStore('leftSide', 'controls', ['editor', 'spacer', 'explorer']);
+    setAppearanceStore('leftSide', 'content', 'project' as any);
+
+    moveTabControl('editor', 'leftSide', 1);
+
+    expect(appearanceStore.leftSide.controls).toEqual(['spacer', 'editor', 'explorer']);
+    expect(appearanceStore.leftSide.content).toBe('editor');
   });
 
   it('toggles visibility for mounted controls', () => {
@@ -93,5 +111,13 @@ describe('features/config/TabControlController', () => {
     expect(appearanceStore.rightSide.controls).toEqual(['export', 'history', 'project']);
     expect(isTabControlVisible('project')).toBe(true);
     expect(mocks.saveEditorStateImmediate).toHaveBeenCalledTimes(1);
+  });
+
+  it('mounts a missing control on its default placement relative to the spacer', () => {
+    setAppearanceStore('rightSide', 'controls', ['export', 'spacer', 'history']);
+
+    toggleTabControlVisibility('project');
+
+    expect(appearanceStore.rightSide.controls).toEqual(['export', 'project', 'spacer', 'history']);
   });
 });

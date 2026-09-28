@@ -7,7 +7,6 @@ import Effects from '~/components/section/effects/Effects';
 import Explorer from '~/components/section/explorer/Explorer';
 import Export from '~/components/section/export/Export';
 import History from '~/components/section/history/History';
-import PerilousLayers from '~/components/section/perilous/PerilousLayers';
 import CanvasSettings from '~/components/section/project/CanvasSettings';
 import Project from '~/components/section/project/Project';
 import Snapshots from '~/components/section/project/Snapshots';
@@ -61,14 +60,6 @@ export const ExportTab: Component = () => {
   return (
     <>
       <Export />
-    </>
-  );
-};
-
-export const PerilousTab: Component = () => {
-  return (
-    <>
-      <PerilousLayers />
     </>
   );
 };

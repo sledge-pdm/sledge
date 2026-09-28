@@ -3,7 +3,7 @@ import { CleanupFn } from '@atlaskit/pragmatic-drag-and-drop/dist/types/internal
 import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { color, Slider } from '@sledge-pdm/ui';
 import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
-import { SectionTab, SectionTabControl } from '~/config/SectionTabConfig';
+import { isTabControl, SectionControlsItem, SectionTab, SectionTabControl } from '~/config/SectionTabConfig';
 import { fitCanvasInVisibleArea, getMaxZoom, getMinZoom, zoomTowardAreaCenter } from '~/features/canvas';
 import { toggleTabContent } from '~/features/config/TabContentController';
 import { moveTabControl } from '~/features/config/TabControlController';
@@ -58,6 +58,13 @@ const itemRoot = css`
   }
 `;
 
+// takes the free space as its own box, so the drop line right after it lands on the bottom group.
+const controlsSpacer = css`
+  display: flex;
+  width: 100%;
+  flex: 1;
+`;
+
 const label = css`
   font-family: ZFB09;
   font-size: 8px;
@@ -84,12 +91,6 @@ const zoomContainer = css`
   gap: 8px;
 `;
 
-const dangerTabContainer = css`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-`;
-
 const zoomLabelContainer = css`
   writing-mode: vertical-lr;
   vertical-align: middle;
@@ -107,7 +108,7 @@ const zoomSliderContainer = css`
 
 interface ItemProps {
   side: 'leftSide' | 'rightSide';
-  control: SectionTabControl | SectionTab; // accept non-control content for individual controls (e.g, "danger")
+  control: SectionTabControl | SectionTab;
   draggable?: boolean;
 }
 
@@ -141,15 +142,12 @@ const ControlItem: Component<ItemProps> = (props) => {
       class={itemRoot}
       ref={(el) => (itemEl = el)}
       data-control-id={props.draggable ? String(control) : undefined}
-      style={{ 'margin-top': control === 'danger' ? 'auto' : undefined, 'margin-bottom': control === 'danger' ? '0px' : undefined }}
       onClick={() => {
         if (props.draggable && isDragging()) return;
         toggleTabContent(side, control);
       }}
     >
-      <p class={selected() ? labelActive : label} style={{ color: control === 'danger' ? (selected() ? '#FF0000' : '#FF000090') : undefined }}>
-        {control}.
-      </p>
+      <p class={selected() ? labelActive : label}>{control}.</p>
     </div>
   );
 };
@@ -158,8 +156,8 @@ interface Props {
   side: 'leftSide' | 'rightSide';
 }
 
-const isControlVisible = (side: 'leftSide' | 'rightSide', control: SectionTabControl) =>
-  appearanceStore[side].controlsVisibility?.[control] !== false;
+const isControlVisible = (side: 'leftSide' | 'rightSide', item: SectionControlsItem) =>
+  !isTabControl(item) || appearanceStore[side].controlsVisibility?.[item] !== false;
 
 const visibleControlsBySide = (side: 'leftSide' | 'rightSide') => appearanceStore[side].controls.filter((control) => isControlVisible(side, control));
 
@@ -240,14 +238,18 @@ const SideSectionControls: Component<Props> = (props) => {
     >
       <div class={controlsList}>
         <div class={reorderArea} ref={(el) => (listEl = el)}>
-          <For each={visibleControlsBySide(props.side)}>{(control) => <ControlItem side={props.side} control={control} draggable={true} />}</For>
+          <For each={visibleControlsBySide(props.side)}>
+            {(item) =>
+              isTabControl(item) ? (
+                <ControlItem side={props.side} control={item} draggable={true} />
+              ) : (
+                // counted as a drop candidate so that a drop above or below it decides the group
+                <div class={controlsSpacer} data-control-id={item} />
+              )
+            }
+          </For>
         </div>
 
-        <Show when={props.side === 'leftSide'}>
-          <div class={dangerTabContainer}>
-            <ControlItem control='danger' side='leftSide' />
-          </div>
-        </Show>
         <Show when={props.side === 'rightSide'}>
           <div class={zoomContainer}>
             <p class={zoomLabelContainer}>x {(interactStore.zoom / interactStore.initialZoom).toFixed(2)}</p>

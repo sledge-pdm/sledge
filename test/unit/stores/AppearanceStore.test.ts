@@ -64,6 +64,35 @@ describe('sanitizeAppearanceStore', () => {
     expect(sanitized.rightSide.content).toBe('project');
   });
 
+  it('places a spacer by default placement when the stored controls have none', () => {
+    const sanitized = sanitizeAppearanceStore({
+      leftSide: { controls: ['explorer', 'editor', 'effects'], controlsVisibility: {}, width: 300 },
+      rightSide: { controls: ['history', 'project', 'export'], controlsVisibility: {}, width: 300 },
+    });
+
+    expect(sanitized.leftSide.controls).toEqual(['editor', 'effects', 'spacer', 'explorer']);
+    expect(sanitized.rightSide.controls).toEqual(['history', 'project', 'export', 'spacer']);
+  });
+
+  it('keeps the stored spacer position and one spacer per side', () => {
+    const sanitized = sanitizeAppearanceStore({
+      leftSide: { controls: ['spacer', 'editor', 'spacer', 'effects', 'explorer'], controlsVisibility: {}, content: 'editor', width: 300 },
+      rightSide: { controls: ['project', 'spacer', 'export', 'history'], controlsVisibility: {}, width: 300 },
+    });
+
+    expect(sanitized.leftSide.controls).toEqual(['spacer', 'editor', 'effects', 'explorer']);
+    expect(sanitized.rightSide.controls).toEqual(['project', 'spacer', 'export', 'history']);
+    expect(sanitized.leftSide.controlsVisibility).toEqual({ editor: true, effects: true, explorer: true });
+  });
+
+  it('never picks the spacer as content', () => {
+    const sanitized = sanitizeAppearanceStore({
+      leftSide: { controls: ['spacer', 'effects', 'editor', 'explorer'], controlsVisibility: {}, width: 300 },
+    } as any);
+
+    expect(sanitized.leftSide.content).toBe('effects');
+  });
+
   it('accepts controls defined as visibility map object', () => {
     const sanitized = sanitizeAppearanceStore({
       // @ts-expect-error missing width (state saved before widths were stored)

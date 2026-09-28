@@ -7,7 +7,6 @@ const ExplorerTab = lazy(() => import('~/config/SectionTabs').then((mod) => ({ d
 const ProjectTab = lazy(() => import('~/config/SectionTabs').then((mod) => ({ default: mod.ProjectTab })));
 const ExportTab = lazy(() => import('~/config/SectionTabs').then((mod) => ({ default: mod.ExportTab })));
 const HistoryTab = lazy(() => import('~/config/SectionTabs').then((mod) => ({ default: mod.HistoryTab })));
-const PerilousTab = lazy(() => import('~/config/SectionTabs').then((mod) => ({ default: mod.PerilousTab })));
 
 export const SECTION_TABS = [
   { id: SECTION_TAB_IDS[0], content: () => <EditorTab /> },
@@ -16,7 +15,6 @@ export const SECTION_TABS = [
   { id: SECTION_TAB_IDS[3], content: () => <ProjectTab /> },
   { id: SECTION_TAB_IDS[4], content: () => <ExportTab /> },
   { id: SECTION_TAB_IDS[5], content: () => <HistoryTab /> },
-  { id: SECTION_TAB_IDS[6], content: () => <PerilousTab /> },
 ] as const satisfies readonly {
   id: string;
   content: () => JSX.Element;

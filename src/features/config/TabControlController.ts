@@ -1,8 +1,15 @@
-import { SECTION_TAB_CONTROLS, SectionTabControlDefinition, type SectionSide, type SectionTabControl } from '~/config/SectionTabConfig';
+import {
+  insertControlAtDefaultPlacement,
+  isTabControl,
+  SECTION_TAB_CONTROLS,
+  SectionTabControlDefinition,
+  type SectionSide,
+  type SectionTabControl,
+} from '~/config/SectionTabConfig';
 import { saveEditorStateImmediate } from '~/features/io/editor/save';
 import { appearanceStore, setAppearanceStore } from '~/stores/EditorStores';
 
-export const getTabControl = (control: SectionTabControl): SectionTabControlDefinition | undefined =>
+export const getTabControlDefinition = (control: SectionTabControl): SectionTabControlDefinition | undefined =>
   SECTION_TAB_CONTROLS.find((c) => control === c.id);
 
 export const getTabControlSide = (control: SectionTabControl): SectionSide | undefined => {
@@ -50,7 +57,7 @@ export const moveTabControl = (control: SectionTabControl, targetSide: SectionSi
   } else if (targetSide === sourceSide && appearanceStore[sourceSide].content) {
     const nextSelection = nextTargetTabs.includes(appearanceStore[sourceSide].content as any)
       ? appearanceStore[sourceSide].content
-      : nextTargetTabs[0];
+      : nextTargetTabs.find(isTabControl);
     setAppearanceStore(sourceSide, 'content', nextSelection);
   }
 
@@ -65,7 +72,7 @@ export const isTabControlVisible = (control: SectionTabControl): boolean => {
 };
 
 export const toggleTabControlVisibility = (control: SectionTabControl) => {
-  const definition = getTabControl(control);
+  const definition = getTabControlDefinition(control);
   const currentSide = getTabControlSide(control);
   const targetSide = currentSide ?? definition?.defaultSide ?? 'leftSide';
   const currentlyVisible = currentSide ? isTabControlVisible(control) : false;
@@ -73,7 +80,7 @@ export const toggleTabControlVisibility = (control: SectionTabControl) => {
   if (!currentSide) {
     const currentControls = appearanceStore[targetSide].controls;
     if (!currentControls.includes(control)) {
-      setAppearanceStore(targetSide, 'controls', [...currentControls, control]);
+      setAppearanceStore(targetSide, 'controls', insertControlAtDefaultPlacement(currentControls, control));
     }
   }
 

@@ -186,8 +186,9 @@ export const centeringCanvas = () => {
 };
 
 export const setZoom = (zoom: number): boolean => {
-  if (zoom > 0 && zoom !== interactStore.zoom) {
-    zoom = Math.min(getMaxZoom(), Math.max(getMinZoom(), zoom));
+  if (!Number.isFinite(zoom) || zoom <= 0) return false;
+  zoom = clipZoom(zoom);
+  if (zoom !== interactStore.zoom) {
     setInteractStore('zoom', zoom);
     coordinateTransform.clearCache();
     return true;
@@ -222,29 +223,25 @@ export const setRotation = (rotation: number) => {
 };
 
 export function zoomTowardWindowPos(centerWindowPos: WindowPos, zoomNew: number) {
-  const zoomOld = interactStore.zoom;
-
   // ズーム前の座標系でキャンバス座標を計算
   const centerCanvasPos = coordinateTransform.windowToCanvas(centerWindowPos);
 
   // ズームを適用
-  const zoomChanged = setZoom(zoomNew);
+  if (!setZoom(zoomNew)) return false;
 
-  // ズーム中心を維持するための標準的な計算式
-  const dx = centerCanvasPos.x * (zoomOld - zoomNew);
-  const dy = centerCanvasPos.y * (zoomOld - zoomNew);
+  // Reproject the same canvas point using the applied (possibly clamped) zoom.
+  // Its screen displacement already includes the canvas rotation and flips.
+  const afterWindowPos = coordinateTransform.canvasToWindow(centerCanvasPos);
 
   setOffset({
-    x: interactStore.offset.x + dx,
-    y: interactStore.offset.y + dy,
+    x: interactStore.offset.x + centerWindowPos.x - afterWindowPos.x,
+    y: interactStore.offset.y + centerWindowPos.y - afterWindowPos.y,
   });
 
-  return zoomChanged;
+  return true;
 }
 
 export function zoomTowardAreaCenter(zoomNew: number) {
-  const zoomOld = interactStore.zoom;
-
   const betweenAreaCenter = document.getElementById('between-area-center');
   if (!betweenAreaCenter) {
     return;
@@ -257,23 +254,7 @@ export function zoomTowardAreaCenter(zoomNew: number) {
     betweenAreaCenterRect.top + betweenAreaCenterRect.height / 2
   );
 
-  // ズーム前の座標系でキャンバス座標を計算
-  const centerCanvasPos = coordinateTransform.windowToCanvas(centerWindowPos);
-
-  // ズームを適用
-  const zoomChanged = setZoom(zoomNew);
-
-  // ズーム中心を維持するための標準的な計算式
-  // ズーム変更によるオフセット調整
-  const dx = centerCanvasPos.x * (zoomOld - zoomNew);
-  const dy = centerCanvasPos.y * (zoomOld - zoomNew);
-
-  setOffset({
-    x: interactStore.offset.x + dx,
-    y: interactStore.offset.y + dy,
-  });
-
-  return zoomChanged;
+  return zoomTowardWindowPos(centerWindowPos, zoomNew);
 }
 
 export function rotateInAreaCenter(rotation: number) {

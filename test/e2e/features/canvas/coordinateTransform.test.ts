@@ -1,19 +1,22 @@
 ﻿import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
+import { coordinateTransform, UnifiedCoordinateTransform } from '~/features/canvas/transform/UnifiedCoordinateTransform';
 import { defaultInteractStore, InteractStore } from '~/stores/editor/InteractStore';
 import { setInteractStore } from '~/stores/EditorStores';
 import { setProjectStore } from '~/stores/RuntimeProjectStore';
+import { CanvasPos } from '~/types/CoordinateTypes';
 
+// createStore owns the default object; preserve a pristine snapshot for each case.
+const initialInteract = structuredClone(defaultInteractStore);
 const buildInteract = (partial: Partial<InteractStore> = {}): InteractStore => ({
-  ...defaultInteractStore,
+  ...initialInteract,
   ...partial,
-  lastPointerWindow: { ...defaultInteractStore.lastPointerWindow, ...partial.lastPointerWindow },
-  lastPointerOnCanvas: { ...defaultInteractStore.lastPointerOnCanvas, ...partial.lastPointerOnCanvas },
-  placementPosition: { ...defaultInteractStore.placementPosition, ...partial.placementPosition },
-  offsetOrigin: { ...defaultInteractStore.offsetOrigin, ...partial.offsetOrigin },
-  offset: { ...defaultInteractStore.offset, ...partial.offset },
-  canvasSizeFrameOffset: { ...defaultInteractStore.canvasSizeFrameOffset, ...partial.canvasSizeFrameOffset },
-  canvasSizeFrameSize: { ...defaultInteractStore.canvasSizeFrameSize, ...partial.canvasSizeFrameSize },
+  lastPointerWindow: { ...initialInteract.lastPointerWindow, ...partial.lastPointerWindow },
+  lastPointerOnCanvas: { ...initialInteract.lastPointerOnCanvas, ...partial.lastPointerOnCanvas },
+  placementPosition: { ...initialInteract.placementPosition, ...partial.placementPosition },
+  offsetOrigin: { ...initialInteract.offsetOrigin, ...partial.offsetOrigin },
+  offset: { ...initialInteract.offset, ...partial.offset },
+  canvasSizeFrameOffset: { ...initialInteract.canvasSizeFrameOffset, ...partial.canvasSizeFrameOffset },
+  canvasSizeFrameSize: { ...initialInteract.canvasSizeFrameSize, ...partial.canvasSizeFrameSize },
 });
 
 const createCanvasArea = (rect: { left: number; top: number; width: number; height: number }) => {
@@ -82,4 +85,30 @@ describe('UnifiedCoordinateTransform (e2e)', () => {
     expect(windowPos.x).toBeCloseTo(230, 6);
     expect(windowPos.y).toBeCloseTo(80, 6);
   });
+
+  const stateChanges = [
+    { name: 'zoom', change: () => setInteractStore('zoom', 2.5) },
+    { name: 'rotation', change: () => setInteractStore('rotation', 75) },
+    { name: 'horizontal flip', change: () => setInteractStore('horizontalFlipped', true) },
+    { name: 'vertical flip', change: () => setInteractStore('verticalFlipped', true) },
+    { name: 'pan', change: () => setInteractStore('offset', { x: 32, y: -19 }) },
+    { name: 'origin', change: () => setInteractStore('offsetOrigin', { x: 64, y: 21 }) },
+    { name: 'canvas size', change: () => setProjectStore('canvas', 'size', { width: 710, height: 315 }) },
+  ];
+
+  for (const noZoom of [false, true]) {
+    it.each(stateChanges)(`refreshes the ${noZoom ? 'no-zoom ' : ''}inverse after $name without a forward call or clearCache`, ({ change }) => {
+      setInteractStore('rotation', 30);
+      const transform = new UnifiedCoordinateTransform();
+      const point = CanvasPos.create(123.5, 87.25);
+      const forward = (t: UnifiedCoordinateTransform) => (noZoom ? t.canvasToWindowNoZoom(point) : t.canvasToWindow(point));
+      const inverse = (p: ReturnType<typeof forward>) => (noZoom ? transform.windowToCanvasNoZoom(p) : transform.windowToCanvas(p));
+      inverse(forward(transform));
+
+      change();
+      const result = inverse(forward(new UnifiedCoordinateTransform()));
+      expect(result.x).toBeCloseTo(point.x, 3);
+      expect(result.y).toBeCloseTo(point.y, 3);
+    });
+  }
 });

@@ -106,6 +106,7 @@ describe('features/canvas/service behavior', () => {
     };
     elements['side-section-control-leftSide'] = { scrollWidth: 40 };
     elements['bottom-bar'] = { scrollHeight: 12 };
+    setInteractStore('rotation', 0);
 
     fitCanvasInVisibleArea(100, 50);
 
@@ -114,6 +115,21 @@ describe('features/canvas/service behavior', () => {
     expect(interactStore.offset).toEqual({ x: -40, y: 12 });
     expect(interactStore.offsetOrigin.x).toBeCloseTo(90, 6);
     expect(interactStore.offsetOrigin.y).toBeCloseTo(115, 6);
+  });
+
+  it('fitCanvasInVisibleArea fits the rotated canvas and keeps the zoom reference and the rotation', () => {
+    elements['sections-between-area'] = {
+      getBoundingClientRect: () => ({ x: 10, y: 20, width: 500, height: 400 }),
+    };
+    setInteractStore('rotation', 45);
+
+    fitCanvasInVisibleArea(100, 50);
+
+    // at 45° the 100x50 canvas is shown as a (100 + 50) / √2 square
+    const shownLongerLength = 150 * Math.SQRT1_2;
+    expect(interactStore.initialZoom).toBeCloseTo(3.4, 6);
+    expect(interactStore.zoom).toBeCloseTo(340 / shownLongerLength, 6);
+    expect(interactStore.rotation).toBe(45);
   });
 
   it('centeringCanvas centers the canvas without touching the rotation', () => {

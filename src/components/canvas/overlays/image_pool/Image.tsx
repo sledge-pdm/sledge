@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { clsx, ImagePoolEntry } from '@sledge-pdm/core';
 import { color, Icon } from '@sledge-pdm/ui';
-import { Component, createEffect, createMemo, onMount } from 'solid-js';
+import { Component, createEffect, createMemo, onCleanup, onMount } from 'solid-js';
 import { FrameHandles, FrameRect, OnCanvasFrameInteract } from '~/components/canvas/overlays/OnCanvasFrameInteract';
 import { isBusy } from '~/features/busy';
 import { cloneEntry, registerEntryUpdate, selectEntry, updateEntryPartial } from '~/features/image_pool';
@@ -152,10 +152,10 @@ const Image: Component<{ entry: ImagePoolEntry; index: number }> = ({ entry, ind
 
     document.addEventListener('click', handleImageSelection);
 
-    return () => {
+    onCleanup(() => {
       document.removeEventListener('click', handleImageSelection);
       entryInteract?.removeInteractListeners();
-    };
+    });
   });
 
   createEffect(() => {

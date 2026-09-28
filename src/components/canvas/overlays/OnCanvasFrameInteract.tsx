@@ -5,6 +5,7 @@ import { coordinateTransform } from '~/features/canvas/transform/UnifiedCoordina
 import { beginEditSession } from '~/features/edit_session';
 import { interactStore } from '~/stores/EditorStores';
 import { WindowPos } from '~/types/CoordinateTypes';
+import CanvasAreaInteract from '../CanvasAreaInteract';
 
 export interface HandleProps {
   x: string;
@@ -157,23 +158,24 @@ export class OnCanvasFrameInteract {
   private handlePointerDown = (e: PointerEvent) => {
     // an operation holding the window has already committed whatever transform was under the pointer; a new
     // one must not start against the state it is reading.
-    if (isBusy()) return;
+    if (isBusy() || this.pointerActive) return;
     // 左クリック(通常: button===0) 以外は無視
-    if (e.button !== 0) return;
+    if (e.button !== 0 || e.pointerType === 'touch' || CanvasAreaInteract.isDraggable(e)) return;
     const target = e.target as HTMLElement;
     const handle = target.closest?.('.resize-handle') as HTMLElement | null;
     const dragSurface = target.closest?.('.drag-surface');
+    if (!handle && !dragSurface) return;
 
     const rect = this.getRect();
     if (!rect) return;
 
     this.startPointerClientX = e.clientX;
     this.startPointerClientY = e.clientY;
-    const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.from(e));
+    const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.create(e.clientX, e.clientY));
     this.startPointerCanvasX = cx;
     this.startPointerCanvasY = cy;
 
-    this.startRect = this.snapRectIfEnabled(rect);
+    this.startRect = this.snapRectIfEnabled({ ...rect });
     this.options.onStart?.(this.startRect);
 
     if (handle) {
@@ -214,11 +216,16 @@ export class OnCanvasFrameInteract {
   };
 
   private handlePointerMove = (e: PointerEvent) => {
+    if (!this.pointerActive || e.pointerId !== this.capturedPointerId) return;
+    if (e.buttons === 0) {
+      this.finalizeInteraction();
+      return;
+    }
     this.emitChangeByPointerEvent(e);
   };
 
   private handlePointerUp = (e: PointerEvent) => {
-    if (!this.pointerActive) return;
+    if (!this.pointerActive || e.pointerId !== this.capturedPointerId) return;
     this.emitChangeByPointerEvent(e);
     this.releasePointer(e);
     if (this.startRect) {
@@ -229,6 +236,7 @@ export class OnCanvasFrameInteract {
   };
 
   private handlePointerCancel = (e: PointerEvent) => {
+    if (!this.pointerActive || e.pointerId !== this.capturedPointerId) return;
     this.releasePointer(e);
     if (this.startRect) {
       // request revert to startRect on cancel
@@ -236,6 +244,12 @@ export class OnCanvasFrameInteract {
       this.options.onCancel?.(this.startRect, e);
     }
     this.resetState();
+  };
+
+  private handleLostPointerCapture = (e: PointerEvent) => {
+    if (this.pointerActive && e.pointerId === this.capturedPointerId) {
+      this.finalizeInteraction();
+    }
   };
 
   private releasePointer(e: PointerEvent) {
@@ -267,7 +281,7 @@ export class OnCanvasFrameInteract {
       this.resetState();
       return;
     }
-    const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.from(e));
+    const { x: cx, y: cy } = coordinateTransform.windowToCanvas(WindowPos.create(e.clientX, e.clientY));
     const dx = cx - this.startPointerCanvasX;
     const dy = cy - this.startPointerCanvasY;
 
@@ -381,6 +395,7 @@ export class OnCanvasFrameInteract {
       return Math.max(this.minSize, size);
     }
   }
+
   private shouldUpdateOffset(calculatedSize: number): boolean {
     if (this.options.allowInvert) {
       return Math.abs(calculatedSize) >= this.minSize;
@@ -422,17 +437,16 @@ export class OnCanvasFrameInteract {
     this.frameRoot.addEventListener('pointermove', this.handlePointerMove as EventListener);
     this.frameRoot.addEventListener('pointerup', this.handlePointerUp as EventListener);
     this.frameRoot.addEventListener('pointercancel', this.handlePointerCancel as EventListener);
+    this.frameRoot.addEventListener('lostpointercapture', this.handleLostPointerCapture as EventListener);
   }
 
   public removeInteractListeners() {
-    // a gesture still under the pointer when the listeners go is one nothing can end any more, so its
-    // session must not be left open on its behalf.
-    this.endSession?.();
-    this.endSession = undefined;
+    this.finalizeInteraction();
     this.frameRoot.removeEventListener('pointerdown', this.handlePointerDown as EventListener);
     this.frameRoot.removeEventListener('pointermove', this.handlePointerMove as EventListener);
     this.frameRoot.removeEventListener('pointerup', this.handlePointerUp as EventListener);
     this.frameRoot.removeEventListener('pointercancel', this.handlePointerCancel as EventListener);
+    this.frameRoot.removeEventListener('lostpointercapture', this.handleLostPointerCapture as EventListener);
   }
 
   private snapRectIfEnabled(r: FrameRect): FrameRect {

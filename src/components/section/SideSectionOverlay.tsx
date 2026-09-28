@@ -5,7 +5,9 @@ import { color } from '@sledge-pdm/ui';
 import interact from 'interactjs';
 import ScrollFadeContainer from '~/components/global/common/ScrollFadeContainer';
 import { getTabContent } from '~/features/config/TabContentController';
-import { appearanceStore } from '~/stores/EditorStores';
+import { saveEditorStateImmediate } from '~/features/io/editor/save';
+import { SIDE_SECTION_WIDTH_LIMITS } from '~/stores/editor/AppearanceStore';
+import { appearanceStore, setAppearanceStore } from '~/stores/EditorStores';
 import { eventBus } from '~/utils/EventBus';
 
 export const notifySideSectionSideChanged = () => {
@@ -75,23 +77,19 @@ const SideSectionsOverlay: Component<Props> = (props) => {
       edges: { right: true, left: false },
       modifiers: [
         interact.modifiers.restrictSize({
-          min: { width: 300, height: -1 },
-          max: { width: 600, height: -1 },
+          min: { width: SIDE_SECTION_WIDTH_LIMITS.leftSide.min, height: -1 },
+          max: { width: SIDE_SECTION_WIDTH_LIMITS.leftSide.max, height: -1 },
         }),
       ],
       listeners: {
-        start: function (event) {
-          Object.assign(event.target.style, {
-            width: `${event.rect.width}px`,
-          });
-        },
         move: function (event) {
-          let { x, y } = event.target.dataset;
-          x = (parseFloat(x) || 0) + event.deltaRect.left;
-          Object.assign(event.target.style, {
-            width: `${event.rect.width}px`,
-          });
+          // the width goes to the store rather than onto the element. the style binding below rewrites the
+          // element's width every time the panel is reopened, so a width kept only on the element is lost there.
+          setAppearanceStore('leftSide', 'width', event.rect.width);
           notifySideSectionSideChanged();
+        },
+        end: function () {
+          saveEditorStateImmediate(['appearanceStore']);
         },
       },
     });
@@ -99,23 +97,17 @@ const SideSectionsOverlay: Component<Props> = (props) => {
       edges: { right: false, left: true },
       modifiers: [
         interact.modifiers.restrictSize({
-          min: { width: 300, height: -1 },
-          max: { width: 500, height: -1 },
+          min: { width: SIDE_SECTION_WIDTH_LIMITS.rightSide.min, height: -1 },
+          max: { width: SIDE_SECTION_WIDTH_LIMITS.rightSide.max, height: -1 },
         }),
       ],
       listeners: {
-        start: function (event) {
-          Object.assign(event.target.style, {
-            width: `${event.rect.width}px`,
-          });
-        },
         move: function (event) {
-          let { x, y } = event.target.dataset;
-          x = (parseFloat(x) || 0) + event.deltaRect.left;
-          Object.assign(event.target.style, {
-            width: `${event.rect.width}px`,
-          });
+          setAppearanceStore('rightSide', 'width', event.rect.width);
           notifySideSectionSideChanged();
+        },
+        end: function () {
+          saveEditorStateImmediate(['appearanceStore']);
         },
       },
     });
@@ -136,7 +128,7 @@ const SideSectionsOverlay: Component<Props> = (props) => {
         class={sideAreaRoot}
         style={{
           display: appearanceStore[props.side].content ? 'flex' : 'none',
-          width: appearanceStore[props.side].content ? '300px' : '0px',
+          width: appearanceStore[props.side].content ? `${appearanceStore[props.side].width}px` : '0px',
 
           'border-right': props.side === 'leftSide' && appearanceStore[props.side].content ? `1px solid ${color.borderSecondary}` : '',
           'border-left': props.side === 'rightSide' && appearanceStore[props.side].content ? `1px solid ${color.borderSecondary}` : '',

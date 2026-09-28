@@ -1,15 +1,23 @@
 import { DEFAULT_TAB_CONTROLS_BY_SIDE, SECTION_TAB_CONTROLS, SectionTab, SectionTabControl, type SectionSide } from '~/config/SectionTabDefinitions';
 
+// px, including the panel's border.
+export const SIDE_SECTION_WIDTH_LIMITS: Record<SectionSide, { min: number; max: number }> = {
+  leftSide: { min: 300, max: 600 },
+  rightSide: { min: 300, max: 500 },
+};
+
 export type AppearanceStore = {
   leftSide: {
     controls: SectionTabControl[];
     controlsVisibility: Partial<Record<SectionTabControl, boolean>>;
     content?: SectionTab;
+    width: number;
   };
   rightSide: {
     controls: SectionTabControl[];
     controlsVisibility: Partial<Record<SectionTabControl, boolean>>;
     content?: SectionTab;
+    width: number;
   };
 
   ruler: boolean;
@@ -22,11 +30,13 @@ export const createDefaultAppearanceStore = (): AppearanceStore => ({
     controls: [...DEFAULT_TAB_CONTROLS_BY_SIDE.leftSide],
     controlsVisibility: {},
     content: DEFAULT_TAB_CONTROLS_BY_SIDE.leftSide[0],
+    width: SIDE_SECTION_WIDTH_LIMITS.leftSide.min,
   },
   rightSide: {
     controls: [...DEFAULT_TAB_CONTROLS_BY_SIDE.rightSide],
     controlsVisibility: {},
     content: DEFAULT_TAB_CONTROLS_BY_SIDE.rightSide[0],
+    width: SIDE_SECTION_WIDTH_LIMITS.rightSide.min,
   },
 
   ruler: false,
@@ -86,16 +96,24 @@ export const sanitizeAppearanceStore = (state?: Partial<AppearanceStore>): Appea
   const leftContent = pickContent(state?.leftSide?.content, leftControls, base.leftSide.content);
   const rightContent = pickContent(state?.rightSide?.content, rightControls, base.rightSide.content);
 
+  const pickWidth = (side: SectionSide, width: unknown) => {
+    if (typeof width !== 'number' || !Number.isFinite(width)) return base[side].width;
+    const { min, max } = SIDE_SECTION_WIDTH_LIMITS[side];
+    return Math.min(max, Math.max(min, width));
+  };
+
   return {
     leftSide: {
       controls: leftControls,
       controlsVisibility: leftVisibility,
       content: leftContent,
+      width: pickWidth('leftSide', state?.leftSide?.width),
     },
     rightSide: {
       controls: rightControls,
       controlsVisibility: rightVisibility,
       content: rightContent,
+      width: pickWidth('rightSide', state?.rightSide?.width),
     },
     ruler: state?.ruler ?? base.ruler,
     onscreenControl: state?.onscreenControl ?? base.onscreenControl,

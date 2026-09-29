@@ -18,6 +18,7 @@ export default defineConfig({
   // component fails to import, which rules out testing components rather than just the modules under them.
   plugins: [wasmPlugin(), ecsstatic(), solidPlugin()],
   resolve: {
+    dedupe: ['solid-js'],
     alias: {
       ...sharedAliases,
       '@sledge/wasm': path.resolve(projectRoot, 'wasm/pkg/sledge_wasm.js'),

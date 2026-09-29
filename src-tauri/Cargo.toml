@@ -19,7 +19,7 @@ tauri-build = { version = "2.5.6", features = [] }
 
 [dependencies]
 log = "0.4.29"
-sysinfo = "0.38.4"
+sysinfo = "0.39.6"
 serde_json = "1.0.149"
 serde = { version = "1.0.228", features = ["derive"] }
 semver = "1.0.28"
@@ -54,7 +54,7 @@ windows = { version = "0.62.2", features = [
 
 
 [target."cfg(target_os = \"macos\")".dependencies]
-cocoa = "0.26.1"
+cocoa = "0.27.0"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2.10.1"
@@ -68,3 +68,4 @@ lto = true        # Enables link-time-optimizations.
 opt-level = "s"   # Prioritizes small binary size. Use `3` if you prefer speed.
 panic = "abort"   # Higher performance by disabling panic handlers.
 strip = true      # Ensures debug symbols are removed.
+

@@ -101,31 +101,25 @@ const Explorer: Component = () => {
     twoColumns: false,
     pathEditMode: false,
   });
-  const { currentPath, setCurrentPath, push, back, forward } = useExplorerNavigation('');
-  createEffect(async () => {
+  const { currentPath, content, replace, push, back, forward } = useExplorerNavigation<DirEntry[]>({
+    read: async (path) => sortEntries(await fs.readDir(normalizePath(path))),
+    onReadError: async (path) => {
+      await dialog.message(`Couldn't open directory.\n${normalizePath(path)}`, {
+        kind: 'warning',
+        title: 'Explorer',
+        okLabel: 'OK',
+      });
+    },
+  });
+  createEffect(() => {
+    // only a path that has been opened becomes current, so a path that cannot be opened is never saved here
     const newPath = currentPath();
-    if (newPath) {
-      // update store
-      setAppearanceStore('explorerPath', newPath);
-      // update explorer entries
-      const normalized = normalizePath(newPath);
-      try {
-        const dirEntries = await fs.readDir(normalized);
-        if (currentPath() !== newPath) return;
-        sortEntries(dirEntries);
-        setEntries(dirEntries);
-      } catch (e) {
-        // handle error
-        await dialog.message(`Couldn't open directory.\n${normalized}`, {
-          kind: 'warning',
-          title: 'Explorer',
-          okLabel: 'OK',
-        });
-      }
-    }
+    if (newPath) setAppearanceStore('explorerPath', newPath);
   });
 
-  const [entries, setEntries] = createSignal<DirEntry[] | undefined>([]);
+  // set when none of the initial paths could be opened
+  const [initialOpenFailed, setInitialOpenFailed] = createSignal(false);
+  const entries = createMemo<DirEntry[] | undefined>(() => content() ?? (initialOpenFailed() ? undefined : []));
   const visibleEntries = createMemo<DirEntry[] | undefined>(() => {
     const currentEntries = entries();
     if (!currentEntries) return currentEntries;
@@ -171,7 +165,7 @@ const Explorer: Component = () => {
       const normalizedDraft = normalizeDirectoryPath(rawDraft);
       if (normalizedDraft && normalizedDraft !== currentPath()) {
         // prevent pushing same path
-        push(normalizedDraft);
+        await push(normalizedDraft);
       }
     }
     setPathDraft(currentPath());
@@ -195,11 +189,17 @@ const Explorer: Component = () => {
     const openPath = ioStore.savedLocation.path ? normalizePath(ioStore.savedLocation.path) : undefined;
     const fallbackPath = await exportDir();
     const editorSavedPath = appearanceStore.explorerPath ?? undefined;
-    const defaultPath = editorSavedPath ?? openPath ?? fallbackPath;
-    if (defaultPath) {
-      setPathDraft(defaultPath);
-      setCurrentPath(defaultPath);
+    // the saved path may no longer exist (removed folder, disconnected drive). fall back to the next one.
+    const candidates = [editorSavedPath, openPath, fallbackPath].filter((path): path is string => !!path);
+    let opened = false;
+    for (const path of new Set(candidates)) {
+      if (await replace(path)) {
+        opened = true;
+        break;
+      }
     }
+    setInitialOpenFailed(!opened);
+    setPathDraft(currentPath());
 
     setDriveLetters(await getDefinedDriveLetters());
 
@@ -224,8 +224,9 @@ const Explorer: Component = () => {
 
   return (
     <div class={explorerContainer}>
-      <Show when={driveLetters()}>
-        <div class={controlsRow}>
+      <div class={controlsRow}>
+        {/* drive letters only exist on Windows; the buttons next to it are for every platform */}
+        <Show when={driveLetters()}>
           <Dropdown
             align='left'
             wheelSpin={false}
@@ -242,77 +243,77 @@ const Explorer: Component = () => {
               push(v);
             }}
           />
-          <div class={controlButtonsRow}>
-            <div class={iconButton} onClick={() => enterEditMode()}>
-              <Icon src={'/assets/icons/files/edit.png'} base={8} hoverColor={color.accent} />
-            </div>
+        </Show>
+        <div class={controlButtonsRow}>
+          <div class={iconButton} onClick={() => enterEditMode()}>
+            <Icon src={'/assets/icons/files/edit.png'} base={8} hoverColor={color.accent} />
+          </div>
+          <div
+            class={iconButton}
+            onClick={() => {
+              const parent = getParentDirectory(currentPath());
+              if (parent) push(parent);
+            }}
+          >
+            <Icon src={'/assets/icons/files/folder_up.png'} base={8} hoverColor={color.accent} />
+          </div>
+          <div class={iconButton} onClick={() => setConfigStore('twoColumns', (v) => !v)}>
+            <Icon
+              src={configStore.twoColumns ? '/assets/icons/files/two_column.png' : '/assets/icons/files/one_column.png'}
+              base={8}
+              hoverColor={color.accent}
+            />
+          </div>
+          <div class={iconButton} title='show only files that sledge can open.' onClick={() => setConfigStore('showOnlySledgeOpenable', (v) => !v)}>
+            <Icon src={'/assets/icons/files/file_sledge.png'} base={8} color={configStore.showOnlySledgeOpenable ? color.enabled : color.muted} />
+          </div>
+          <div class={menuButtonContainer}>
             <div
               class={iconButton}
-              onClick={() => {
-                const parent = getParentDirectory(currentPath());
-                if (parent) push(parent);
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setMenuOpened(!isMenuOpened());
               }}
             >
-              <Icon src={'/assets/icons/files/folder_up.png'} base={8} hoverColor={color.accent} />
+              <Icon src={'/assets/icons/misc/vert_dots.png'} base={8} hoverColor={color.accent} />
             </div>
-            <div class={iconButton} onClick={() => setConfigStore('twoColumns', (v) => !v)}>
-              <Icon
-                src={configStore.twoColumns ? '/assets/icons/files/two_column.png' : '/assets/icons/files/one_column.png'}
-                base={8}
-                hoverColor={color.accent}
+            <Show when={isMenuOpened()}>
+              <MenuList
+                align='right'
+                onClose={() => setMenuOpened(false)}
+                closeByOutsideClick
+                style={{ 'margin-top': '4px', 'margin-left': '-8px' }}
+                options={[
+                  {
+                    type: 'item',
+                    label: 'open in explorer',
+                    onSelect: async () => {
+                      await revealInFileBrowser(currentPath());
+                    },
+                  },
+                  {
+                    type: 'item',
+                    label: 'back to saved folder',
+                    disabled: !ioStore.savedLocation.path || !ioStore.savedLocation.name,
+                    onSelect: () => {
+                      if (ioStore.savedLocation.path) push(ioStore.savedLocation.path);
+                    },
+                  },
+                  {
+                    type: 'item',
+                    label: 'Export to this folder',
+                    onSelect: () => {
+                      showTabContent('export', 'rightSide');
+                      openExportWithPath(currentPath());
+                    },
+                  },
+                ]}
               />
-            </div>
-            <div class={iconButton} title='show only files that sledge can open.' onClick={() => setConfigStore('showOnlySledgeOpenable', (v) => !v)}>
-              <Icon src={'/assets/icons/files/file_sledge.png'} base={8} color={configStore.showOnlySledgeOpenable ? color.enabled : color.muted} />
-            </div>
-            <div class={menuButtonContainer}>
-              <div
-                class={iconButton}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setMenuOpened(!isMenuOpened());
-                }}
-              >
-                <Icon src={'/assets/icons/misc/vert_dots.png'} base={8} hoverColor={color.accent} />
-              </div>
-              <Show when={isMenuOpened()}>
-                <MenuList
-                  align='right'
-                  onClose={() => setMenuOpened(false)}
-                  closeByOutsideClick
-                  style={{ 'margin-top': '4px', 'margin-left': '-8px' }}
-                  options={[
-                    {
-                      type: 'item',
-                      label: 'open in explorer',
-                      onSelect: async () => {
-                        await revealInFileBrowser(currentPath());
-                      },
-                    },
-                    {
-                      type: 'item',
-                      label: 'back to saved folder',
-                      disabled: !ioStore.savedLocation.path || !ioStore.savedLocation.name,
-                      onSelect: () => {
-                        if (ioStore.savedLocation.path) push(ioStore.savedLocation.path);
-                      },
-                    },
-                    {
-                      type: 'item',
-                      label: 'Export to this folder',
-                      onSelect: () => {
-                        showTabContent('export', 'rightSide');
-                        openExportWithPath(currentPath());
-                      },
-                    },
-                  ]}
-                />
-              </Show>
-            </div>
+            </Show>
           </div>
         </div>
-      </Show>
+      </div>
       <div class={explorerInner}>
         <div class={navigationPanel}>
           <div class={navigationRow} onDblClick={() => enterEditMode()}>

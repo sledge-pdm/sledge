@@ -43,6 +43,7 @@ export default defineConfig({
     exclude: ['@sledge-pdm/core', '@sledge-pdm/frasco', '@sledge-pdm/ui'],
   },
   resolve: {
+    dedupe: ['solid-js'],
     alias: {
       '~': path.join(import.meta.dirname, 'src'),
       '@sledge/wasm': path.join(import.meta.dirname, 'wasm/pkg/sledge_wasm.js'),

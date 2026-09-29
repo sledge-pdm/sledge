@@ -270,7 +270,7 @@ export function trim_mask_with_box(mask, mask_width, mask_height, box_x, box_y, 
     wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
     return v2;
 }
-export function __wbg___wbindgen_copy_to_typed_array_fc0809a4dec43528(arg0, arg1, arg2) {
+export function __wbg___wbindgen_copy_to_typed_array_88899a52af046901(arg0, arg1, arg2) {
     new Uint8Array(arg2.buffer, arg2.byteOffset, arg2.byteLength).set(getArrayU8FromWasm0(arg0, arg1));
 }
 export function __wbindgen_init_externref_table() {
@@ -296,8 +296,7 @@ function getFloat32ArrayMemory0() {
 }
 
 function getStringFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return decodeText(ptr, len);
+    return decodeText(ptr >>> 0, len);
 }
 
 let cachedUint8ArrayMemory0 = null;

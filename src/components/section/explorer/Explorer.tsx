@@ -101,31 +101,25 @@ const Explorer: Component = () => {
     twoColumns: false,
     pathEditMode: false,
   });
-  const { currentPath, setCurrentPath, push, back, forward } = useExplorerNavigation('');
-  createEffect(async () => {
+  const { currentPath, content, replace, push, back, forward } = useExplorerNavigation<DirEntry[]>({
+    read: async (path) => sortEntries(await fs.readDir(normalizePath(path))),
+    onReadError: async (path) => {
+      await dialog.message(`Couldn't open directory.\n${normalizePath(path)}`, {
+        kind: 'warning',
+        title: 'Explorer',
+        okLabel: 'OK',
+      });
+    },
+  });
+  createEffect(() => {
+    // only a path that has been opened becomes current, so a path that cannot be opened is never saved here
     const newPath = currentPath();
-    if (newPath) {
-      // update store
-      setAppearanceStore('explorerPath', newPath);
-      // update explorer entries
-      const normalized = normalizePath(newPath);
-      try {
-        const dirEntries = await fs.readDir(normalized);
-        if (currentPath() !== newPath) return;
-        sortEntries(dirEntries);
-        setEntries(dirEntries);
-      } catch (e) {
-        // handle error
-        await dialog.message(`Couldn't open directory.\n${normalized}`, {
-          kind: 'warning',
-          title: 'Explorer',
-          okLabel: 'OK',
-        });
-      }
-    }
+    if (newPath) setAppearanceStore('explorerPath', newPath);
   });
 
-  const [entries, setEntries] = createSignal<DirEntry[] | undefined>([]);
+  // set when none of the initial paths could be opened
+  const [initialOpenFailed, setInitialOpenFailed] = createSignal(false);
+  const entries = createMemo<DirEntry[] | undefined>(() => content() ?? (initialOpenFailed() ? undefined : []));
   const visibleEntries = createMemo<DirEntry[] | undefined>(() => {
     const currentEntries = entries();
     if (!currentEntries) return currentEntries;
@@ -171,7 +165,7 @@ const Explorer: Component = () => {
       const normalizedDraft = normalizeDirectoryPath(rawDraft);
       if (normalizedDraft && normalizedDraft !== currentPath()) {
         // prevent pushing same path
-        push(normalizedDraft);
+        await push(normalizedDraft);
       }
     }
     setPathDraft(currentPath());
@@ -195,11 +189,17 @@ const Explorer: Component = () => {
     const openPath = ioStore.savedLocation.path ? normalizePath(ioStore.savedLocation.path) : undefined;
     const fallbackPath = await exportDir();
     const editorSavedPath = appearanceStore.explorerPath ?? undefined;
-    const defaultPath = editorSavedPath ?? openPath ?? fallbackPath;
-    if (defaultPath) {
-      setPathDraft(defaultPath);
-      setCurrentPath(defaultPath);
+    // the saved path may no longer exist (removed folder, disconnected drive). fall back to the next one.
+    const candidates = [editorSavedPath, openPath, fallbackPath].filter((path): path is string => !!path);
+    let opened = false;
+    for (const path of new Set(candidates)) {
+      if (await replace(path)) {
+        opened = true;
+        break;
+      }
     }
+    setInitialOpenFailed(!opened);
+    setPathDraft(currentPath());
 
     setDriveLetters(await getDefinedDriveLetters());
 

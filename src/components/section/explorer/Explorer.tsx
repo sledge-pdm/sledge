@@ -224,8 +224,9 @@ const Explorer: Component = () => {
 
   return (
     <div class={explorerContainer}>
-      <Show when={driveLetters()}>
-        <div class={controlsRow}>
+      <div class={controlsRow}>
+        {/* drive letters only exist on Windows; the buttons next to it are for every platform */}
+        <Show when={driveLetters()}>
           <Dropdown
             align='left'
             wheelSpin={false}
@@ -242,77 +243,77 @@ const Explorer: Component = () => {
               push(v);
             }}
           />
-          <div class={controlButtonsRow}>
-            <div class={iconButton} onClick={() => enterEditMode()}>
-              <Icon src={'/assets/icons/files/edit.png'} base={8} hoverColor={color.accent} />
-            </div>
+        </Show>
+        <div class={controlButtonsRow}>
+          <div class={iconButton} onClick={() => enterEditMode()}>
+            <Icon src={'/assets/icons/files/edit.png'} base={8} hoverColor={color.accent} />
+          </div>
+          <div
+            class={iconButton}
+            onClick={() => {
+              const parent = getParentDirectory(currentPath());
+              if (parent) push(parent);
+            }}
+          >
+            <Icon src={'/assets/icons/files/folder_up.png'} base={8} hoverColor={color.accent} />
+          </div>
+          <div class={iconButton} onClick={() => setConfigStore('twoColumns', (v) => !v)}>
+            <Icon
+              src={configStore.twoColumns ? '/assets/icons/files/two_column.png' : '/assets/icons/files/one_column.png'}
+              base={8}
+              hoverColor={color.accent}
+            />
+          </div>
+          <div class={iconButton} title='show only files that sledge can open.' onClick={() => setConfigStore('showOnlySledgeOpenable', (v) => !v)}>
+            <Icon src={'/assets/icons/files/file_sledge.png'} base={8} color={configStore.showOnlySledgeOpenable ? color.enabled : color.muted} />
+          </div>
+          <div class={menuButtonContainer}>
             <div
               class={iconButton}
-              onClick={() => {
-                const parent = getParentDirectory(currentPath());
-                if (parent) push(parent);
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setMenuOpened(!isMenuOpened());
               }}
             >
-              <Icon src={'/assets/icons/files/folder_up.png'} base={8} hoverColor={color.accent} />
+              <Icon src={'/assets/icons/misc/vert_dots.png'} base={8} hoverColor={color.accent} />
             </div>
-            <div class={iconButton} onClick={() => setConfigStore('twoColumns', (v) => !v)}>
-              <Icon
-                src={configStore.twoColumns ? '/assets/icons/files/two_column.png' : '/assets/icons/files/one_column.png'}
-                base={8}
-                hoverColor={color.accent}
+            <Show when={isMenuOpened()}>
+              <MenuList
+                align='right'
+                onClose={() => setMenuOpened(false)}
+                closeByOutsideClick
+                style={{ 'margin-top': '4px', 'margin-left': '-8px' }}
+                options={[
+                  {
+                    type: 'item',
+                    label: 'open in explorer',
+                    onSelect: async () => {
+                      await revealInFileBrowser(currentPath());
+                    },
+                  },
+                  {
+                    type: 'item',
+                    label: 'back to saved folder',
+                    disabled: !ioStore.savedLocation.path || !ioStore.savedLocation.name,
+                    onSelect: () => {
+                      if (ioStore.savedLocation.path) push(ioStore.savedLocation.path);
+                    },
+                  },
+                  {
+                    type: 'item',
+                    label: 'Export to this folder',
+                    onSelect: () => {
+                      showTabContent('export', 'rightSide');
+                      openExportWithPath(currentPath());
+                    },
+                  },
+                ]}
               />
-            </div>
-            <div class={iconButton} title='show only files that sledge can open.' onClick={() => setConfigStore('showOnlySledgeOpenable', (v) => !v)}>
-              <Icon src={'/assets/icons/files/file_sledge.png'} base={8} color={configStore.showOnlySledgeOpenable ? color.enabled : color.muted} />
-            </div>
-            <div class={menuButtonContainer}>
-              <div
-                class={iconButton}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setMenuOpened(!isMenuOpened());
-                }}
-              >
-                <Icon src={'/assets/icons/misc/vert_dots.png'} base={8} hoverColor={color.accent} />
-              </div>
-              <Show when={isMenuOpened()}>
-                <MenuList
-                  align='right'
-                  onClose={() => setMenuOpened(false)}
-                  closeByOutsideClick
-                  style={{ 'margin-top': '4px', 'margin-left': '-8px' }}
-                  options={[
-                    {
-                      type: 'item',
-                      label: 'open in explorer',
-                      onSelect: async () => {
-                        await revealInFileBrowser(currentPath());
-                      },
-                    },
-                    {
-                      type: 'item',
-                      label: 'back to saved folder',
-                      disabled: !ioStore.savedLocation.path || !ioStore.savedLocation.name,
-                      onSelect: () => {
-                        if (ioStore.savedLocation.path) push(ioStore.savedLocation.path);
-                      },
-                    },
-                    {
-                      type: 'item',
-                      label: 'Export to this folder',
-                      onSelect: () => {
-                        showTabContent('export', 'rightSide');
-                        openExportWithPath(currentPath());
-                      },
-                    },
-                  ]}
-                />
-              </Show>
-            </div>
+            </Show>
           </div>
         </div>
-      </Show>
+      </div>
       <div class={explorerInner}>
         <div class={navigationPanel}>
           <div class={navigationRow} onDblClick={() => enterEditMode()}>

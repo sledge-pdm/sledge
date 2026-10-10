@@ -1,21 +1,21 @@
 import { css } from '@acab/ecsstatic';
 import { clsx } from '@sledge-pdm/core';
-import { componentProps, ConfigFieldRenderer, getValueAtPath, Icon, Light, pathToArray, type ConfigField } from '@sledge-pdm/ui';
-import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
-import { ConfigSections, FieldMeta, FieldValueMeta, isHeaderMeta } from '~/config/ConfigMeta';
+import { Light } from '@sledge-pdm/ui';
+import { Component, createEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { ConfigSections } from '~/components/config/ConfigSections';
+import CanvasConfigSection from '~/components/config/sections/CanvasConfigSection';
+import DebugConfigSection from '~/components/config/sections/DebugConfigSection';
+import GeneralConfigSection from '~/components/config/sections/GeneralConfigSection';
+import PerformanceConfigSection from '~/components/config/sections/PerformanceConfigSection';
+import ProtectionConfigSection from '~/components/config/sections/ProtectionConfigSection';
+import StartupConfigSection from '~/components/config/sections/StartupConfigSection';
 import { GlobalConfig } from '~/config/GlobalConfig';
-import { canvasMetas } from '~/config/meta/Canvas';
-import { debugMetas } from '~/config/meta/Debug';
-import { generalMetas } from '~/config/meta/General';
-import { performanceMetas } from '~/config/meta/Performance';
-import { protectionMetas } from '~/config/meta/Protection';
-import { startupMetas } from '~/config/meta/Startup';
 import { Consts } from '~/Consts';
 import { loadGlobalConfig } from '~/features/io/config/load';
 import { resetToDefaultConfig } from '~/features/io/config/reset';
 import { saveGlobalSettings } from '~/features/io/config/save';
-import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
-import { accentedButton, flexRow } from '~/styles/styles';
+import { globalConfig } from '~/stores/GlobalStores';
+import { accentedButton } from '~/styles/styles';
 import { normalizeJoin } from '~/utils/FileUtils';
 import { revealInFileBrowser } from '~/utils/NativeOpener';
 import { dialog, path, UnlistenFn } from '~/utils/platform';
@@ -105,52 +105,6 @@ const configFormScrollContent = css`
   padding-bottom: var(--spacing-md);
 `;
 
-const configFormFieldHeader = css`
-  font-size: 8px;
-  font-family: ZFB09;
-  letter-spacing: 1px;
-  color: var(--color-accent);
-  margin-top: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-  text-transform: lowercase;
-`;
-
-const configFormFieldItem = css`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-`;
-
-const configFormFieldLabelTooltip = css`
-  width: fit-content;
-  font-family: ZFB09;
-  opacity: 0.2;
-  cursor: help;
-`;
-
-const configFormFieldLabel = css`
-  font-family: ZFB21;
-  vertical-align: middle;
-  text-align: left;
-  margin-left: 8px;
-  margin-right: 8px;
-`;
-
-const configFormFieldControlWrapper = css`
-  display: flex;
-  flex-direction: row;
-  max-width: 260px;
-  margin-left: 16px;
-  align-items: center;
-`;
-
-const configFormFieldControlLabel = css`
-  min-width: 64px;
-  cursor: pointer;
-`;
-
 const configFormInfoAreaTop = css`
   display: flex;
   flex-direction: row;
@@ -181,21 +135,6 @@ const configFormAbout = css`
   margin-top: 8px;
 `;
 
-const getValueFromMetaPath = (meta: FieldValueMeta) => getValueAtPath(globalConfig, meta.path);
-
-function getParsedValueFromMetaPath(meta: FieldValueMeta) {
-  let v = getValueFromMetaPath(meta);
-
-  switch (meta.component) {
-    case 'CheckBox':
-    case 'ToggleSwitch':
-      v = v ? 'enabled' : 'disabled';
-      break;
-  }
-
-  return String(v);
-}
-
 interface Props {
   onClose?: () => void;
 }
@@ -225,10 +164,10 @@ const ConfigForm: Component<Props> = (props) => {
     }
   };
 
-  const onFieldChange = (meta: FieldMeta, v: any) => checkDirty();
   const onKeyConfigChange = () => checkDirty();
 
   const checkDirty = () => {
+    if (!originalConfig) return;
     if (
       JSON.stringify({
         ...originalConfig,
@@ -245,33 +184,17 @@ const ConfigForm: Component<Props> = (props) => {
     }
   };
 
-  const [grouped, setGrouped] = createSignal<Map<ConfigSections, FieldMeta[]>>(new Map());
-
   let originalConfig: GlobalConfig | undefined;
 
   let unlistenOnSettingSaved: UnlistenFn | undefined;
 
+  // The sections write to globalConfig directly, so any change to it re-evaluates the dirty state.
+  createEffect(on(() => JSON.stringify(globalConfig), checkDirty, { defer: true }));
+
   onMount(async () => {
     await loadGlobalConfig();
 
-    const settingsMeta = [
-      ...generalMetas,
-      ...canvasMetas,
-      ...startupMetas,
-      ...performanceMetas,
-      ...protectionMetas,
-      ...debugMetas,
-    ] as const satisfies readonly FieldMeta[];
-
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
-    const grouped = settingsMeta.reduce((map, field) => {
-      if (!('section' in field)) return map;
-      const arr = map.get(field.section) ?? [];
-      arr.push(field);
-      map.set(field.section, arr);
-      return map;
-    }, new Map<ConfigSections, FieldMeta[]>());
-    setGrouped(grouped);
 
     unlistenOnSettingSaved = await listenEvent('onSettingsSaved', async () => {
       await loadGlobalConfig();
@@ -303,62 +226,29 @@ const ConfigForm: Component<Props> = (props) => {
       </div>
       <div class={configFormFields}>
         <div class={configFormScrollContent}>
-          <Show when={currentSection() !== undefined}>
-            <Show when={currentSection() === ConfigSections.Shortcuts}>
+          <Switch>
+            <Match when={currentSection() === ConfigSections.General}>
+              <GeneralConfigSection />
+            </Match>
+            <Match when={currentSection() === ConfigSections.Performance}>
+              <PerformanceConfigSection />
+            </Match>
+            <Match when={currentSection() === ConfigSections.Canvas}>
+              <CanvasConfigSection />
+            </Match>
+            <Match when={currentSection() === ConfigSections.Startup}>
+              <StartupConfigSection />
+            </Match>
+            <Match when={currentSection() === ConfigSections.Protection}>
+              <ProtectionConfigSection />
+            </Match>
+            <Match when={currentSection() === ConfigSections.Shortcuts}>
               <KeyConfigSettings onKeyConfigChange={onKeyConfigChange} />
-            </Show>
-            <Show when={currentSection() !== ConfigSections.Shortcuts}>
-              <For each={grouped().get(currentSection())}>
-                {(meta) => {
-                  if (isHeaderMeta(meta)) {
-                    return <p class={configFormFieldHeader}>{meta.header.toUpperCase()}.</p>;
-                  }
-
-                  const componentName = typeof meta.component === 'string' ? meta.component : undefined;
-                  const componentProp = componentName ? componentProps.get(componentName) : undefined;
-                  // Boolean controls show their value (enabled/disabled) here. The ui controls would otherwise
-                  // print the field name next to the switch, repeating the header right above it.
-                  const isBooleanControl = componentName === 'CheckBox' || componentName === 'RadioButton' || componentName === 'ToggleSwitch';
-                  const shouldShowLeftLabel = !isBooleanControl && !componentProp?.labelByComponent && componentProp?.labelMode === 'left';
-                  const shouldShowRightLabel = isBooleanControl || (!componentProp?.labelByComponent && componentProp?.labelMode === 'right');
-                  const controlField = (isBooleanControl ? { ...meta, props: { ...meta.props, labelMode: 'none' } } : meta) as ConfigField;
-                  const value = () => getValueFromMetaPath(meta);
-                  const onChange = (v: any) => {
-                    const arrPath = pathToArray(meta.path);
-                    (setGlobalConfig as unknown as (...args: any[]) => void)(...arrPath, v);
-                    onFieldChange(meta, v);
-                  };
-
-                  return (
-                    <div class={configFormFieldItem}>
-                      <div class={flexRow}>
-                        <Icon src={'/assets/icons/misc/bullet_s_8.png'} base={8} />
-                        <p class={configFormFieldLabel}>{meta.label?.toUpperCase()}</p>
-                        <Show when={meta.tips !== undefined}>
-                          <p class={configFormFieldLabelTooltip} title={meta.tips ?? undefined}>
-                            ?
-                          </p>
-                        </Show>
-                      </div>
-                      <div class={configFormFieldControlWrapper}>
-                        <Show when={shouldShowLeftLabel}>
-                          <label for={meta.path.toString()} class={configFormFieldControlLabel}>
-                            {getParsedValueFromMetaPath(meta)}.
-                          </label>
-                        </Show>
-                        <ConfigFieldRenderer field={controlField} value={value} onChange={onChange} />
-                        <Show when={shouldShowRightLabel}>
-                          <label for={meta.path.toString()} class={configFormFieldControlLabel} style={{ 'padding-left': 'var(--spacing-sm)' }}>
-                            {getParsedValueFromMetaPath(meta)}.
-                          </label>
-                        </Show>
-                      </div>
-                    </div>
-                  );
-                }}
-              </For>
-            </Show>
-          </Show>
+            </Match>
+            <Match when={currentSection() === ConfigSections.Debug}>
+              <DebugConfigSection />
+            </Match>
+          </Switch>
         </div>
       </div>
 

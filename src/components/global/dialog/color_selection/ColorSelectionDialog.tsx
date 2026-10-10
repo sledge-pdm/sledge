@@ -1,6 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { color, ColorBox, Dialog, Icon, RadioButton, Slider } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, Show } from 'solid-js';
+import { SelectionModeSelector } from '~/components/section/editor/tool/config/SelectionModeSelector';
 import { isBusy } from '~/features/busy';
 import {
   applyColorSelection,
@@ -12,7 +13,6 @@ import {
   setColorSelectionThreshold,
   startColorSelectionPick,
 } from '~/features/selection/color_selection';
-import { SelectionModeSelector } from '~/features/tools/presets/SelectionModeField';
 import { flexCol } from '~/styles/styles';
 
 const contentRoot = css`

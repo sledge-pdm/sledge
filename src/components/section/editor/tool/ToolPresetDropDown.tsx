@@ -2,7 +2,6 @@ import { Dropdown } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { ToolCategoryId } from '~/features/tools/Tools';
 import { setToolStore, toolStore } from '~/stores/EditorStores';
-import { eventBus } from '~/utils/EventBus';
 
 interface Props {
   toolId: ToolCategoryId;
@@ -24,7 +23,6 @@ const ToolPresetDropDown: Component<Props> = (props) => {
       value={selectedPreset() ?? 'default'}
       onChange={(v) => {
         setToolStore('tools', props.toolId, 'presets', 'selected', v);
-        eventBus.emit('tools:presetLoaded', { toolId: props.toolId });
       }}
     />
   );

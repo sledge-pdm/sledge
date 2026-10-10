@@ -9,7 +9,6 @@ import { InteractStore, defaultInteractStore } from '~/stores/editor/InteractSto
 import { LogStore, defaultLogStore } from '~/stores/editor/LogStore';
 import { ToolStore, defaultToolStore } from '~/stores/editor/ToolStore';
 import { LastSettingsStore, defaultLastSettingsStore } from '~/stores/global/LastSettingsStore';
-import { eventBus } from '~/utils/EventBus';
 
 export const initEditorStore = () => {
   const [appearanceStore, setAppearanceStore] = createStore<AppearanceStore>(createDefaultAppearanceStore());
@@ -115,7 +114,6 @@ export const loadEditorStateStore = (state: EditorStateStore): EditorStateStore 
         }
       : record.presets;
     setToolStore('tools', record.toolId, 'presets', migratedPresets);
-    eventBus.emit('tools:presetLoaded', { toolId: record.toolId });
   });
 
   // init explorer path on load

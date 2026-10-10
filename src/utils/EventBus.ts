@@ -15,8 +15,6 @@ export type Events = {
 
   'selection:updateLassoOutline': {};
 
-  'tools:presetLoaded': { toolId?: string };
-
   'webgl:requestUpdate': { context: string };
   'webgl:requestResume': {};
   'webgl:renderPaused': {};

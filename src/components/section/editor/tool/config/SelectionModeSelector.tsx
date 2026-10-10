@@ -83,9 +83,3 @@ export const SelectionModeSelector = (props: SelectionModeFieldProps) => {
     </div>
   );
 };
-
-const SelectionModeField = () => {
-  return <SelectionModeSelector />;
-};
-
-export default SelectionModeField;

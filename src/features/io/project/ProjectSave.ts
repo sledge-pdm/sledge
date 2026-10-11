@@ -1,3 +1,4 @@
+import { createSignal } from 'solid-js';
 import { formatProgress, isBusy, runExclusive, setBusyProgress, type BusyHandle, type BusyMode } from '~/features/busy';
 import { setSavedLocation } from '~/features/config';
 import { addRecentFile } from '~/features/config/RecentFileController';
@@ -101,7 +102,11 @@ type SaveTarget = { name?: string; existingPath?: string };
  */
 export type SaveResult = 'saved' | 'failed' | 'cancelled';
 
-let saveInFlight: Promise<SaveResult> | undefined;
+/**
+ * @description the running save. a signal so a display can follow it: a save that is one step of a quit runs
+ *   inside the period the quit holds, so the busy state never names it.
+ */
+const [saveInFlight, setSaveInFlight] = createSignal<Promise<SaveResult>>();
 let saveInFlightTarget: SaveTarget | undefined;
 let saveAbort: AbortController | undefined;
 /** @description set once the running save reaches its write; from then on it cannot be cancelled. */
@@ -123,10 +128,11 @@ export interface SaveProjectOptions {
 export async function saveProject(name?: string, existingPath?: string, options?: SaveProjectOptions): Promise<SaveResult> {
   // checked before taking the window: a repeat of the running save is answered by that save, and the
   // window it would be asking for is the one that save already holds.
-  if (saveInFlight) {
+  const running = saveInFlight();
+  if (running) {
     if (saveInFlightTarget?.name === name && saveInFlightTarget?.existingPath === existingPath) {
       logSystemWarn('Save already in progress. Reusing the in-flight save.', { label: LOG_LABEL });
-      return saveInFlight;
+      return running;
     }
     logUserWarn('another save is still running.', { label: LOG_LABEL, persistent: true });
     return 'failed';
@@ -144,7 +150,7 @@ export async function saveProject(name?: string, existingPath?: string, options?
   saveAbort = controller;
   saveInFlightTarget = { name, existingPath };
   writeStarted = false;
-  saveInFlight = runExclusive(
+  const save = runExclusive(
     'save',
     async (handle) => {
       // open gestures and pending history entries are committed first, so the assembled bytes match the
@@ -162,17 +168,18 @@ export async function saveProject(name?: string, existingPath?: string, options?
   )
     .then((result) => result ?? 'failed')
     .finally(() => {
-      saveInFlight = undefined;
+      setSaveInFlight(undefined);
       saveInFlightTarget = undefined;
       writeStarted = false;
       if (saveAbort === controller) saveAbort = undefined;
     });
-  return saveInFlight;
+  setSaveInFlight(save);
+  return save;
 }
 
-/** @description whether a save is running and could still be cancelled. */
+/** @description whether a save is running, wherever it was started from. reactive. */
 export function isSaveInProgress(): boolean {
-  return saveInFlight !== undefined;
+  return saveInFlight() !== undefined;
 }
 
 /**
@@ -181,7 +188,7 @@ export function isSaveInProgress(): boolean {
  *   records the write, leaving a file on disk the editor does not know it wrote.
  */
 export function isSaveCancellable(): boolean {
-  return saveInFlight !== undefined && !writeStarted;
+  return saveInFlight() !== undefined && !writeStarted;
 }
 
 /**

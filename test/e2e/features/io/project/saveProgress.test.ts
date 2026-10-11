@@ -1,4 +1,6 @@
+import { createEffect, createRoot } from 'solid-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { runExclusive } from '~/features/busy';
 import { cancelSave, isSaveInProgress, saveProject } from '~/features/io/project/ProjectSave';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
 import { isProjectChanged, markProjectChanged } from '~/features/project';
@@ -145,6 +147,22 @@ describe('io/project/save progress and cancellation (e2e)', () => {
 
     await running;
     expect(isSaveInProgress()).toBe(false);
+  });
+
+  it('can be followed by a display, for a save inside a quit as well', async () => {
+    const seen: boolean[] = [];
+    const dispose = createRoot((disposeRoot) => {
+      createEffect(() => seen.push(isSaveInProgress()));
+      return disposeRoot;
+    });
+    await Promise.resolve();
+
+    // a save that is one step of a quit leaves the busy state on `quit`, so nothing else says it is running
+    await runExclusive('quit', () => saveProject('demo.sledge', 'C:/work', { busy: 'inherit' }));
+    await Promise.resolve();
+    dispose();
+
+    expect(seen).toEqual([false, true, false]);
   });
 
   it('cancels without writing and leaves the project unsaved', async () => {

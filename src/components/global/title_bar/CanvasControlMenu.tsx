@@ -1,9 +1,10 @@
 import { css } from '@acab/ecsstatic';
 import { color, Icon } from '@sledge-pdm/ui';
-import { Component, createMemo } from 'solid-js';
+import { Component, createMemo, Show } from 'solid-js';
 import { isBusy } from '~/features/busy';
 import { resetOrientation, setRotation, toggleHorizontalFlip, toggleVerticalFlip } from '~/features/canvas';
 import { appearanceStore, interactStore, setAppearanceStore } from '~/stores/EditorStores';
+import { globalConfig, setGlobalConfig } from '~/stores/GlobalStores';
 
 const iconContainer = css`
   display: flex;
@@ -73,6 +74,15 @@ const CanvasControlMenu: Component = () => {
         enabled={appearanceStore.onscreenControl}
         disabled={isBusy()}
       />
+      <Show when={import.meta.env.DEV}>
+        <CanvasControlMenuItem
+          tooltipTitle='toggle onscreenControl.'
+          icon9px='/assets/icons/canvas/perf_monitor_9.png'
+          onClick={() => setGlobalConfig('debug', 'showPerformanceMonitor', (v) => !v)}
+          enabled={globalConfig.debug.showPerformanceMonitor}
+          disabled={isBusy()}
+        />
+      </Show>
     </>
   );
 };

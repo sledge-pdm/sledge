@@ -45,6 +45,7 @@ const bottomInfoContainerRight = css`
 const sliderContainer = css`
   display: flex;
   flex-direction: row;
+  align-items: center;
   width: 160px;
   overflow: visible;
 `;
@@ -91,6 +92,7 @@ const BottomBar: Component = () => {
             </p>
             <Slider
               labelMode='none'
+              appearance='simple'
               value={interactStore.rotation}
               min={-180}
               max={180}

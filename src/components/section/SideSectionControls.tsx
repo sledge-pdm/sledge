@@ -255,6 +255,7 @@ const SideSectionControls: Component<Props> = (props) => {
             <div class={zoomSliderContainer}>
               <Slider
                 orientation='vertical'
+                appearance='simple'
                 labelMode='none'
                 value={interactStore.zoom}
                 min={getMinZoom()}

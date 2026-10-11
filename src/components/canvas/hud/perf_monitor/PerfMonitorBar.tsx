@@ -78,7 +78,7 @@ const PerfMonitorBar: Component = () => {
     const jsMiB = (jsMemory()?.usedJSHeapSize ?? 0) / 1024 / 1024;
     setSparkLineStore((prev) => {
       return {
-        jsHeap: [...prev.jsHeap, jsMiB].slice(-12),
+        jsHeap: [...prev.jsHeap, jsMiB].slice(-14),
       };
     });
   });

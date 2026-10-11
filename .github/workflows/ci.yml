@@ -40,6 +40,7 @@ jobs:
               - 'wasm/**'
               - '**/Cargo.toml'
               - '**/Cargo.lock'
+              - '.github/workflows/ci.yml'
             ts:
               - '**/*.ts'
               - '**/*.tsx'
@@ -52,6 +53,7 @@ jobs:
               - '**/tsconfig.json'
               - '**/vite.config.*'
               - '**/vitest.config.*'
+              - '.github/workflows/ci.yml'
 
   # TypeScript/Node.js quality checks
   ts-quality:

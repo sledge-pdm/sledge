@@ -96,6 +96,9 @@ jobs:
       - name: Prettier check
         run: pnpm exec prettier --check .
 
+      - name: ESLint
+        run: pnpm lint
+
       - name: Cache Playwright Browsers
         uses: actions/cache@v6
         id: playwright-cache

@@ -2,9 +2,9 @@ import { PosterizeEffect } from '@sledge-pdm/frasco';
 import { Slider } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { EffectControl } from '~/components/section/effects/EffectControl';
+import { EffectItem } from '~/components/section/effects/EffectItem';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
-import { EffectWrapper } from '~/components/section/effects/EffectWrapper';
+import { EffectControl } from '~/components/section/effects/items/common/EffectControl';
 import { applyEffect } from '~/features/effect/Effects';
 
 const Posterize: Component<EffectSectionProps> = (props) => {
@@ -15,7 +15,7 @@ const Posterize: Component<EffectSectionProps> = (props) => {
   });
 
   return (
-    <EffectWrapper
+    <EffectItem
       title='posterize.'
       onApply={() => {
         applyEffect(props.selectedLayerId(), 'posterize', (layer) =>
@@ -38,7 +38,7 @@ const Posterize: Component<EffectSectionProps> = (props) => {
           }}
         />
       </EffectControl>
-    </EffectWrapper>
+    </EffectItem>
   );
 };
 

@@ -1,14 +1,14 @@
 import { Dropdown, Slider } from '@sledge-pdm/ui';
 import { Component, Show } from 'solid-js';
-import { ToolConfigProps } from '~/components/section/editor/tool/config/ToolConfigProps';
-import ToolConfigRow from '~/components/section/editor/tool/config/ToolConfigRow';
+import { ToolConfigProps } from '~/components/section/editor/tool/config/common/ToolConfigProps';
+import ToolConfigRow from '~/components/section/editor/tool/config/common/ToolConfigRow';
+import { toolConfigForm } from '~/components/section/editor/tool/config/common/ToolConfigStyles';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import { FillPresetConfig } from '~/features/tools/Tools';
-import { flexCol } from '~/styles/styles';
 
 const FillToolConfig: Component<ToolConfigProps<FillPresetConfig>> = (props) => {
   return (
-    <div class={flexCol} style={{ gap: '4px' }}>
+    <div class={toolConfigForm}>
       <ToolConfigRow label='Threshold'>
         <Slider
           labelMode='left'

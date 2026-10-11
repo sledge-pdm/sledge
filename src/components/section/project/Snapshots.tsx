@@ -2,7 +2,7 @@ import { Component, createEffect, createMemo, createSignal, For, Show } from 'so
 
 import { css } from '@acab/ecsstatic';
 import { clsx, getProjectAdapter, gzipInflate, ProjectAdapter, ProjectSnapshot, toUint8ClampedArray } from '@sledge-pdm/core';
-import { Icon, Nothing } from '@sledge-pdm/ui';
+import { FoldBox, Nothing } from '@sledge-pdm/ui';
 import SectionItem from '~/components/section/SectionItem';
 import { logSystemWarn } from '~/features/log';
 import { deleteSnapshot, loadSnapshot, registerCurrentProjectSnapshot, RuntimeProjectSnapshot } from '~/features/snapshot';
@@ -74,21 +74,10 @@ const Snapshots: Component = () => {
   );
 };
 
-const itemRoot = css`
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--color-border-secondary);
-`;
 const itemHeader = css`
   display: flex;
   flex-direction: row;
   width: 100%;
-  padding: 6px 10px;
-  cursor: pointer;
-  background-color: var(--color-button-bg);
-  &:hover {
-    background-color: var(--color-button-hover);
-  }
   &:hover > p {
     color: var(--color-active);
   }
@@ -107,7 +96,7 @@ const itemContent = css`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 8px 12px 12px 12px;
+  padding: 4px;
 `;
 const itemDescription = css`
   color: var(--color-muted);
@@ -136,8 +125,6 @@ const itemButtonContainer = css`
 const SnapshotItem: Component<{ snapshot: ProjectSnapshot | RuntimeProjectSnapshot; onRestore?: () => void; onDelete?: () => void }> = (props) => {
   const { thumbnail, ...snapshot } = props.snapshot;
 
-  const [expanded, setExpanded] = createSignal(false);
-
   let canvasRef: HTMLCanvasElement;
 
   const loadThumbnail = () => {
@@ -163,18 +150,13 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot | RuntimeProjectSnapsh
     }
   };
 
-  createEffect(() => {
-    if (expanded()) loadThumbnail();
-    else unloadThumbnail();
-  });
-
   const createdAt = new Date(snapshot.createdAt);
   const { saveTimeText, updatePastTimeStamp } = useTimeAgoText(snapshot.createdAt);
 
   const [optionalAdapter, setOptionalAdapter] = createSignal<ProjectAdapter<any> | undefined>(undefined);
 
   createEffect(() => {
-    if (expanded() && snapshot.project) {
+    if (snapshot.project) {
       try {
         const adapter = getProjectAdapter(snapshot.project);
         setOptionalAdapter(adapter);
@@ -185,50 +167,40 @@ const SnapshotItem: Component<{ snapshot: ProjectSnapshot | RuntimeProjectSnapsh
   });
 
   return (
-    <div class={itemRoot}>
-      <div
-        class={itemHeader}
-        onClick={() => {
-          setExpanded(!expanded());
-        }}
-      >
-        <p class={itemName}>{snapshot.name}</p>
-        <p class={agoText}>{saveTimeText()}</p>
+    <FoldBox
+      titleContent={
+        <div class={itemHeader}>
+          <p class={itemName}>{snapshot.name}</p>
+          <p class={agoText}>{saveTimeText()}</p>
+        </div>
+      }
+      onToggle={(opened) => {
+        if (opened) loadThumbnail();
+        else unloadThumbnail();
+      }}
+    >
+      <div class={itemContent}>
+        <p class={itemDescription}>{snapshot.description ?? '[ no description ]'}</p>
+        <p class={itemDescription}>
+          {createdAt.toLocaleDateString()} {createdAt.toLocaleTimeString()}
+        </p>
+        <Show when={optionalAdapter() !== undefined}>
+          <p class={itemDescription}>
+            {optionalAdapter()?.getCanvasInfo().size.width}x{optionalAdapter()?.getCanvasInfo().size.height}
+          </p>
+        </Show>
+        <Show when={thumbnail}>
+          <canvas id={snapshot.id} class={thumbCanvas} ref={(ref) => (canvasRef = ref)} width={thumbnail!.width} height={thumbnail!.height} />
+        </Show>
 
-        <div
-          style={{
-            height: 'fit-content',
-            transform: expanded() ? 'none' : 'rotate(180deg)',
-          }}
-        >
-          <Icon src={'/assets/icons/misc/triangle_7.png'} base={7} />
+        <div class={itemButtonContainer}>
+          <button onClick={props.onRestore}>restore.</button>
+          <button class={errorButton} onClick={props.onDelete}>
+            delete.
+          </button>
         </div>
       </div>
-
-      <Show when={expanded()}>
-        <div class={itemContent}>
-          <p class={itemDescription}>{snapshot.description ?? '[ no description ]'}</p>
-          <p class={itemDescription}>
-            {createdAt.toLocaleDateString()} {createdAt.toLocaleTimeString()}
-          </p>
-          <Show when={optionalAdapter() !== undefined}>
-            <p class={itemDescription}>
-              {optionalAdapter()?.getCanvasInfo().size.width}x{optionalAdapter()?.getCanvasInfo().size.height}
-            </p>
-          </Show>
-          <Show when={thumbnail}>
-            <canvas id={snapshot.id} class={thumbCanvas} ref={(ref) => (canvasRef = ref)} width={thumbnail!.width} height={thumbnail!.height} />
-          </Show>
-
-          <div class={itemButtonContainer}>
-            <button onClick={props.onRestore}>restore.</button>
-            <button class={errorButton} onClick={props.onDelete}>
-              delete.
-            </button>
-          </div>
-        </div>
-      </Show>
-    </div>
+    </FoldBox>
   );
 };
 

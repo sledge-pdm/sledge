@@ -2,9 +2,9 @@ import { DitheringEffect } from '@sledge-pdm/frasco';
 import { Dropdown, DropdownOption, Slider } from '@sledge-pdm/ui';
 import { Component } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { EffectControl } from '~/components/section/effects/EffectControl';
+import { EffectItem } from '~/components/section/effects/EffectItem';
 import { EffectSectionProps } from '~/components/section/effects/Effects';
-import { EffectWrapper } from '~/components/section/effects/EffectWrapper';
+import { EffectControl } from '~/components/section/effects/items/common/EffectControl';
 import { applyEffect } from '~/features/effect/Effects';
 
 type Mode = 'ordered' | 'random';
@@ -26,7 +26,7 @@ const Dithering: Component<EffectSectionProps> = (props) => {
   });
 
   return (
-    <EffectWrapper
+    <EffectItem
       title='dithering.'
       onApply={() => {
         applyEffect(props.selectedLayerId(), 'dithering', (layer) =>
@@ -82,7 +82,7 @@ const Dithering: Component<EffectSectionProps> = (props) => {
           }}
         />
       </EffectControl>
-    </EffectWrapper>
+    </EffectItem>
   );
 };
 

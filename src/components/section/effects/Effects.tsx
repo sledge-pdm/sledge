@@ -2,12 +2,12 @@ import { css } from '@acab/ecsstatic';
 import { Dropdown, DropdownOption } from '@sledge-pdm/ui';
 import { Accessor, Component, createMemo, createSignal } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
-import BrightnessContrast from '~/components/section/effects/effects/BrightnessContrast';
-import Dithering from '~/components/section/effects/effects/Dithering';
-import GaussianBlur from '~/components/section/effects/effects/GaussianBlur';
-import GrayScale from '~/components/section/effects/effects/GrayScale';
-import Invert from '~/components/section/effects/effects/Invert';
-import Posterize from '~/components/section/effects/effects/Posterize';
+import BrightnessContrast from '~/components/section/effects/items/BrightnessContrast';
+import Dithering from '~/components/section/effects/items/Dithering';
+import GaussianBlur from '~/components/section/effects/items/GaussianBlur';
+import GrayScale from '~/components/section/effects/items/GrayScale';
+import Invert from '~/components/section/effects/items/Invert';
+import Posterize from '~/components/section/effects/items/Posterize';
 import { activeLayer, allLayers, findLayerById } from '~/features/layer';
 import { projectStore } from '~/stores/RuntimeProjectStore';
 
@@ -25,7 +25,7 @@ const previewContainer = css`
   align-self: center;
   width: fit-content;
   height: fit-content;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 `;
 
 const applyToText = css`
@@ -36,8 +36,7 @@ const layerSelectContainer = css`
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-left: 12px;
-  margin-bottom: 16px;
+  margin: 8px;
 `;
 
 export interface EffectSectionProps {

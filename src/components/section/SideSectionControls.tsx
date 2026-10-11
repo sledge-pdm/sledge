@@ -18,6 +18,7 @@ const controlsRoot = css`
   justify-content: start;
   align-items: center;
   background-color: var(--color-controls);
+  z-index: var(--zindex-side-section);
 `;
 
 const controlsList = css`
@@ -232,8 +233,6 @@ const SideSectionControls: Component<Props> = (props) => {
         // same token as the panel's own edge so the two lines match when the panel is open.
         'border-right': props.side === 'leftSide' ? `1px solid ${color.borderSecondary}` : 'none',
         'border-left': props.side === 'rightSide' ? `1px solid ${color.borderSecondary}` : 'none',
-
-        'z-index': 'var(--zindex-side-section)',
       }}
     >
       <div class={controlsList}>
@@ -256,6 +255,7 @@ const SideSectionControls: Component<Props> = (props) => {
             <div class={zoomSliderContainer}>
               <Slider
                 orientation='vertical'
+                appearance='simple'
                 labelMode='none'
                 value={interactStore.zoom}
                 min={getMinZoom()}

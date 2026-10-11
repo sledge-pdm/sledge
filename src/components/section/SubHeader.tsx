@@ -9,25 +9,19 @@ const container = css`
   flex-direction: row;
   align-items: center;
   background-color: var(--color-surface);
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 8px;
+  padding-left: 4px;
   padding-right: 4px;
   width: 100%;
-  height: 14px;
+  height: 12px;
+  cursor: auto;
 `;
 
 const expandableContainer = css`
+  cursor: pointer;
+
   &:hover > p {
     color: var(--color-enabled);
   }
-`;
-
-const captionContainer = css`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
 `;
 
 const iconsContainer = css`
@@ -60,6 +54,7 @@ interface Props {
   onExpandChanged?: (expanded: boolean) => void;
   children: JSX.Element;
 }
+
 export const SectionSubHeader: Component<Props> = (props) => {
   const [expanded, setExpanded] = createSignal(props.defaultExpanded ?? true);
 
@@ -73,12 +68,7 @@ export const SectionSubHeader: Component<Props> = (props) => {
         }
       }}
     >
-      <div
-        class={clsx(container, props.expandable && expandableContainer)}
-        style={{
-          cursor: props.expandable ? 'pointer' : 'auto',
-        }}
-      >
+      <div class={clsx(container, props.expandable && expandableContainer)}>
         <p class={sectionCaption}>{props.children}</p>
 
         <Show when={expanded() && props.icons}>

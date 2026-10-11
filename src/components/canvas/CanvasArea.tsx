@@ -10,7 +10,6 @@ import { logSystemWarn } from '~/features/log/service';
 import { appearanceStore, interactStore } from '~/stores/EditorStores';
 import { eventBus, Events } from '~/utils/EventBus';
 import { window as platformWindow, UnlistenFn } from '~/utils/platform';
-import PerformanceMonitor from './hud/PerformanceMonitor';
 
 import createRAF, { targetFPS } from '@solid-primitives/raf';
 import CanvasError from '~/components/canvas/hud/CanvasError';
@@ -21,6 +20,7 @@ import CanvasOverlaySVG from '~/components/canvas/overlays/CanvasOverlaySVG';
 import CanvasResizeFrame from '~/components/canvas/overlays/resize_frame/CanvasResizeFrame';
 import SideSectionsOverlay from '~/components/section/SideSectionOverlay';
 import { globalConfig } from '~/stores/GlobalStores';
+import PerfMonitorBar from './hud/perf_monitor/PerfMonitorBar';
 import { OnCanvasFloatingAreaMenu, OuterFloatingAreaMenu } from './overlays/area_menu/FloatingAreaMenu';
 
 const canvasArea = css`
@@ -247,7 +247,8 @@ const CanvasArea: Component = () => {
             <CanvasControls />
             <OuterSelectionMenu />
             <OuterFloatingAreaMenu />
-            <PerformanceMonitor />
+            {/*<PerformanceMonitor />*/}
+            <PerfMonitorBar />
             <CanvasError />
           </div>
         </div>

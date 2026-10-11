@@ -4,5 +4,8 @@ allowBuilds:
   simple-git-hooks: true
 minimumReleaseAgeExclude:
   - '@sledge-pdm/*'
+
+# To re-link local packages use:
+# pnpm install --config.optimistic-repeat-install=false
 # overrides:
 #   '@sledge-pdm/ui': link:../../packages/ui

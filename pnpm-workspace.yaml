@@ -4,3 +4,5 @@ allowBuilds:
   simple-git-hooks: true
 minimumReleaseAgeExclude:
   - '@sledge-pdm/*'
+# overrides:
+#   '@sledge-pdm/ui': link:../../packages/ui

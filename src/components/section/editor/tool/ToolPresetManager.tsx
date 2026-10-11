@@ -1,10 +1,15 @@
-import { Component, Show } from 'solid-js';
+import { Component, Match, Show, Switch } from 'solid-js';
+import AutoSelectionToolConfig from '~/components/section/editor/tool/config/AutoSelectionToolConfig';
+import EraserToolConfig from '~/components/section/editor/tool/config/EraserToolConfig';
+import FillToolConfig from '~/components/section/editor/tool/config/FillToolConfig';
+import LassoSelectionToolConfig from '~/components/section/editor/tool/config/LassoSelectionToolConfig';
+import PenToolConfig from '~/components/section/editor/tool/config/PenToolConfig';
+import RectSelectionToolConfig from '~/components/section/editor/tool/config/RectSelectionToolConfig';
 import ToolPresetDropDown from '~/components/section/editor/tool/ToolPresetDropDown';
-import { updateToolPresetConfig } from '~/features/tools/ToolController';
-import { ToolCategoryId } from '~/features/tools/Tools';
+import { getCurrentPresetConfig, updateToolPresetConfig } from '~/features/tools/ToolController';
+import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
 import { flexCol } from '~/styles/styles';
-import ToolPresetConfigForm from './ToolPresetConfigForm';
 
 interface Props {
   toolId: ToolCategoryId;
@@ -14,6 +19,7 @@ const ToolPresetManager: Component<Props> = (props) => {
   const currentTool = () => toolStore.tools[props.toolId];
   const presets = () => currentTool()?.presets;
   const selectedPreset = () => presets()?.selected;
+  const config = () => getCurrentPresetConfig(props.toolId);
 
   const handleConfigChange = (key: string, value: any) => {
     if (!selectedPreset()) return;
@@ -27,7 +33,28 @@ const ToolPresetManager: Component<Props> = (props) => {
           <ToolPresetDropDown toolId={props.toolId} />
         </Show>
 
-        <ToolPresetConfigForm toolId={props.toolId} onConfigChange={handleConfigChange} />
+        <Show when={config()}>
+          <Switch>
+            <Match when={props.toolId === TOOL_CATEGORIES.PEN}>
+              <PenToolConfig config={config()!} onChange={handleConfigChange} />
+            </Match>
+            <Match when={props.toolId === TOOL_CATEGORIES.ERASER}>
+              <EraserToolConfig config={config()!} onChange={handleConfigChange} />
+            </Match>
+            <Match when={props.toolId === TOOL_CATEGORIES.FILL}>
+              <FillToolConfig config={config()!} onChange={handleConfigChange} />
+            </Match>
+            <Match when={props.toolId === TOOL_CATEGORIES.RECT_SELECTION}>
+              <RectSelectionToolConfig />
+            </Match>
+            <Match when={props.toolId === TOOL_CATEGORIES.LASSO_SELECTION}>
+              <LassoSelectionToolConfig config={config()!} onChange={handleConfigChange} />
+            </Match>
+            <Match when={props.toolId === TOOL_CATEGORIES.AUTO_SELECTION}>
+              <AutoSelectionToolConfig config={config()!} onChange={handleConfigChange} />
+            </Match>
+          </Switch>
+        </Show>
       </div>
     </div>
   );

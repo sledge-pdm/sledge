@@ -40,8 +40,8 @@ const sideAreaContentWrapper = css`
   bottom: 0;
   left: 0;
   right: 0;
-  padding-top: 24px;
-  padding-bottom: 48px;
+  padding-top: 16px;
+  padding-bottom: 20px;
   overflow-y: auto;
 
   &::-webkit-scrollbar {
@@ -63,8 +63,8 @@ const sideAreaContent = css`
   flex-direction: column;
   overflow-x: visible;
   gap: 8px;
-  padding-left: 12px;
-  padding-right: 12px;
+  padding-left: 10px;
+  padding-right: 10px;
 `;
 
 interface Props {

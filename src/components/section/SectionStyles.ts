@@ -13,7 +13,7 @@ export const sectionContent = css`
   flex-direction: column;
   width: 100%;
   padding-top: 4px;
-  padding-left: 16px;
+  padding-left: 12px;
   padding-right: 8px;
   padding-bottom: 12px;
   overflow: visible;
@@ -21,9 +21,9 @@ export const sectionContent = css`
 
 export const sectionCaption = css`
   font-family: ZFB09;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   font-size: 8px;
-  opacity: 1;
+  color: var(--color-on-background-secondary);
   white-space: nowrap;
   margin-right: auto;
 `;

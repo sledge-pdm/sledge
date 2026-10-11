@@ -76,7 +76,10 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
-  prepare-dev-tags:
+  # The builds upload to a draft release for the dev version tag. dev-latest is replaced only after
+  # every build has succeeded (publish-dev-latest), so the dev update channel keeps serving the
+  # previous build until then.
+  prepare-staging-release:
     needs: [resolve-dev-version]
     permissions:
       contents: write
@@ -87,29 +90,25 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      - name: Update dev tags
+      - name: Update dev tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -f ${{ needs.resolve-dev-version.outputs.dev_tag }} ${{ github.sha }}
           git push -f origin ${{ needs.resolve-dev-version.outputs.dev_tag }}
-          git tag -f dev-latest ${{ github.sha }}
-          git push -f origin dev-latest
-      - name: Recreate dev-latest release
+      - name: Create staging release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if gh release view dev-latest >/dev/null 2>&1; then
-            gh release delete dev-latest -y
-          fi
-          gh release create dev-latest \
+          gh release create "${{ needs.resolve-dev-version.outputs.dev_tag }}" \
+            --draft \
             --prerelease \
-            --title "dev-latest" \
-            --notes "Development channel release (auto-updated)." \
-            --target "${{ github.sha }}"
+            --verify-tag \
+            --title "${{ needs.resolve-dev-version.outputs.dev_tag }}" \
+            --notes "Staging release for dev-latest. Deleted when the dev-release workflow finishes."
 
   build:
-    needs: [resolve-dev-version, prepare-dev-tags]
+    needs: [resolve-dev-version, prepare-staging-release]
     permissions:
       contents: write
       packages: read
@@ -184,7 +183,7 @@ jobs:
           $newText = [regex]::Replace($text, $pattern, $replacement, 1)
           Set-Content -LiteralPath $manifest -Value $newText -Encoding utf8
 
-      # Tauri Build + Release Upload
+      # Tauri Build + Upload to the staging release
       - uses: tauri-apps/tauri-action@v0
         id: tauri-build
         env:
@@ -192,10 +191,10 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: dev-latest
-          releaseName: dev-latest
+          tagName: ${{ needs.resolve-dev-version.outputs.dev_tag }}
+          releaseName: ${{ needs.resolve-dev-version.outputs.dev_tag }}
           releaseBody: 'This is a development build. If you are new for sledge, install the stable version (x.y.z) instead of this.'
-          releaseDraft: false
+          releaseDraft: true
           prerelease: true
           releaseCommitish: ${{ github.sha }}
           projectPath: '.'
@@ -204,8 +203,65 @@ jobs:
           updaterJsonKeepUniversal: true
           args: ${{ matrix.args }}
 
+  publish-dev-latest:
+    needs: [resolve-dev-version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DEV_TAG: ${{ needs.resolve-dev-version.outputs.dev_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download staging release assets
+        run: gh release download "$DEV_TAG" --dir dist
+
+      # tauri-action wrote download URLs for the staging release. Point them at dev-latest, and stop
+      # before touching dev-latest when a platform is missing or a URL names a file that was not built.
+      - name: Point latest.json at dev-latest
+        run: |
+          node - <<'JS'
+          const fs = require('node:fs');
+          const file = 'dist/latest.json';
+          const manifest = JSON.parse(fs.readFileSync(file, 'utf8'));
+          const required = ['darwin-aarch64', 'darwin-x86_64', 'linux-x86_64', 'windows-x86_64'];
+          const missing = required.filter((key) => !manifest.platforms[key]);
+          if (missing.length > 0) {
+            throw new Error(`latest.json has no entry for: ${missing.join(', ')}`);
+          }
+          const pattern = /\/releases\/download\/[^/]+\//;
+          for (const [key, platform] of Object.entries(manifest.platforms)) {
+            const name = decodeURIComponent(platform.url.split('/').pop());
+            if (!pattern.test(platform.url) || !fs.existsSync(`dist/${name}`)) {
+              throw new Error(`${key}: ${platform.url} does not point to a staging release asset`);
+            }
+            platform.url = platform.url.replace(pattern, '/releases/download/dev-latest/');
+          }
+          fs.writeFileSync(file, JSON.stringify(manifest, null, 2));
+          JS
+
+      - name: Update dev-latest tag
+        run: |
+          git tag -f dev-latest "$GITHUB_SHA"
+          git push -f origin dev-latest
+
+      # With assets given, gh creates the release as a draft, uploads them, and then publishes it,
+      # so dev-latest is absent only from the delete until the upload finishes.
+      - name: Replace dev-latest release
+        run: |
+          if gh release view dev-latest >/dev/null 2>&1; then
+            gh release delete dev-latest -y
+          fi
+          gh release create dev-latest dist/* \
+            --prerelease \
+            --title "dev-latest" \
+            --notes "Development channel release (auto-updated)." \
+            --target "$GITHUB_SHA"
+
   archive-dev-build:
-    needs: [build, resolve-dev-version]
+    needs: [publish-dev-latest, resolve-dev-version]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -224,13 +280,23 @@ jobs:
           path: dist/**
           retention-days: 30
 
-  cleanup-trigger-tag:
-    needs: [resolve-dev-version, prepare-dev-tags, build, archive-dev-build]
+  cleanup:
+    needs: [resolve-dev-version, prepare-staging-release, build, publish-dev-latest, archive-dev-build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     if: always()
     steps:
+      - name: Delete staging release
+        if: needs.resolve-dev-version.outputs.dev_tag != ''
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEV_TAG: ${{ needs.resolve-dev-version.outputs.dev_tag }}
+        run: |
+          if [ "$(gh release view "$DEV_TAG" --json isDraft --jq .isDraft 2>/dev/null)" = "true" ]; then
+            gh release delete "$DEV_TAG" -y
+          fi
       - name: Delete dev-release tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

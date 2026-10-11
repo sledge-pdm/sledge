@@ -7,11 +7,20 @@ import { setProjectStore } from '~/stores/RuntimeProjectStore';
 
 const mocks = vi.hoisted(() => ({
   saveProject: vi.fn(async () => true),
+  /** what `isSaveInProgress` answers. replaced by the factory below once the signal behind it exists. */
+  setSaveInProgress: (_running: boolean) => {},
 }));
 
-vi.mock('~/features/io/project/ProjectSave', () => ({
-  saveProject: mocks.saveProject,
-}));
+vi.mock('~/features/io/project/ProjectSave', async () => {
+  // a signal, as the real one is, so the button follows a save that starts or ends while it is shown
+  const { createSignal } = await import('solid-js');
+  const [saveInProgress, setSaveInProgress] = createSignal(false);
+  mocks.setSaveInProgress = (running) => setSaveInProgress(running);
+  return {
+    saveProject: mocks.saveProject,
+    isSaveInProgress: saveInProgress,
+  };
+});
 
 /** let solid flush the render effects the emit above scheduled. */
 const settled = () => new Promise((resolve) => setTimeout(resolve, 0));
@@ -25,6 +34,7 @@ describe('SaveSection (e2e)', () => {
 
   beforeEach(() => {
     mocks.saveProject.mockClear();
+    mocks.setSaveInProgress(false);
 
     setIOStore('openAs', 'project');
     setIOStore('savedLocation', { name: 'demo.sledge', path: 'C:/work' });
@@ -88,6 +98,30 @@ describe('SaveSection (e2e)', () => {
       // there is no saving over an import, but this button must not claim to be the thing running either
       expect(button().disabled).toBe(true);
       expect(button().textContent).toBe('save');
+    });
+  });
+
+  it('does not claim a save while the quit prompt is up', async () => {
+    // a quit holds the window from its unsaved-changes prompt on, before the user has chosen to save
+    await whileRunning('quit', async () => {
+      expect(button().disabled).toBe(true);
+      expect(button().textContent).toBe('save');
+    });
+  });
+
+  it('follows the save a quit runs, and only that', async () => {
+    await whileRunning('quit', async () => {
+      // "Save and Quit": the save runs inside the period the quit holds
+      mocks.setSaveInProgress(true);
+      await settled();
+      expect(button().textContent).toBe('saving...');
+      expect(button().disabled).toBe(true);
+
+      // the save is over, but the quit holds the window until it closes
+      mocks.setSaveInProgress(false);
+      await settled();
+      expect(button().textContent).toBe('save');
+      expect(button().disabled).toBe(true);
     });
   });
 

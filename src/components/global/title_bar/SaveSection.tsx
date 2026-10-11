@@ -2,7 +2,7 @@ import { css } from '@acab/ecsstatic';
 import { color, Icon, MenuList, MenuListOption } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { busyStore } from '~/features/busy';
-import { saveProject } from '~/features/io/project/ProjectSave';
+import { isSaveInProgress, saveProject } from '~/features/io/project/ProjectSave';
 import rawAreaPattern from '~/patterns/SelectionAreaPattern.svg?raw';
 import { ioStore } from '~/stores/EditorStores';
 import { projectStore } from '~/stores/RuntimeProjectStore';
@@ -87,8 +87,12 @@ const SaveSection: Component = () => {
    * miss the stretches that report no progress, above all the file dialog a "save as" opens first.
    */
   const isOperationRunning = () => busyStore.operation !== undefined;
-  /** whether the operation running is this button's own. what it is doing is reported by the bottom bar. */
-  const isSaving = () => busyStore.operation === 'save' || busyStore.operation === 'quit';
+  /**
+   * whether the operation running is this button's own. a quit holds the window from its unsaved-changes
+   * prompt on, and saves only if the user chooses to, so it counts only while that save runs. what the save
+   * is doing is reported by the bottom bar.
+   */
+  const isSaving = () => busyStore.operation === 'save' || (busyStore.operation === 'quit' && isSaveInProgress());
 
   const save = async () => {
     if (isOperationRunning()) return;

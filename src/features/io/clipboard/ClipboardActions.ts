@@ -2,10 +2,12 @@ import { toUint8Array } from '@sledge-pdm/core';
 import { runExclusive } from '~/features/busy';
 import { refuseIfExclusiveEditSession } from '~/features/edit_session';
 import { doCommands } from '~/features/history';
+import { LayerReorderCommand } from '~/features/history/command/layer/LayerReorderCommand';
 import { cutPasteSnippet } from '~/features/history/commands';
 import { createEntryFromRawBuffer, insertEntry, selectEntry } from '~/features/image_pool';
 import { activeIndex, addLayerTo, findLayerById, setLayerProp } from '~/features/layer';
 import { layerManager } from '~/features/layer/frasco/LayerManager';
+import { getOperationTargetLayerIds } from '~/features/layer/service';
 import { logSystemError, logUserError, logUserSuccess } from '~/features/log';
 import { selectionManager } from '~/features/selection/SelectionManager';
 import { cancelSelection, deleteSelectedArea, getCurrentSelectionBuffer } from '~/features/selection/service';
@@ -52,30 +54,75 @@ async function copyInternal(e?: ClipboardEvent): Promise<'layer' | 'selection' |
   }
 }
 
-export async function clipboardCut(e?: ClipboardEvent) {
-  await runExclusive('clipboardCut', () => cutInternal(e));
+export async function clipboardCut(e?: ClipboardEvent, layerIds?: string[]) {
+  await runExclusive('clipboardCut', () => cutInternal(e, layerIds));
 }
 
-async function cutInternal(e?: ClipboardEvent) {
+async function cutInternal(e?: ClipboardEvent, layerIds?: string[]) {
   const inputFocused = isInputFocused();
   if (inputFocused) return;
   e?.preventDefault();
+
+  const targets = getOperationTargetLayerIds(layerIds);
+  // A layer-list action always cuts whole layers. Multiple selected layers also take precedence over
+  // a pixel selection; the single-layer canvas action retains its selection-copy/delete behavior.
+  if (layerIds !== undefined || targets.length > 1 || !selectionManager.hasSelection()) {
+    if (refuseIfExclusiveEditSession('cutting')) return;
+    if (targets.length === 0) return;
+    try {
+      const text = targets.length === 1 ? targets[0] : JSON.stringify({ type: 'sledge/layers', layerIds: targets });
+      await clipboard.writeText(text);
+      targets.forEach((id) => setLayerProp(id, 'cutFreeze', true, { register: false }));
+      logUserSuccess(targets.length === 1 ? 'layer cut!' : 'layers cut!', { label: LOG_LABEL });
+    } catch (err) {
+      logUserError('cut failed.', { label: LOG_LABEL, details: [err] });
+    }
+    return;
+  }
 
   // the copy is the first half of the cut, not an operation of its own: it runs inside the window the cut
   // already holds, so the delete below removes exactly what was copied.
   const copyMode = await copyInternal(e); // this doesn't add history
   if (!copyMode) return;
 
-  if (copyMode === 'layer') {
-    // this literally delete original layer to copy so cannot paste after.
-    // this should be like an "archive" operation, that freezes layer but not delete from list and anvilManager. like below.
-    setLayerProp(projectStore.layers.state.activeLayerId, 'cutFreeze', true, { register: false }); // history suppressed
-    // removeLayer(projectStore.layers.state.activeLayerId, { register: true }); // history added
+  deleteSelectedArea({
+    layerId: projectStore.layers.state.activeLayerId,
+    noAction: false,
+  }); // history added
+}
+
+function getClipboardLayerIds(text: string): string[] | undefined {
+  try {
+    const data = JSON.parse(text);
+    if (data?.type !== 'sledge/layers' || !Array.isArray(data.layerIds) || data.layerIds.length < 2) return;
+    if (!data.layerIds.every((id: unknown) => typeof id === 'string')) return;
+    return Array.from(new Set<string>(data.layerIds));
+  } catch {
+    return;
+  }
+}
+
+function pasteLayers(layerIds: string[]) {
+  const sources = layerIds.map((id) => findLayerById(id));
+  // Do not partially paste a group whose source layers have been removed.
+  if (sources.some((layer) => !layer || !layerManager.getLayerOptional(layer.id))) return;
+  const layers = sources.map((layer) => layer!);
+  if (layers.every((layer) => layer.cutFreeze)) {
+    const beforeOrder = projectStore.layers.layers.map((layer) => layer.id);
+    const targetIndex = activeIndex();
+    const remaining = beforeOrder.filter((id) => !layerIds.includes(id));
+    const insertIndex = beforeOrder.slice(0, Math.max(0, targetIndex)).filter((id) => !layerIds.includes(id)).length;
+    const afterOrder = [...remaining.slice(0, insertIndex), ...layerIds, ...remaining.slice(insertIndex)];
+    layers.forEach((layer) => setLayerProp(layer.id, 'cutFreeze', false, { register: false }));
+    doCommands(new LayerReorderCommand({ beforeOrder, afterOrder }), {
+      context: { icon: '/assets/icons/context_menu/cut.png', description: `paste ${layers.length} cut layers` },
+    });
   } else {
-    deleteSelectedArea({
-      layerId: projectStore.layers.state.activeLayerId,
-      noAction: false,
-    }); // history added
+    const insertIndex = activeIndex();
+    layers.forEach((layer, index) => {
+      const buffer = layerManager.exportRawCanvas(layer.id);
+      addLayerTo(insertIndex + index, { ...layer, cutFreeze: false }, { initImage: buffer, register: false, uniqueName: false });
+    });
   }
 }
 
@@ -98,6 +145,11 @@ async function pasteInternal(e?: ClipboardEvent) {
     // 1. check layer id paste
     const textData = await tryGetTextFromClipboard();
     if (textData) {
+      const layerIds = getClipboardLayerIds(textData);
+      if (layerIds) {
+        pasteLayers(layerIds);
+        return;
+      }
       const srcLayer = findLayerById(textData);
       if (srcLayer) {
         const srcFrascoLayer = layerManager.getLayerOptional(textData);

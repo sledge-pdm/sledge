@@ -6,6 +6,7 @@ import { Checkbox, color, Icon, Light } from '@sledge-pdm/ui';
 import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import LayerPreview from '~/components/global/LayerPreview';
 import { isBusy } from '~/features/busy';
+import { clipboardCut } from '~/features/io/clipboard/ClipboardActions';
 import { allLayers, findLayerById, mergeToBelowLayer, reorderLayer, setActiveLayerId, setLayerProp, toggleLayerVisibility } from '~/features/layer';
 import {
   clearLayersFromUser,
@@ -277,6 +278,7 @@ const LayerItem: Component<LayerItemProps> = (props) => {
             showContextMenu(
               [
                 { type: 'label', label: contextMenuLabel() },
+                { ...ContextMenuItems.BaseCut, onSelect: async () => await clipboardCut(undefined, resolvedContextTargets()) },
                 { ...ContextMenuItems.BaseDuplicate, onSelect: () => duplicateLayers(targetLayers) },
                 { ...ContextMenuItems.BaseMergeDown, onSelect: () => mergeToBelowLayer(layerId) },
                 { ...ContextMenuItems.BaseClear, onSelect: async () => await clearLayersFromUser(targetLayers) },

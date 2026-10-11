@@ -1,6 +1,6 @@
 import { css } from '@acab/ecsstatic';
 import { SparkLine } from '@sledge-pdm/ui';
-import { Component, createEffect, Show } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { globalConfig } from '~/stores/GlobalStores';
 import usePerfMonitor from './UsePerfMonitor';
@@ -83,15 +83,23 @@ const PerfMonitorBar: Component = () => {
     });
   });
 
-  const rootEl = document.querySelector(':root');
-  const accentHex = rootEl ? getComputedStyle(rootEl).getPropertyValue('--color-accent').trim() : '#FF0000';
+  const [accentHex, setAccentHex] = createSignal<string | undefined>();
+  createEffect(() => {
+    globalConfig.general.theme;
+    const rootEl = document.querySelector(':root');
+    if (rootEl) {
+      setAccentHex(getComputedStyle(rootEl).getPropertyValue('--color-accent').trim());
+    } else {
+      setAccentHex(undefined);
+    }
+  });
 
   return (
     <Show when={globalConfig.debug.showPerformanceMonitor}>
       <div class={root}>
         <div class={container}>
           <div class={item}>
-            <SparkLine length={14} height={24} lengthMult={4} color={accentHex} values={sparkLineStore.jsHeap} min={0} />
+            <SparkLine length={14} height={24} lengthMult={4} color={accentHex() ?? '#FF0000'} values={sparkLineStore.jsHeap} min={0} />
             <p class={text}>
               <span class={labelText}>JS Heap</span>
               <br />

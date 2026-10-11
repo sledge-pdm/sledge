@@ -159,7 +159,7 @@ const ConfigForm: Component<Props> = (props) => {
     });
 
     if (confirmed) {
-      resetToDefaultConfig();
+      rebaseOriginal(resetToDefaultConfig);
       dialog.message('reset succeeded.');
     }
   };
@@ -186,21 +186,39 @@ const ConfigForm: Component<Props> = (props) => {
 
   let originalConfig: GlobalConfig | undefined;
 
+  // Reloading or resetting the config also writes globalConfig, and those writes are not edits. While one is in
+  // flight the dirty check waits, and the original is taken again from what it leaves behind.
+  let pendingRebases = 0;
+  const rebaseOriginal = async (write: () => Promise<unknown>) => {
+    pendingRebases++;
+    try {
+      await write();
+      originalConfig = JSON.parse(JSON.stringify(globalConfig));
+    } finally {
+      pendingRebases--;
+      checkDirty();
+    }
+  };
+
   let unlistenOnSettingSaved: UnlistenFn | undefined;
 
   // The sections write to globalConfig directly, so any change to it re-evaluates the dirty state.
-  createEffect(on(() => JSON.stringify(globalConfig), checkDirty, { defer: true }));
+  createEffect(
+    on(
+      () => JSON.stringify(globalConfig),
+      () => {
+        if (pendingRebases === 0) checkDirty();
+      },
+      { defer: true }
+    )
+  );
 
   onMount(async () => {
     await loadGlobalConfig();
 
     originalConfig = JSON.parse(JSON.stringify(globalConfig));
 
-    unlistenOnSettingSaved = await listenEvent('onSettingsSaved', async () => {
-      await loadGlobalConfig();
-      originalConfig = JSON.parse(JSON.stringify(globalConfig));
-      checkDirty();
-    });
+    unlistenOnSettingSaved = await listenEvent('onSettingsSaved', () => rebaseOriginal(loadGlobalConfig));
   });
 
   onCleanup(() => {

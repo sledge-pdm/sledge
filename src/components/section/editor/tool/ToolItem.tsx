@@ -1,4 +1,5 @@
 import { css } from '@acab/ecsstatic';
+import { clsx } from '@sledge-pdm/core';
 import { color, Icon } from '@sledge-pdm/ui';
 import { Component, Show } from 'solid-js';
 import { setActiveToolCategory } from '~/features/tools/ToolController';
@@ -8,53 +9,60 @@ import { toolStore } from '~/stores/EditorStores';
 const itemRoot = css`
   display: flex;
   flex-direction: row;
-  height: 32px;
-  gap: 8px;
+  width: 28px;
+  height: 28px;
   align-items: center;
-`;
-
-const clickableContainer = css`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  justify-content: center;
   pointer-events: all;
   cursor: pointer;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: var(--color-button-hover);
+  }
+`;
+
+const itemRootInUse = css`
+  flex: 1;
+  background-color: var(--color-surface);
+  padding: 0 8px;
+`;
+
+const icon = css`
+  min-width: 16px;
+  min-height: 16px;
 `;
 
 const name = css`
-  cursor: pointer;
-  width: 40px;
-  margin-left: 8px;
+  /*width: 40px;*/
+  margin-left: 6px;
+  flex: 1;
   font-size: var(--text-sm);
+  color: var(--color-active);
 `;
+
 interface Props {
   categoryId: ToolCategoryId;
-  withLabel?: 'none' | 'always' | 'inUse';
   isInUse: boolean;
 }
 
 const ToolItem: Component<Props> = (props: Props) => {
-  props.withLabel = props.withLabel ?? 'none';
   const category = toolStore.tools[props.categoryId];
-  const shouldShowLabel = () => props.withLabel === 'always' || (props.withLabel === 'inUse' && props.isInUse);
 
   return (
-    <div class={itemRoot}>
-      {/* <Light on={props.isInUse} /> */}
-      <div class={clickableContainer} onClick={() => setActiveToolCategory(category.id)}>
-        <Icon src={category.iconSrc ?? ''} base={8} scale={2} color={props.isInUse ? color.active : color.onBackground} hoverColor={color.active} />
+    <div class={clsx(itemRoot, props.isInUse ? itemRootInUse : undefined)} onClick={() => setActiveToolCategory(category.id)}>
+      <Icon
+        class={icon}
+        src={category.iconSrc ?? ''}
+        base={8}
+        scale={2}
+        color={props.isInUse ? color.active : color.onBackground}
+        hoverColor={color.active}
+      />
 
-        <Show when={shouldShowLabel()}>
-          <p
-            class={name}
-            style={{
-              color: props.isInUse ? color.active : color.onBackground,
-            }}
-          >
-            {category.name}.
-          </p>
-        </Show>
-      </div>
+      <Show when={props.isInUse}>
+        <p class={name}>{category.name}.</p>
+      </Show>
     </div>
   );
 };

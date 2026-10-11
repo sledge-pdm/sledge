@@ -1,3 +1,4 @@
+import { css } from '@acab/ecsstatic';
 import { Component, Match, Show, Switch } from 'solid-js';
 import AutoSelectionToolConfig from '~/components/section/editor/tool/config/AutoSelectionToolConfig';
 import EraserToolConfig from '~/components/section/editor/tool/config/EraserToolConfig';
@@ -10,6 +11,14 @@ import { getCurrentPresetConfig, updateToolPresetConfig } from '~/features/tools
 import { TOOL_CATEGORIES, ToolCategoryId } from '~/features/tools/Tools';
 import { toolStore } from '~/stores/EditorStores';
 import { flexCol } from '~/styles/styles';
+
+const presetContent = css`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 0 8px;
+`;
 
 interface Props {
   toolId: ToolCategoryId;
@@ -28,7 +37,7 @@ const ToolPresetManager: Component<Props> = (props) => {
 
   return (
     <div class={flexCol}>
-      <div class={flexCol} style={{ gap: '8px', 'margin-top': '8px' }}>
+      <div class={presetContent}>
         <Show when={presets() && Object.keys(presets()!.options).length > 1}>
           <ToolPresetDropDown toolId={props.toolId} />
         </Show>

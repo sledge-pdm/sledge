@@ -1,7 +1,7 @@
 import { css } from '@acab/ecsstatic';
 import { color, ColorBox, Dialog, Icon, RadioButton, Slider } from '@sledge-pdm/ui';
 import { Component, createEffect, createMemo, Show } from 'solid-js';
-import { SelectionModeSelector } from '~/components/section/editor/tool/config/SelectionModeSelector';
+import { SelectionModeSelector } from '~/components/section/editor/tool/config/common/SelectionModeSelector';
 import { isBusy } from '~/features/busy';
 import {
   applyColorSelection,

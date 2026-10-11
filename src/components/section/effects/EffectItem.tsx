@@ -1,9 +1,13 @@
 import { css } from '@acab/ecsstatic';
+import { FoldBox } from '@sledge-pdm/ui';
 import { Component, JSXElement } from 'solid-js';
-import SectionItem from '~/components/section/SectionItem';
-import { sectionContent } from '~/components/section/SectionStyles';
 import { accentedButton } from '~/styles/styles';
 
+const content = css`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
 const applyButtonContainer = css`
   display: flex;
   flex-direction: column;
@@ -15,15 +19,14 @@ const applyButtonContainer = css`
 interface EffectWrapperProps {
   title: string;
   onApply: () => void;
-  applyButtonLabel?: string; // デフォルト "Apply."
+  applyButtonLabel?: string;
   children?: JSXElement;
-  gap?: string; // デフォルト "4px"
 }
 
-export const EffectWrapper: Component<EffectWrapperProps> = (props) => {
+export const EffectItem: Component<EffectWrapperProps> = (props) => {
   return (
-    <SectionItem title={props.title} expandable defaultExpanded>
-      <div class={sectionContent} style={{ gap: props.gap ?? '4px' }}>
+    <FoldBox title={props.title}>
+      <div class={content}>
         {props.children}
 
         <div class={applyButtonContainer}>
@@ -37,6 +40,6 @@ export const EffectWrapper: Component<EffectWrapperProps> = (props) => {
           </button>
         </div>
       </div>
-    </SectionItem>
+    </FoldBox>
   );
 };

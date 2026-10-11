@@ -13,7 +13,7 @@ const root = css`
   display: flex;
   flex-direction: row;
   width: 100%;
-  pointer-events: all;
+  pointer-events: none;
   overflow-y: visible;
   z-index: var(--zindex-canvas-overlay);
 `;
